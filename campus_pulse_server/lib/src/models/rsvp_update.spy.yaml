@@ -1,0 +1,4 @@
+class: RsvpUpdate
+fields:
+  eventId: int
+  rsvpCount: int

@@ -1,0 +1,16 @@
+auth:
+  - signup:
+  - login:
+  - getProfile:
+buddy:
+  - findBuddies:
+  - createRequest:
+  - getRequests:
+event:
+  - getFeed:
+  - createEvent:
+  - rsvp:
+quiz:
+  - getQuestions:
+  - submitScore:
+  - getLeaderboard:

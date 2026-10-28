@@ -1,0 +1,7 @@
+class: QuizQuestion
+table: quiz_question
+fields:
+  subject: String
+  question: String
+  options: List<String>
+  correctIndex: int

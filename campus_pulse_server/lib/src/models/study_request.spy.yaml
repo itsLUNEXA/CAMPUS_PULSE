@@ -1,0 +1,10 @@
+class: StudyRequest
+table: study_request
+fields:
+  studentId: int
+  studentName: String?
+  branch: String?
+  subject: String
+  location: String
+  status: String, default='open'
+  createdAt: DateTime

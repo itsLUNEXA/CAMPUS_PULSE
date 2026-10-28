@@ -1,0 +1,7 @@
+class: QuizScore
+table: quiz_score
+fields:
+  studentId: int
+  subject: String
+  score: int
+  createdAt: DateTime

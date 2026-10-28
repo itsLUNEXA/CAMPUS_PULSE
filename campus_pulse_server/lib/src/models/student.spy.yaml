@@ -1,0 +1,10 @@
+class: Student
+table: student
+fields:
+  name: String
+  email: String
+  passwordHash: String?
+  branch: String
+  year: int
+  interests: List<String>
+  hostelArea: String

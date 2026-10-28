@@ -1,0 +1,24 @@
+# Configuration for Production environment (Serverpod Cloud)
+apiServer:
+  port: 8080
+  publicHost: api.campuspulse.internal
+  publicPort: 443
+  publicScheme: https
+
+insightsServer:
+  port: 8081
+  publicHost: insights.campuspulse.internal
+  publicPort: 443
+  publicScheme: https
+
+webServer:
+  port: 8082
+  publicHost: app.campuspulse.internal
+  publicPort: 443
+  publicScheme: https
+
+database:
+  host: postgres
+  port: 5432
+  name: campus_pulse
+  user: postgres

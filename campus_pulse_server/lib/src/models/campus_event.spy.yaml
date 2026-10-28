@@ -1,0 +1,10 @@
+class: CampusEvent
+table: campus_event
+fields:
+  title: String
+  description: String
+  category: String
+  venue: String
+  startTime: DateTime
+  createdBy: String
+  rsvpCount: int, default=0

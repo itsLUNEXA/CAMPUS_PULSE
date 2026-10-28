@@ -1,0 +1,9 @@
+class: Rsvp
+table: rsvp
+fields:
+  studentId: int
+  eventId: int
+indexes:
+  student_event_unique_idx:
+    fields: studentId, eventId
+    unique: true

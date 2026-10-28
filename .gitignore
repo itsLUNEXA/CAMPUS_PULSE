@@ -1,0 +1,26 @@
+# Serverpod embedded database and runtime data
+**/.serverpod/
+**/*.log
+
+# Dart and Flutter build artifacts & caches
+**/.dart_tool/
+**/.packages
+**/.pub-cache/
+**/.pub/
+**/build/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+
+# Python
+__pycache__/
+*.pyc
+
+# IDE & Editor files
+.idea/
+.vscode/
+*.iml
+
+# OS generated files
+.DS_Store
+Thumbs.db
+

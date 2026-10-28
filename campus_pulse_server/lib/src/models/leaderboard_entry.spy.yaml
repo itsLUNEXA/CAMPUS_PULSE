@@ -1,0 +1,8 @@
+class: LeaderboardEntry
+fields:
+  studentName: String
+  branch: String
+  year: int
+  subject: String
+  score: int
+  createdAt: DateTime
