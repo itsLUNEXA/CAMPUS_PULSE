@@ -21,6 +21,7 @@ import 'package:campus_pulse_client/src/protocol/campus_event.dart'
     as _ip4v6fvs;
 import 'package:campus_pulse_client/src/protocol/chat_message.dart'
     as _ik3iv9q2;
+import 'package:campus_pulse_client/src/protocol/chat_report.dart' as _izhvp4kh;
 import 'package:campus_pulse_client/src/protocol/chat_room.dart' as _i69co3yd;
 import 'package:campus_pulse_client/src/protocol/event_certificate.dart'
     as _ihpqvest;
@@ -594,12 +595,14 @@ class EndpointChat extends _isc.EndpointRef {
   @override
   String get name => 'chat';
 
-  /// Create or fetch an existing chat room
+  /// Create or fetch an existing chat room with optional branch/year restrictions
   _ida.Future<_i69co3yd.ChatRoom> getOrCreateRoom({
     required String roomType,
     String? referenceId,
     required String name,
     required List<_isc.UuidValue> participantIds,
+    String? allowedBranch,
+    int? allowedAcademicYear,
   }) => caller.callServerEndpoint<_i69co3yd.ChatRoom>(
     'chat',
     'getOrCreateRoom',
@@ -608,14 +611,15 @@ class EndpointChat extends _isc.EndpointRef {
       'referenceId': referenceId,
       'name': name,
       'participantIds': participantIds,
+      'allowedBranch': allowedBranch,
+      'allowedAcademicYear': allowedAcademicYear,
     },
   );
 
-  /// Send message in a room
+  /// Send message in a room with enforced membership & safe authenticated sender identity
   _ida.Future<_ik3iv9q2.ChatMessage> sendMessage({
     required int roomId,
     required String content,
-    required String senderName,
     String? attachmentUrl,
     String? attachmentType,
   }) => caller.callServerEndpoint<_ik3iv9q2.ChatMessage>(
@@ -624,13 +628,12 @@ class EndpointChat extends _isc.EndpointRef {
     {
       'roomId': roomId,
       'content': content,
-      'senderName': senderName,
       'attachmentUrl': attachmentUrl,
       'attachmentType': attachmentType,
     },
   );
 
-  /// Retrieve messages for room
+  /// Retrieve messages for room with membership enforcement
   _ida.Future<List<_ik3iv9q2.ChatMessage>> getRoomMessages(
     int roomId, {
     required int limit,
@@ -643,7 +646,53 @@ class EndpointChat extends _isc.EndpointRef {
     },
   );
 
-  /// List rooms for caller
+  /// Real-time stream of messages for a room with membership enforcement
+  _ida.Stream<_ik3iv9q2.ChatMessage> streamChatMessages(int roomId) =>
+      caller.callStreamingServerEndpoint<
+        _ida.Stream<_ik3iv9q2.ChatMessage>,
+        _ik3iv9q2.ChatMessage
+      >(
+        'chat',
+        'streamChatMessages',
+        {'roomId': roomId},
+        {},
+      );
+
+  /// Report an inappropriate chat message
+  _ida.Future<_izhvp4kh.ChatReport> reportMessage({
+    required int messageId,
+    required String reason,
+  }) => caller.callServerEndpoint<_izhvp4kh.ChatReport>(
+    'chat',
+    'reportMessage',
+    {
+      'messageId': messageId,
+      'reason': reason,
+    },
+  );
+
+  /// List chat reports (Admin only)
+  _ida.Future<List<_izhvp4kh.ChatReport>> listChatReports({String? status}) =>
+      caller.callServerEndpoint<List<_izhvp4kh.ChatReport>>(
+        'chat',
+        'listChatReports',
+        {'status': status},
+      );
+
+  /// Resolve a chat report (Admin only)
+  _ida.Future<bool> resolveChatReport({
+    required int reportId,
+    required String action,
+  }) => caller.callServerEndpoint<bool>(
+    'chat',
+    'resolveChatReport',
+    {
+      'reportId': reportId,
+      'action': action,
+    },
+  );
+
+  /// List rooms accessible to the authenticated caller
   _ida.Future<List<_i69co3yd.ChatRoom>> listMyRooms() =>
       caller.callServerEndpoint<List<_i69co3yd.ChatRoom>>(
         'chat',
@@ -926,6 +975,9 @@ class EndpointQuiz extends _isc.EndpointRef {
   );
 
   /// Evaluates quiz answers securely on the server and persists the attempt.
+  /// Idempotent: resubmitting with the same attemptId returns existing results
+  /// without re-scoring or double-posting to the leaderboard.
+  /// Legitimate retakes with new attemptIds are cleanly tracked with isRetake=true.
   _ida.Future<_iy42s5tm.QuizResultSummary> submitQuiz(
     _ipj905dc.QuizSubmission submission,
   ) => caller.callServerEndpoint<_iy42s5tm.QuizResultSummary>(

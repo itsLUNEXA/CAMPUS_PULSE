@@ -1,19 +1,24 @@
 class: QuizAttempt
 table: quiz_attempt
 fields:
+  attemptId: String?
   authUserId: UuidValue
   studentName: String
   studentBranch: String
   subject: String
+  quizId: String?
   score: int
   totalQuestions: int
   percentage: double
   durationSeconds: int
+  attemptNumber: int, default=1
+  isRetake: bool, default=false
   completedAt: DateTime, default=now
 
 indexes:
+  quiz_attempt_user_attempt_idx:
+    fields: authUserId, attemptId
   quiz_attempt_subject_score_idx:
     fields: subject, score
   quiz_attempt_user_idx:
     fields: authUserId
-

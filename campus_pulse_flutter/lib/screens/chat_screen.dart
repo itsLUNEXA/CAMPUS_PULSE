@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:campus_pulse_client/campus_pulse_client.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -26,6 +27,7 @@ class _ChatScreenState extends State<ChatScreen> {
   bool _isLoadingRooms = true;
   bool _isLoadingMessages = false;
   final _msgController = TextEditingController();
+  StreamSubscription<ChatMessage>? _messageSub;
 
   @override
   void initState() {
@@ -35,6 +37,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   void dispose() {
+    _messageSub?.cancel();
     _msgController.dispose();
     super.dispose();
   }
@@ -87,6 +90,7 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Future<void> _selectRoom(ChatRoom room) async {
+    _messageSub?.cancel();
     setState(() {
       _selectedRoom = room;
       _isLoadingMessages = true;
@@ -101,6 +105,17 @@ class _ChatScreenState extends State<ChatScreen> {
             _isLoadingMessages = false;
           });
         }
+
+        // Live stream subscription
+        _messageSub = client.chat.streamChatMessages(room.id!).listen((incoming) {
+          if (mounted) {
+            setState(() {
+              if (!_messages.any((m) => m.id != null && m.id == incoming.id)) {
+                _messages.add(incoming);
+              }
+            });
+          }
+        });
       }
     } catch (_) {
       if (mounted) {
@@ -157,10 +172,70 @@ class _ChatScreenState extends State<ChatScreen> {
         await client.chat.sendMessage(
           roomId: _selectedRoom!.id!,
           content: text,
-          senderName: senderName,
         );
       }
     } catch (_) {}
+  }
+
+  void _showReportDialog(ChatMessage msg) {
+    String selectedReason = 'Inappropriate content';
+    final customCtrl = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDlgState) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: const Text('Report Message'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Why are you reporting this message?'),
+              const SizedBox(height: 12),
+              ...['Inappropriate content', 'Harassment or hate speech', 'Spam / Advertising', 'Other'].map(
+                (reason) => ListTile(
+                  dense: true,
+                  leading: Icon(
+                    selectedReason == reason ? Icons.radio_button_checked : Icons.radio_button_off,
+                    color: selectedReason == reason ? AppleTokens.accentPurple : Colors.grey,
+                  ),
+                  title: Text(reason),
+                  onTap: () => setDlgState(() => selectedReason = reason),
+                ),
+              ),
+              if (selectedReason == 'Other')
+                TextField(
+                  controller: customCtrl,
+                  decoration: const InputDecoration(labelText: 'Explain reason...'),
+                ),
+            ],
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+            ElevatedButton(
+              onPressed: () async {
+                final reason = selectedReason == 'Other' ? customCtrl.text.trim() : selectedReason;
+                if (msg.id != null) {
+                  try {
+                    await client.chat.reportMessage(messageId: msg.id!, reason: reason);
+                  } catch (_) {}
+                }
+                if (ctx.mounted) {
+                  Navigator.pop(ctx);
+                }
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Message reported to moderators for review.')),
+                  );
+                }
+              },
+              child: const Text('Submit Report'),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -362,13 +437,23 @@ class _ChatScreenState extends State<ChatScreen> {
                               isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                           children: [
                             if (!isMe)
-                              Text(
-                                msg.senderName,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 11,
-                                  color: AppleTokens.softLavender,
-                                ),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    msg.senderName,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 11,
+                                      color: AppleTokens.softLavender,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  InkWell(
+                                    onTap: () => _showReportDialog(msg),
+                                    child: const Icon(Icons.flag_outlined, size: 12, color: AppleTokens.textMutedGrey),
+                                  ),
+                                ],
                               ),
                             Text(
                               msg.content,

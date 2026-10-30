@@ -1,6 +1,7 @@
 class: QuizSubmission
 fields:
+  attemptId: String?
   subject: String
+  quizId: String?
   answers: List<QuizAnswerSubmission>
   durationSeconds: int
-

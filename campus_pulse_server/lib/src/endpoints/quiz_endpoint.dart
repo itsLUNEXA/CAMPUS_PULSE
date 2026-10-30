@@ -29,6 +29,9 @@ class QuizEndpoint extends Endpoint {
   }
 
   /// Evaluates quiz answers securely on the server and persists the attempt.
+  /// Idempotent: resubmitting with the same attemptId returns existing results
+  /// without re-scoring or double-posting to the leaderboard.
+  /// Legitimate retakes with new attemptIds are cleanly tracked with isRetake=true.
   Future<QuizResultSummary> submitQuiz(
     Session session,
     QuizSubmission submission,
@@ -38,6 +41,10 @@ class QuizEndpoint extends Endpoint {
       throw StateError('User must be authenticated to submit quizzes.');
     }
 
+    if (submission.answers.isEmpty) {
+      throw ArgumentError('Submission cannot be empty.');
+    }
+
     final studentProfile = await StudentProfile.db.findFirstRow(
       session,
       where: (t) => t.authUserId.equals(authUserId),
@@ -45,11 +52,53 @@ class QuizEndpoint extends Endpoint {
     final studentName = studentProfile?.fullName ?? 'Student';
     final studentBranch = studentProfile?.branch ?? 'CSE';
 
-    if (submission.answers.isEmpty) {
-      throw ArgumentError('Submission cannot be empty.');
+    final attemptKey = submission.attemptId?.trim();
+
+    // 1. Idempotency check: If this attemptId was already recorded, return cached summary
+    if (attemptKey != null && attemptKey.isNotEmpty) {
+      final existingAttempt = await QuizAttempt.db.findFirstRow(
+        session,
+        where:
+            (t) =>
+                t.authUserId.equals(authUserId) &
+                t.attemptId.equals(attemptKey),
+      );
+
+      if (existingAttempt != null) {
+        // Rebuild items for identical response without mutating state or leaderboard
+        final resultItems = <QuizResultItem>[];
+        for (final ans in submission.answers) {
+          final q = await QuizQuestion.db.findById(session, ans.questionId);
+          if (q != null) {
+            final isCorrect = q.correctOptionIndex == ans.selectedOptionIndex;
+            resultItems.add(
+              QuizResultItem(
+                questionId: q.id!,
+                question: q.question,
+                options: q.options,
+                selectedOptionIndex: ans.selectedOptionIndex,
+                correctOptionIndex: q.correctOptionIndex,
+                isCorrect: isCorrect,
+                explanation: q.explanation,
+              ),
+            );
+          }
+        }
+
+        return QuizResultSummary(
+          attemptId: existingAttempt.id!,
+          subject: existingAttempt.subject,
+          score: existingAttempt.score,
+          totalQuestions: existingAttempt.totalQuestions,
+          percentage: existingAttempt.percentage,
+          durationSeconds: existingAttempt.durationSeconds,
+          completedAt: existingAttempt.completedAt,
+          items: resultItems,
+        );
+      }
     }
 
-    // Authoritative grading
+    // 2. Authoritative server-side grading
     int score = 0;
     final totalQuestions = submission.answers.length;
     final resultItems = <QuizResultItem>[];
@@ -75,28 +124,47 @@ class QuizEndpoint extends Endpoint {
       }
     }
 
-    final percentage = totalQuestions > 0
-        ? (score / totalQuestions) * 100.0
-        : 0.0;
+    final percentage =
+        totalQuestions > 0 ? (score / totalQuestions) * 100.0 : 0.0;
     final now = DateTime.now().toUtc();
 
-    // Persist attempt
+    // 3. Legitimate retake tracking: count prior attempts on this subject
+    final priorAttemptsCount = await QuizAttempt.db.count(
+      session,
+      where:
+          (t) =>
+              t.authUserId.equals(authUserId) &
+              t.subject.equals(submission.subject),
+    );
+    final attemptNumber = priorAttemptsCount + 1;
+    final isRetake = priorAttemptsCount > 0;
+
+    final effectiveAttemptId =
+        (attemptKey != null && attemptKey.isNotEmpty)
+            ? attemptKey
+            : '${DateTime.now().microsecondsSinceEpoch}-${authUserId.toString().substring(0, 8)}';
+
+    // 4. Persist new attempt
     final attempt = await QuizAttempt.db.insertRow(
       session,
       QuizAttempt(
+        attemptId: effectiveAttemptId,
         authUserId: authUserId,
         studentName: studentName,
         studentBranch: studentBranch,
         subject: submission.subject,
+        quizId: submission.quizId ?? submission.subject,
         score: score,
         totalQuestions: totalQuestions,
         percentage: percentage,
         durationSeconds: submission.durationSeconds.clamp(1, 3600),
+        attemptNumber: attemptNumber,
+        isRetake: isRetake,
         completedAt: now,
       ),
     );
 
-    // Broadcast minimal real-time leaderboard update
+    // 5. Broadcast real-time leaderboard update
     await session.messages.postMessage(
       LeaderboardEndpoint.leaderboardChannel,
       LeaderboardUpdate(

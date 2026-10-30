@@ -1,0 +1,19 @@
+class: ChatReport
+table: chat_report
+fields:
+  messageId: int, relation(parent=chat_message, onDelete=Cascade)
+  roomId: int, relation(parent=chat_room, onDelete=Cascade)
+  reporterUserId: UuidValue
+  reporterName: String
+  reason: String
+  status: String, default='pending'
+  actionTaken: String?
+  createdAt: DateTime, default=now
+  reviewedByUserId: UuidValue?
+  reviewedAt: DateTime?
+
+indexes:
+  chat_report_status_idx:
+    fields: status
+  chat_report_msg_idx:
+    fields: messageId

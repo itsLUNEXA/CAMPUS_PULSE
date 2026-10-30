@@ -16,43 +16,59 @@ abstract class QuizAttempt
     implements _is.TableRow<int?>, _is.ProtocolSerialization {
   QuizAttempt._({
     this.id,
+    this.attemptId,
     required this.authUserId,
     required this.studentName,
     required this.studentBranch,
     required this.subject,
+    this.quizId,
     required this.score,
     required this.totalQuestions,
     required this.percentage,
     required this.durationSeconds,
+    int? attemptNumber,
+    bool? isRetake,
     DateTime? completedAt,
-  }) : completedAt = completedAt ?? DateTime.now();
+  }) : attemptNumber = attemptNumber ?? 1,
+       isRetake = isRetake ?? false,
+       completedAt = completedAt ?? DateTime.now();
 
   factory QuizAttempt({
     int? id,
+    String? attemptId,
     required _is.UuidValue authUserId,
     required String studentName,
     required String studentBranch,
     required String subject,
+    String? quizId,
     required int score,
     required int totalQuestions,
     required double percentage,
     required int durationSeconds,
+    int? attemptNumber,
+    bool? isRetake,
     DateTime? completedAt,
   }) = _QuizAttemptImpl;
 
   factory QuizAttempt.fromJson(Map<String, dynamic> jsonSerialization) {
     return QuizAttempt(
       id: jsonSerialization['id'] as int?,
+      attemptId: jsonSerialization['attemptId'] as String?,
       authUserId: _is.UuidValueJsonExtension.fromJson(
         jsonSerialization['authUserId'],
       ),
       studentName: jsonSerialization['studentName'] as String,
       studentBranch: jsonSerialization['studentBranch'] as String,
       subject: jsonSerialization['subject'] as String,
+      quizId: jsonSerialization['quizId'] as String?,
       score: jsonSerialization['score'] as int,
       totalQuestions: jsonSerialization['totalQuestions'] as int,
       percentage: (jsonSerialization['percentage'] as num).toDouble(),
       durationSeconds: jsonSerialization['durationSeconds'] as int,
+      attemptNumber: jsonSerialization['attemptNumber'] as int?,
+      isRetake: jsonSerialization['isRetake'] == null
+          ? null
+          : _is.BoolJsonExtension.fromJson(jsonSerialization['isRetake']),
       completedAt: jsonSerialization['completedAt'] == null
           ? null
           : _is.DateTimeJsonExtension.fromJson(
@@ -68,6 +84,8 @@ abstract class QuizAttempt
   @override
   int? id;
 
+  String? attemptId;
+
   _is.UuidValue authUserId;
 
   String studentName;
@@ -76,6 +94,8 @@ abstract class QuizAttempt
 
   String subject;
 
+  String? quizId;
+
   int score;
 
   int totalQuestions;
@@ -83,6 +103,10 @@ abstract class QuizAttempt
   double percentage;
 
   int durationSeconds;
+
+  int attemptNumber;
+
+  bool isRetake;
 
   DateTime completedAt;
 
@@ -94,14 +118,18 @@ abstract class QuizAttempt
   @_is.useResult
   QuizAttempt copyWith({
     int? id,
+    String? attemptId,
     _is.UuidValue? authUserId,
     String? studentName,
     String? studentBranch,
     String? subject,
+    String? quizId,
     int? score,
     int? totalQuestions,
     double? percentage,
     int? durationSeconds,
+    int? attemptNumber,
+    bool? isRetake,
     DateTime? completedAt,
   });
   @override
@@ -109,14 +137,18 @@ abstract class QuizAttempt
     return {
       '__className__': 'QuizAttempt',
       if (id != null) 'id': id,
+      if (attemptId != null) 'attemptId': attemptId,
       'authUserId': authUserId.toJson(),
       'studentName': studentName,
       'studentBranch': studentBranch,
       'subject': subject,
+      if (quizId != null) 'quizId': quizId,
       'score': score,
       'totalQuestions': totalQuestions,
       'percentage': percentage,
       'durationSeconds': durationSeconds,
+      'attemptNumber': attemptNumber,
+      'isRetake': isRetake,
       'completedAt': completedAt.toJson(),
     };
   }
@@ -126,14 +158,18 @@ abstract class QuizAttempt
     return {
       '__className__': 'QuizAttempt',
       if (id != null) 'id': id,
+      if (attemptId != null) 'attemptId': attemptId,
       'authUserId': authUserId.toJson(),
       'studentName': studentName,
       'studentBranch': studentBranch,
       'subject': subject,
+      if (quizId != null) 'quizId': quizId,
       'score': score,
       'totalQuestions': totalQuestions,
       'percentage': percentage,
       'durationSeconds': durationSeconds,
+      'attemptNumber': attemptNumber,
+      'isRetake': isRetake,
       'completedAt': completedAt.toJson(),
     };
   }
@@ -171,25 +207,33 @@ class _Undefined {}
 class _QuizAttemptImpl extends QuizAttempt {
   _QuizAttemptImpl({
     int? id,
+    String? attemptId,
     required _is.UuidValue authUserId,
     required String studentName,
     required String studentBranch,
     required String subject,
+    String? quizId,
     required int score,
     required int totalQuestions,
     required double percentage,
     required int durationSeconds,
+    int? attemptNumber,
+    bool? isRetake,
     DateTime? completedAt,
   }) : super._(
          id: id,
+         attemptId: attemptId,
          authUserId: authUserId,
          studentName: studentName,
          studentBranch: studentBranch,
          subject: subject,
+         quizId: quizId,
          score: score,
          totalQuestions: totalQuestions,
          percentage: percentage,
          durationSeconds: durationSeconds,
+         attemptNumber: attemptNumber,
+         isRetake: isRetake,
          completedAt: completedAt,
        );
 
@@ -199,26 +243,34 @@ class _QuizAttemptImpl extends QuizAttempt {
   @override
   QuizAttempt copyWith({
     Object? id = _Undefined,
+    Object? attemptId = _Undefined,
     _is.UuidValue? authUserId,
     String? studentName,
     String? studentBranch,
     String? subject,
+    Object? quizId = _Undefined,
     int? score,
     int? totalQuestions,
     double? percentage,
     int? durationSeconds,
+    int? attemptNumber,
+    bool? isRetake,
     DateTime? completedAt,
   }) {
     return QuizAttempt(
       id: id is int? ? id : this.id,
+      attemptId: attemptId is String? ? attemptId : this.attemptId,
       authUserId: authUserId ?? this.authUserId,
       studentName: studentName ?? this.studentName,
       studentBranch: studentBranch ?? this.studentBranch,
       subject: subject ?? this.subject,
+      quizId: quizId is String? ? quizId : this.quizId,
       score: score ?? this.score,
       totalQuestions: totalQuestions ?? this.totalQuestions,
       percentage: percentage ?? this.percentage,
       durationSeconds: durationSeconds ?? this.durationSeconds,
+      attemptNumber: attemptNumber ?? this.attemptNumber,
+      isRetake: isRetake ?? this.isRetake,
       completedAt: completedAt ?? this.completedAt,
     );
   }
@@ -226,6 +278,11 @@ class _QuizAttemptImpl extends QuizAttempt {
 
 class QuizAttemptUpdateTable extends _is.UpdateTable<QuizAttemptTable> {
   QuizAttemptUpdateTable(super.table);
+
+  _is.ColumnValue<String, String> attemptId(String? value) => _is.ColumnValue(
+    table.attemptId,
+    value,
+  );
 
   _is.ColumnValue<_is.UuidValue, _is.UuidValue> authUserId(
     _is.UuidValue value,
@@ -250,6 +307,11 @@ class QuizAttemptUpdateTable extends _is.UpdateTable<QuizAttemptTable> {
     value,
   );
 
+  _is.ColumnValue<String, String> quizId(String? value) => _is.ColumnValue(
+    table.quizId,
+    value,
+  );
+
   _is.ColumnValue<int, int> score(int value) => _is.ColumnValue(
     table.score,
     value,
@@ -270,6 +332,16 @@ class QuizAttemptUpdateTable extends _is.UpdateTable<QuizAttemptTable> {
     value,
   );
 
+  _is.ColumnValue<int, int> attemptNumber(int value) => _is.ColumnValue(
+    table.attemptNumber,
+    value,
+  );
+
+  _is.ColumnValue<bool, bool> isRetake(bool value) => _is.ColumnValue(
+    table.isRetake,
+    value,
+  );
+
   _is.ColumnValue<DateTime, DateTime> completedAt(DateTime value) =>
       _is.ColumnValue(
         table.completedAt,
@@ -280,6 +352,10 @@ class QuizAttemptUpdateTable extends _is.UpdateTable<QuizAttemptTable> {
 class QuizAttemptTable extends _is.Table<int?> {
   QuizAttemptTable({super.tableRelation}) : super(tableName: 'quiz_attempt') {
     updateTable = QuizAttemptUpdateTable(this);
+    attemptId = _is.ColumnString(
+      'attemptId',
+      this,
+    );
     authUserId = _is.ColumnUuid(
       'authUserId',
       this,
@@ -294,6 +370,10 @@ class QuizAttemptTable extends _is.Table<int?> {
     );
     subject = _is.ColumnString(
       'subject',
+      this,
+    );
+    quizId = _is.ColumnString(
+      'quizId',
       this,
     );
     score = _is.ColumnInt(
@@ -312,6 +392,16 @@ class QuizAttemptTable extends _is.Table<int?> {
       'durationSeconds',
       this,
     );
+    attemptNumber = _is.ColumnInt(
+      'attemptNumber',
+      this,
+      hasDefault: true,
+    );
+    isRetake = _is.ColumnBool(
+      'isRetake',
+      this,
+      hasDefault: true,
+    );
     completedAt = _is.ColumnDateTime(
       'completedAt',
       this,
@@ -321,6 +411,8 @@ class QuizAttemptTable extends _is.Table<int?> {
 
   late final QuizAttemptUpdateTable updateTable;
 
+  late final _is.ColumnString attemptId;
+
   late final _is.ColumnUuid authUserId;
 
   late final _is.ColumnString studentName;
@@ -328,6 +420,8 @@ class QuizAttemptTable extends _is.Table<int?> {
   late final _is.ColumnString studentBranch;
 
   late final _is.ColumnString subject;
+
+  late final _is.ColumnString quizId;
 
   late final _is.ColumnInt score;
 
@@ -337,19 +431,27 @@ class QuizAttemptTable extends _is.Table<int?> {
 
   late final _is.ColumnInt durationSeconds;
 
+  late final _is.ColumnInt attemptNumber;
+
+  late final _is.ColumnBool isRetake;
+
   late final _is.ColumnDateTime completedAt;
 
   @override
   List<_is.Column> get columns => [
     id,
+    attemptId,
     authUserId,
     studentName,
     studentBranch,
     subject,
+    quizId,
     score,
     totalQuestions,
     percentage,
     durationSeconds,
+    attemptNumber,
+    isRetake,
     completedAt,
   ];
 }

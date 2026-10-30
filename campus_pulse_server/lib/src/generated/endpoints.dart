@@ -972,6 +972,16 @@ class Endpoints extends _is.EndpointDispatch {
               type: _is.getType<List<_is.UuidValue>>(),
               nullable: false,
             ),
+            'allowedBranch': _is.ParameterDescription(
+              name: 'allowedBranch',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+            'allowedAcademicYear': _is.ParameterDescription(
+              name: 'allowedAcademicYear',
+              type: _is.getType<int?>(),
+              nullable: true,
+            ),
           },
           call:
               (
@@ -984,6 +994,8 @@ class Endpoints extends _is.EndpointDispatch {
                     referenceId: params['referenceId'],
                     name: params['name'],
                     participantIds: params['participantIds'],
+                    allowedBranch: params['allowedBranch'],
+                    allowedAcademicYear: params['allowedAcademicYear'],
                   ),
         ),
         'sendMessage': _is.MethodConnector(
@@ -996,11 +1008,6 @@ class Endpoints extends _is.EndpointDispatch {
             ),
             'content': _is.ParameterDescription(
               name: 'content',
-              type: _is.getType<String>(),
-              nullable: false,
-            ),
-            'senderName': _is.ParameterDescription(
-              name: 'senderName',
               type: _is.getType<String>(),
               nullable: false,
             ),
@@ -1024,7 +1031,6 @@ class Endpoints extends _is.EndpointDispatch {
                     session,
                     roomId: params['roomId'],
                     content: params['content'],
-                    senderName: params['senderName'],
                     attachmentUrl: params['attachmentUrl'],
                     attachmentType: params['attachmentType'],
                   ),
@@ -1054,6 +1060,75 @@ class Endpoints extends _is.EndpointDispatch {
                     limit: params['limit'],
                   ),
         ),
+        'reportMessage': _is.MethodConnector(
+          name: 'reportMessage',
+          params: {
+            'messageId': _is.ParameterDescription(
+              name: 'messageId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'reason': _is.ParameterDescription(
+              name: 'reason',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['chat'] as _ihc7hrsa.ChatEndpoint).reportMessage(
+                    session,
+                    messageId: params['messageId'],
+                    reason: params['reason'],
+                  ),
+        ),
+        'listChatReports': _is.MethodConnector(
+          name: 'listChatReports',
+          params: {
+            'status': _is.ParameterDescription(
+              name: 'status',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['chat'] as _ihc7hrsa.ChatEndpoint).listChatReports(
+                    session,
+                    status: params['status'],
+                  ),
+        ),
+        'resolveChatReport': _is.MethodConnector(
+          name: 'resolveChatReport',
+          params: {
+            'reportId': _is.ParameterDescription(
+              name: 'reportId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'action': _is.ParameterDescription(
+              name: 'action',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['chat'] as _ihc7hrsa.ChatEndpoint)
+                  .resolveChatReport(
+                    session,
+                    reportId: params['reportId'],
+                    action: params['action'],
+                  ),
+        ),
         'listMyRooms': _is.MethodConnector(
           name: 'listMyRooms',
           params: {},
@@ -1063,6 +1138,28 @@ class Endpoints extends _is.EndpointDispatch {
                 Map<String, dynamic> params,
               ) async => (endpoints['chat'] as _ihc7hrsa.ChatEndpoint)
                   .listMyRooms(session),
+        ),
+        'streamChatMessages': _is.MethodStreamConnector(
+          name: 'streamChatMessages',
+          params: {
+            'roomId': _is.ParameterDescription(
+              name: 'roomId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          streamParams: {},
+          returnType: _is.MethodStreamReturnType.streamType,
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+                Map<String, Stream> streamParams,
+              ) => (endpoints['chat'] as _ihc7hrsa.ChatEndpoint)
+                  .streamChatMessages(
+                    session,
+                    params['roomId'],
+                  ),
         ),
       },
     );

@@ -23,9 +23,13 @@ abstract class ChatMessage
     this.attachmentUrl,
     this.attachmentType,
     bool? isRead,
+    bool? isFlagged,
+    bool? isDeletedByModerator,
     DateTime? createdAt,
     bool? isEdited,
   }) : isRead = isRead ?? false,
+       isFlagged = isFlagged ?? false,
+       isDeletedByModerator = isDeletedByModerator ?? false,
        createdAt = createdAt ?? DateTime.now(),
        isEdited = isEdited ?? false;
 
@@ -38,6 +42,8 @@ abstract class ChatMessage
     String? attachmentUrl,
     String? attachmentType,
     bool? isRead,
+    bool? isFlagged,
+    bool? isDeletedByModerator,
     DateTime? createdAt,
     bool? isEdited,
   }) = _ChatMessageImpl;
@@ -56,6 +62,14 @@ abstract class ChatMessage
       isRead: jsonSerialization['isRead'] == null
           ? null
           : _isc.BoolJsonExtension.fromJson(jsonSerialization['isRead']),
+      isFlagged: jsonSerialization['isFlagged'] == null
+          ? null
+          : _isc.BoolJsonExtension.fromJson(jsonSerialization['isFlagged']),
+      isDeletedByModerator: jsonSerialization['isDeletedByModerator'] == null
+          ? null
+          : _isc.BoolJsonExtension.fromJson(
+              jsonSerialization['isDeletedByModerator'],
+            ),
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
@@ -84,6 +98,10 @@ abstract class ChatMessage
 
   bool isRead;
 
+  bool isFlagged;
+
+  bool isDeletedByModerator;
+
   DateTime createdAt;
 
   bool isEdited;
@@ -100,6 +118,8 @@ abstract class ChatMessage
     String? attachmentUrl,
     String? attachmentType,
     bool? isRead,
+    bool? isFlagged,
+    bool? isDeletedByModerator,
     DateTime? createdAt,
     bool? isEdited,
   });
@@ -115,6 +135,8 @@ abstract class ChatMessage
       if (attachmentUrl != null) 'attachmentUrl': attachmentUrl,
       if (attachmentType != null) 'attachmentType': attachmentType,
       'isRead': isRead,
+      'isFlagged': isFlagged,
+      'isDeletedByModerator': isDeletedByModerator,
       'createdAt': createdAt.toJson(),
       'isEdited': isEdited,
     };
@@ -132,6 +154,8 @@ abstract class ChatMessage
       if (attachmentUrl != null) 'attachmentUrl': attachmentUrl,
       if (attachmentType != null) 'attachmentType': attachmentType,
       'isRead': isRead,
+      'isFlagged': isFlagged,
+      'isDeletedByModerator': isDeletedByModerator,
       'createdAt': createdAt.toJson(),
       'isEdited': isEdited,
     };
@@ -155,6 +179,8 @@ class _ChatMessageImpl extends ChatMessage {
     String? attachmentUrl,
     String? attachmentType,
     bool? isRead,
+    bool? isFlagged,
+    bool? isDeletedByModerator,
     DateTime? createdAt,
     bool? isEdited,
   }) : super._(
@@ -166,6 +192,8 @@ class _ChatMessageImpl extends ChatMessage {
          attachmentUrl: attachmentUrl,
          attachmentType: attachmentType,
          isRead: isRead,
+         isFlagged: isFlagged,
+         isDeletedByModerator: isDeletedByModerator,
          createdAt: createdAt,
          isEdited: isEdited,
        );
@@ -183,6 +211,8 @@ class _ChatMessageImpl extends ChatMessage {
     Object? attachmentUrl = _Undefined,
     Object? attachmentType = _Undefined,
     bool? isRead,
+    bool? isFlagged,
+    bool? isDeletedByModerator,
     DateTime? createdAt,
     bool? isEdited,
   }) {
@@ -199,6 +229,8 @@ class _ChatMessageImpl extends ChatMessage {
           ? attachmentType
           : this.attachmentType,
       isRead: isRead ?? this.isRead,
+      isFlagged: isFlagged ?? this.isFlagged,
+      isDeletedByModerator: isDeletedByModerator ?? this.isDeletedByModerator,
       createdAt: createdAt ?? this.createdAt,
       isEdited: isEdited ?? this.isEdited,
     );

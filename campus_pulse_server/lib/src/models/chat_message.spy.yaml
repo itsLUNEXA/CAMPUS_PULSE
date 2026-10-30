@@ -8,10 +8,11 @@ fields:
   attachmentUrl: String?
   attachmentType: String?
   isRead: bool, default=false
+  isFlagged: bool, default=false
+  isDeletedByModerator: bool, default=false
   createdAt: DateTime, default=now
   isEdited: bool, default=false
 
 indexes:
   msg_room_idx:
     fields: roomId, createdAt
-

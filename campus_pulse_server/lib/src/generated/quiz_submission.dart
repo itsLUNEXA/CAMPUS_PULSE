@@ -17,20 +17,26 @@ import 'quiz_answer_submission.dart' as _icbmbpey;
 abstract class QuizSubmission
     implements _is.SerializableModel, _is.ProtocolSerialization {
   QuizSubmission._({
+    this.attemptId,
     required this.subject,
+    this.quizId,
     required this.answers,
     required this.durationSeconds,
   });
 
   factory QuizSubmission({
+    String? attemptId,
     required String subject,
+    String? quizId,
     required List<_icbmbpey.QuizAnswerSubmission> answers,
     required int durationSeconds,
   }) = _QuizSubmissionImpl;
 
   factory QuizSubmission.fromJson(Map<String, dynamic> jsonSerialization) {
     return QuizSubmission(
+      attemptId: jsonSerialization['attemptId'] as String?,
       subject: jsonSerialization['subject'] as String,
+      quizId: jsonSerialization['quizId'] as String?,
       answers: _i2t5n14n.Protocol()
           .deserialize<List<_icbmbpey.QuizAnswerSubmission>>(
             jsonSerialization['answers'],
@@ -39,7 +45,11 @@ abstract class QuizSubmission
     );
   }
 
+  String? attemptId;
+
   String subject;
+
+  String? quizId;
 
   List<_icbmbpey.QuizAnswerSubmission> answers;
 
@@ -49,7 +59,9 @@ abstract class QuizSubmission
   /// with some or all fields replaced by the given arguments.
   @_is.useResult
   QuizSubmission copyWith({
+    String? attemptId,
     String? subject,
+    String? quizId,
     List<_icbmbpey.QuizAnswerSubmission>? answers,
     int? durationSeconds,
   });
@@ -57,7 +69,9 @@ abstract class QuizSubmission
   Map<String, dynamic> toJson() {
     return {
       '__className__': 'QuizSubmission',
+      if (attemptId != null) 'attemptId': attemptId,
       'subject': subject,
+      if (quizId != null) 'quizId': quizId,
       'answers': answers.toJson(valueToJson: (v) => v.toJson()),
       'durationSeconds': durationSeconds,
     };
@@ -67,7 +81,9 @@ abstract class QuizSubmission
   Map<String, dynamic> toJsonForProtocol() {
     return {
       '__className__': 'QuizSubmission',
+      if (attemptId != null) 'attemptId': attemptId,
       'subject': subject,
+      if (quizId != null) 'quizId': quizId,
       'answers': answers.toJson(valueToJson: (v) => v.toJsonForProtocol()),
       'durationSeconds': durationSeconds,
     };
@@ -79,13 +95,19 @@ abstract class QuizSubmission
   }
 }
 
+class _Undefined {}
+
 class _QuizSubmissionImpl extends QuizSubmission {
   _QuizSubmissionImpl({
+    String? attemptId,
     required String subject,
+    String? quizId,
     required List<_icbmbpey.QuizAnswerSubmission> answers,
     required int durationSeconds,
   }) : super._(
+         attemptId: attemptId,
          subject: subject,
+         quizId: quizId,
          answers: answers,
          durationSeconds: durationSeconds,
        );
@@ -95,12 +117,16 @@ class _QuizSubmissionImpl extends QuizSubmission {
   @_is.useResult
   @override
   QuizSubmission copyWith({
+    Object? attemptId = _Undefined,
     String? subject,
+    Object? quizId = _Undefined,
     List<_icbmbpey.QuizAnswerSubmission>? answers,
     int? durationSeconds,
   }) {
     return QuizSubmission(
+      attemptId: attemptId is String? ? attemptId : this.attemptId,
       subject: subject ?? this.subject,
+      quizId: quizId is String? ? quizId : this.quizId,
       answers: answers ?? this.answers.map((e0) => e0.copyWith()).toList(),
       durationSeconds: durationSeconds ?? this.durationSeconds,
     );

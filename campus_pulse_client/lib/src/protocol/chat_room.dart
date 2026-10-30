@@ -21,6 +21,8 @@ abstract class ChatRoom
     this.referenceId,
     required this.name,
     required this.participantIds,
+    this.allowedBranch,
+    this.allowedAcademicYear,
     DateTime? createdAt,
     this.lastMessageText,
     this.lastMessageAt,
@@ -32,6 +34,8 @@ abstract class ChatRoom
     String? referenceId,
     required String name,
     required List<_isc.UuidValue> participantIds,
+    String? allowedBranch,
+    int? allowedAcademicYear,
     DateTime? createdAt,
     String? lastMessageText,
     DateTime? lastMessageAt,
@@ -46,6 +50,8 @@ abstract class ChatRoom
       participantIds: _il98xzab.Protocol().deserialize<List<_isc.UuidValue>>(
         jsonSerialization['participantIds'],
       ),
+      allowedBranch: jsonSerialization['allowedBranch'] as String?,
+      allowedAcademicYear: jsonSerialization['allowedAcademicYear'] as int?,
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
@@ -71,6 +77,10 @@ abstract class ChatRoom
 
   List<_isc.UuidValue> participantIds;
 
+  String? allowedBranch;
+
+  int? allowedAcademicYear;
+
   DateTime createdAt;
 
   String? lastMessageText;
@@ -86,6 +96,8 @@ abstract class ChatRoom
     String? referenceId,
     String? name,
     List<_isc.UuidValue>? participantIds,
+    String? allowedBranch,
+    int? allowedAcademicYear,
     DateTime? createdAt,
     String? lastMessageText,
     DateTime? lastMessageAt,
@@ -99,6 +111,9 @@ abstract class ChatRoom
       if (referenceId != null) 'referenceId': referenceId,
       'name': name,
       'participantIds': participantIds.toJson(valueToJson: (v) => v.toJson()),
+      if (allowedBranch != null) 'allowedBranch': allowedBranch,
+      if (allowedAcademicYear != null)
+        'allowedAcademicYear': allowedAcademicYear,
       'createdAt': createdAt.toJson(),
       if (lastMessageText != null) 'lastMessageText': lastMessageText,
       if (lastMessageAt != null) 'lastMessageAt': lastMessageAt?.toJson(),
@@ -114,6 +129,9 @@ abstract class ChatRoom
       if (referenceId != null) 'referenceId': referenceId,
       'name': name,
       'participantIds': participantIds.toJson(valueToJson: (v) => v.toJson()),
+      if (allowedBranch != null) 'allowedBranch': allowedBranch,
+      if (allowedAcademicYear != null)
+        'allowedAcademicYear': allowedAcademicYear,
       'createdAt': createdAt.toJson(),
       if (lastMessageText != null) 'lastMessageText': lastMessageText,
       if (lastMessageAt != null) 'lastMessageAt': lastMessageAt?.toJson(),
@@ -135,6 +153,8 @@ class _ChatRoomImpl extends ChatRoom {
     String? referenceId,
     required String name,
     required List<_isc.UuidValue> participantIds,
+    String? allowedBranch,
+    int? allowedAcademicYear,
     DateTime? createdAt,
     String? lastMessageText,
     DateTime? lastMessageAt,
@@ -144,6 +164,8 @@ class _ChatRoomImpl extends ChatRoom {
          referenceId: referenceId,
          name: name,
          participantIds: participantIds,
+         allowedBranch: allowedBranch,
+         allowedAcademicYear: allowedAcademicYear,
          createdAt: createdAt,
          lastMessageText: lastMessageText,
          lastMessageAt: lastMessageAt,
@@ -159,6 +181,8 @@ class _ChatRoomImpl extends ChatRoom {
     Object? referenceId = _Undefined,
     String? name,
     List<_isc.UuidValue>? participantIds,
+    Object? allowedBranch = _Undefined,
+    Object? allowedAcademicYear = _Undefined,
     DateTime? createdAt,
     Object? lastMessageText = _Undefined,
     Object? lastMessageAt = _Undefined,
@@ -170,6 +194,12 @@ class _ChatRoomImpl extends ChatRoom {
       name: name ?? this.name,
       participantIds:
           participantIds ?? this.participantIds.map((e0) => e0).toList(),
+      allowedBranch: allowedBranch is String?
+          ? allowedBranch
+          : this.allowedBranch,
+      allowedAcademicYear: allowedAcademicYear is int?
+          ? allowedAcademicYear
+          : this.allowedAcademicYear,
       createdAt: createdAt ?? this.createdAt,
       lastMessageText: lastMessageText is String?
           ? lastMessageText

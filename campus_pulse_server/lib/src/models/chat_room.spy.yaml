@@ -5,6 +5,8 @@ fields:
   referenceId: String?
   name: String
   participantIds: List<UuidValue>
+  allowedBranch: String?
+  allowedAcademicYear: int?
   createdAt: DateTime, default=now
   lastMessageText: String?
   lastMessageAt: DateTime?
@@ -12,4 +14,3 @@ fields:
 indexes:
   room_type_ref_idx:
     fields: roomType, referenceId
-

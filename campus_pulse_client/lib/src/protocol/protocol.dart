@@ -21,6 +21,7 @@ import 'package:campus_pulse_client/src/protocol/campus_event.dart'
     as _ip4v6fvs;
 import 'package:campus_pulse_client/src/protocol/chat_message.dart'
     as _ik3iv9q2;
+import 'package:campus_pulse_client/src/protocol/chat_report.dart' as _izhvp4kh;
 import 'package:campus_pulse_client/src/protocol/chat_room.dart' as _i69co3yd;
 import 'package:campus_pulse_client/src/protocol/event_certificate.dart'
     as _ihpqvest;
@@ -54,6 +55,7 @@ import 'attendance_record.dart' as _ixvdsmvt;
 import 'campus_event.dart' as _ieh998j0;
 import 'campus_notification.dart' as _ik9ino7k;
 import 'chat_message.dart' as _ivuncx2e;
+import 'chat_report.dart' as _i9uqw2ol;
 import 'chat_room.dart' as _i860mpd8;
 import 'contact_message.dart' as _itkhxrdg;
 import 'event_certificate.dart' as _i18h4dy9;
@@ -86,6 +88,7 @@ export 'attendance_record.dart';
 export 'campus_event.dart';
 export 'campus_notification.dart';
 export 'chat_message.dart';
+export 'chat_report.dart';
 export 'chat_room.dart';
 export 'contact_message.dart';
 export 'event_certificate.dart';
@@ -165,6 +168,9 @@ class Protocol extends _isc.SerializationManager {
     }
     if (t == _ivuncx2e.ChatMessage) {
       return _ivuncx2e.ChatMessage.fromJson(data) as T;
+    }
+    if (t == _i9uqw2ol.ChatReport) {
+      return _i9uqw2ol.ChatReport.fromJson(data) as T;
     }
     if (t == _i860mpd8.ChatRoom) {
       return _i860mpd8.ChatRoom.fromJson(data) as T;
@@ -265,6 +271,9 @@ class Protocol extends _isc.SerializationManager {
     }
     if (t == _isc.getType<_ivuncx2e.ChatMessage?>()) {
       return (data != null ? _ivuncx2e.ChatMessage.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_i9uqw2ol.ChatReport?>()) {
+      return (data != null ? _i9uqw2ol.ChatReport.fromJson(data) : null) as T;
     }
     if (t == _isc.getType<_i860mpd8.ChatRoom?>()) {
       return (data != null ? _i860mpd8.ChatRoom.fromJson(data) : null) as T;
@@ -434,6 +443,12 @@ class Protocol extends _isc.SerializationManager {
               .toList()
           as T;
     }
+    if (t == List<_izhvp4kh.ChatReport>) {
+      return (data as List)
+              .map((e) => deserialize<_izhvp4kh.ChatReport>(e))
+              .toList()
+          as T;
+    }
     if (t == List<_i69co3yd.ChatRoom>) {
       return (data as List)
               .map((e) => deserialize<_i69co3yd.ChatRoom>(e))
@@ -535,6 +550,7 @@ class Protocol extends _isc.SerializationManager {
       _ieh998j0.CampusEvent => 'CampusEvent',
       _ik9ino7k.CampusNotification => 'CampusNotification',
       _ivuncx2e.ChatMessage => 'ChatMessage',
+      _i9uqw2ol.ChatReport => 'ChatReport',
       _i860mpd8.ChatRoom => 'ChatRoom',
       _itkhxrdg.ContactMessage => 'ContactMessage',
       _i18h4dy9.EventCertificate => 'EventCertificate',
@@ -590,6 +606,8 @@ class Protocol extends _isc.SerializationManager {
         return 'CampusNotification';
       case _ivuncx2e.ChatMessage():
         return 'ChatMessage';
+      case _i9uqw2ol.ChatReport():
+        return 'ChatReport';
       case _i860mpd8.ChatRoom():
         return 'ChatRoom';
       case _itkhxrdg.ContactMessage():
@@ -681,6 +699,9 @@ class Protocol extends _isc.SerializationManager {
     }
     if (dataClassName == 'ChatMessage') {
       return deserialize<_ivuncx2e.ChatMessage>(data['data']);
+    }
+    if (dataClassName == 'ChatReport') {
+      return deserialize<_i9uqw2ol.ChatReport>(data['data']);
     }
     if (dataClassName == 'ChatRoom') {
       return deserialize<_i860mpd8.ChatRoom>(data['data']);

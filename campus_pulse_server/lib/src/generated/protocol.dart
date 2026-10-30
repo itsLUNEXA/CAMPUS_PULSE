@@ -21,6 +21,8 @@ import 'package:campus_pulse_server/src/generated/campus_event.dart'
     as _iw7ccsb7;
 import 'package:campus_pulse_server/src/generated/chat_message.dart'
     as _iit1n394;
+import 'package:campus_pulse_server/src/generated/chat_report.dart'
+    as _i8osaxbj;
 import 'package:campus_pulse_server/src/generated/chat_room.dart' as _i787pbkv;
 import 'package:campus_pulse_server/src/generated/event_certificate.dart'
     as _iii6sj61;
@@ -56,6 +58,7 @@ import 'attendance_record.dart' as _ixvdsmvt;
 import 'campus_event.dart' as _ieh998j0;
 import 'campus_notification.dart' as _ik9ino7k;
 import 'chat_message.dart' as _ivuncx2e;
+import 'chat_report.dart' as _i9uqw2ol;
 import 'chat_room.dart' as _i860mpd8;
 import 'contact_message.dart' as _itkhxrdg;
 import 'event_certificate.dart' as _i18h4dy9;
@@ -88,6 +91,7 @@ export 'attendance_record.dart';
 export 'campus_event.dart';
 export 'campus_notification.dart';
 export 'chat_message.dart';
+export 'chat_report.dart';
 export 'chat_room.dart';
 export 'contact_message.dart';
 export 'event_certificate.dart';
@@ -662,6 +666,20 @@ class Protocol extends _is.DatabaseSerializationManager {
           columnDefault: 'false',
         ),
         _isp.ColumnDefinition(
+          name: 'isFlagged',
+          columnType: _isp.ColumnType.boolean,
+          isNullable: false,
+          dartType: 'bool',
+          columnDefault: 'false',
+        ),
+        _isp.ColumnDefinition(
+          name: 'isDeletedByModerator',
+          columnType: _isp.ColumnType.boolean,
+          isNullable: false,
+          dartType: 'bool',
+          columnDefault: 'false',
+        ),
+        _isp.ColumnDefinition(
           name: 'createdAt',
           columnType: _isp.ColumnType.timestampWithoutTimeZone,
           isNullable: false,
@@ -710,6 +728,134 @@ class Protocol extends _is.DatabaseSerializationManager {
       managed: true,
     ),
     _isp.TableDefinition(
+      name: 'chat_report',
+      dartName: 'ChatReport',
+      schema: 'public',
+      module: 'campus_pulse',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int?',
+          columnDefault: 'serial',
+        ),
+        _isp.ColumnDefinition(
+          name: 'messageId',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _isp.ColumnDefinition(
+          name: 'roomId',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _isp.ColumnDefinition(
+          name: 'reporterUserId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'reporterName',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'reason',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'status',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+          columnDefault: '\'pending\'',
+        ),
+        _isp.ColumnDefinition(
+          name: 'actionTaken',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'now',
+        ),
+        _isp.ColumnDefinition(
+          name: 'reviewedByUserId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: true,
+          dartType: 'UuidValue?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'reviewedAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: true,
+          dartType: 'DateTime?',
+        ),
+      ],
+      foreignKeys: [
+        _isp.ForeignKeyDefinition(
+          constraintName: 'chat_report_fk_0',
+          columns: ['messageId'],
+          referenceTable: 'chat_message',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+        _isp.ForeignKeyDefinition(
+          constraintName: 'chat_report_fk_1',
+          columns: ['roomId'],
+          referenceTable: 'chat_room',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+      ],
+      indexes: [
+        _isp.IndexDefinition(
+          indexName: 'chat_report_status_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'status',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+        _isp.IndexDefinition(
+          indexName: 'chat_report_msg_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'messageId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _isp.TableDefinition(
       name: 'chat_room',
       dartName: 'ChatRoom',
       schema: 'public',
@@ -745,6 +891,18 @@ class Protocol extends _is.DatabaseSerializationManager {
           columnType: _isp.ColumnType.json,
           isNullable: false,
           dartType: 'List<UuidValue>',
+        ),
+        _isp.ColumnDefinition(
+          name: 'allowedBranch',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'allowedAcademicYear',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: true,
+          dartType: 'int?',
         ),
         _isp.ColumnDefinition(
           name: 'createdAt',
@@ -1269,6 +1427,12 @@ class Protocol extends _is.DatabaseSerializationManager {
           columnDefault: 'serial',
         ),
         _isp.ColumnDefinition(
+          name: 'attemptId',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
           name: 'authUserId',
           columnType: _isp.ColumnType.uuid,
           isNullable: false,
@@ -1291,6 +1455,12 @@ class Protocol extends _is.DatabaseSerializationManager {
           columnType: _isp.ColumnType.text,
           isNullable: false,
           dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'quizId',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
         ),
         _isp.ColumnDefinition(
           name: 'score',
@@ -1317,6 +1487,20 @@ class Protocol extends _is.DatabaseSerializationManager {
           dartType: 'int',
         ),
         _isp.ColumnDefinition(
+          name: 'attemptNumber',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+          columnDefault: '1',
+        ),
+        _isp.ColumnDefinition(
+          name: 'isRetake',
+          columnType: _isp.ColumnType.boolean,
+          isNullable: false,
+          dartType: 'bool',
+          columnDefault: 'false',
+        ),
+        _isp.ColumnDefinition(
           name: 'completedAt',
           columnType: _isp.ColumnType.timestampWithoutTimeZone,
           isNullable: false,
@@ -1326,6 +1510,23 @@ class Protocol extends _is.DatabaseSerializationManager {
       ],
       foreignKeys: [],
       indexes: [
+        _isp.IndexDefinition(
+          indexName: 'quiz_attempt_user_attempt_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'authUserId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'attemptId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
         _isp.IndexDefinition(
           indexName: 'quiz_attempt_subject_score_idx',
           tableSpace: null,
@@ -2229,6 +2430,9 @@ class Protocol extends _is.DatabaseSerializationManager {
     if (t == _ivuncx2e.ChatMessage) {
       return _ivuncx2e.ChatMessage.fromJson(data) as T;
     }
+    if (t == _i9uqw2ol.ChatReport) {
+      return _i9uqw2ol.ChatReport.fromJson(data) as T;
+    }
     if (t == _i860mpd8.ChatRoom) {
       return _i860mpd8.ChatRoom.fromJson(data) as T;
     }
@@ -2328,6 +2532,9 @@ class Protocol extends _is.DatabaseSerializationManager {
     }
     if (t == _is.getType<_ivuncx2e.ChatMessage?>()) {
       return (data != null ? _ivuncx2e.ChatMessage.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_i9uqw2ol.ChatReport?>()) {
+      return (data != null ? _i9uqw2ol.ChatReport.fromJson(data) : null) as T;
     }
     if (t == _is.getType<_i860mpd8.ChatRoom?>()) {
       return (data != null ? _i860mpd8.ChatRoom.fromJson(data) : null) as T;
@@ -2497,6 +2704,12 @@ class Protocol extends _is.DatabaseSerializationManager {
               .toList()
           as T;
     }
+    if (t == List<_i8osaxbj.ChatReport>) {
+      return (data as List)
+              .map((e) => deserialize<_i8osaxbj.ChatReport>(e))
+              .toList()
+          as T;
+    }
     if (t == List<_i787pbkv.ChatRoom>) {
       return (data as List)
               .map((e) => deserialize<_i787pbkv.ChatRoom>(e))
@@ -2601,6 +2814,7 @@ class Protocol extends _is.DatabaseSerializationManager {
       _ieh998j0.CampusEvent => 'CampusEvent',
       _ik9ino7k.CampusNotification => 'CampusNotification',
       _ivuncx2e.ChatMessage => 'ChatMessage',
+      _i9uqw2ol.ChatReport => 'ChatReport',
       _i860mpd8.ChatRoom => 'ChatRoom',
       _itkhxrdg.ContactMessage => 'ContactMessage',
       _i18h4dy9.EventCertificate => 'EventCertificate',
@@ -2656,6 +2870,8 @@ class Protocol extends _is.DatabaseSerializationManager {
         return 'CampusNotification';
       case _ivuncx2e.ChatMessage():
         return 'ChatMessage';
+      case _i9uqw2ol.ChatReport():
+        return 'ChatReport';
       case _i860mpd8.ChatRoom():
         return 'ChatRoom';
       case _itkhxrdg.ContactMessage():
@@ -2751,6 +2967,9 @@ class Protocol extends _is.DatabaseSerializationManager {
     }
     if (dataClassName == 'ChatMessage') {
       return deserialize<_ivuncx2e.ChatMessage>(data['data']);
+    }
+    if (dataClassName == 'ChatReport') {
+      return deserialize<_i9uqw2ol.ChatReport>(data['data']);
     }
     if (dataClassName == 'ChatRoom') {
       return deserialize<_i860mpd8.ChatRoom>(data['data']);
@@ -2881,6 +3100,8 @@ class Protocol extends _is.DatabaseSerializationManager {
         return _ieh998j0.CampusEvent.t;
       case _ivuncx2e.ChatMessage:
         return _ivuncx2e.ChatMessage.t;
+      case _i9uqw2ol.ChatReport:
+        return _i9uqw2ol.ChatReport.t;
       case _i860mpd8.ChatRoom:
         return _i860mpd8.ChatRoom.t;
       case _itkhxrdg.ContactMessage:

@@ -23,9 +23,13 @@ abstract class ChatMessage
     this.attachmentUrl,
     this.attachmentType,
     bool? isRead,
+    bool? isFlagged,
+    bool? isDeletedByModerator,
     DateTime? createdAt,
     bool? isEdited,
   }) : isRead = isRead ?? false,
+       isFlagged = isFlagged ?? false,
+       isDeletedByModerator = isDeletedByModerator ?? false,
        createdAt = createdAt ?? DateTime.now(),
        isEdited = isEdited ?? false;
 
@@ -38,6 +42,8 @@ abstract class ChatMessage
     String? attachmentUrl,
     String? attachmentType,
     bool? isRead,
+    bool? isFlagged,
+    bool? isDeletedByModerator,
     DateTime? createdAt,
     bool? isEdited,
   }) = _ChatMessageImpl;
@@ -56,6 +62,14 @@ abstract class ChatMessage
       isRead: jsonSerialization['isRead'] == null
           ? null
           : _is.BoolJsonExtension.fromJson(jsonSerialization['isRead']),
+      isFlagged: jsonSerialization['isFlagged'] == null
+          ? null
+          : _is.BoolJsonExtension.fromJson(jsonSerialization['isFlagged']),
+      isDeletedByModerator: jsonSerialization['isDeletedByModerator'] == null
+          ? null
+          : _is.BoolJsonExtension.fromJson(
+              jsonSerialization['isDeletedByModerator'],
+            ),
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _is.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
@@ -86,6 +100,10 @@ abstract class ChatMessage
 
   bool isRead;
 
+  bool isFlagged;
+
+  bool isDeletedByModerator;
+
   DateTime createdAt;
 
   bool isEdited;
@@ -105,6 +123,8 @@ abstract class ChatMessage
     String? attachmentUrl,
     String? attachmentType,
     bool? isRead,
+    bool? isFlagged,
+    bool? isDeletedByModerator,
     DateTime? createdAt,
     bool? isEdited,
   });
@@ -120,6 +140,8 @@ abstract class ChatMessage
       if (attachmentUrl != null) 'attachmentUrl': attachmentUrl,
       if (attachmentType != null) 'attachmentType': attachmentType,
       'isRead': isRead,
+      'isFlagged': isFlagged,
+      'isDeletedByModerator': isDeletedByModerator,
       'createdAt': createdAt.toJson(),
       'isEdited': isEdited,
     };
@@ -137,6 +159,8 @@ abstract class ChatMessage
       if (attachmentUrl != null) 'attachmentUrl': attachmentUrl,
       if (attachmentType != null) 'attachmentType': attachmentType,
       'isRead': isRead,
+      'isFlagged': isFlagged,
+      'isDeletedByModerator': isDeletedByModerator,
       'createdAt': createdAt.toJson(),
       'isEdited': isEdited,
     };
@@ -182,6 +206,8 @@ class _ChatMessageImpl extends ChatMessage {
     String? attachmentUrl,
     String? attachmentType,
     bool? isRead,
+    bool? isFlagged,
+    bool? isDeletedByModerator,
     DateTime? createdAt,
     bool? isEdited,
   }) : super._(
@@ -193,6 +219,8 @@ class _ChatMessageImpl extends ChatMessage {
          attachmentUrl: attachmentUrl,
          attachmentType: attachmentType,
          isRead: isRead,
+         isFlagged: isFlagged,
+         isDeletedByModerator: isDeletedByModerator,
          createdAt: createdAt,
          isEdited: isEdited,
        );
@@ -210,6 +238,8 @@ class _ChatMessageImpl extends ChatMessage {
     Object? attachmentUrl = _Undefined,
     Object? attachmentType = _Undefined,
     bool? isRead,
+    bool? isFlagged,
+    bool? isDeletedByModerator,
     DateTime? createdAt,
     bool? isEdited,
   }) {
@@ -226,6 +256,8 @@ class _ChatMessageImpl extends ChatMessage {
           ? attachmentType
           : this.attachmentType,
       isRead: isRead ?? this.isRead,
+      isFlagged: isFlagged ?? this.isFlagged,
+      isDeletedByModerator: isDeletedByModerator ?? this.isDeletedByModerator,
       createdAt: createdAt ?? this.createdAt,
       isEdited: isEdited ?? this.isEdited,
     );
@@ -274,6 +306,17 @@ class ChatMessageUpdateTable extends _is.UpdateTable<ChatMessageTable> {
     value,
   );
 
+  _is.ColumnValue<bool, bool> isFlagged(bool value) => _is.ColumnValue(
+    table.isFlagged,
+    value,
+  );
+
+  _is.ColumnValue<bool, bool> isDeletedByModerator(bool value) =>
+      _is.ColumnValue(
+        table.isDeletedByModerator,
+        value,
+      );
+
   _is.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
       _is.ColumnValue(
         table.createdAt,
@@ -318,6 +361,16 @@ class ChatMessageTable extends _is.Table<int?> {
       this,
       hasDefault: true,
     );
+    isFlagged = _is.ColumnBool(
+      'isFlagged',
+      this,
+      hasDefault: true,
+    );
+    isDeletedByModerator = _is.ColumnBool(
+      'isDeletedByModerator',
+      this,
+      hasDefault: true,
+    );
     createdAt = _is.ColumnDateTime(
       'createdAt',
       this,
@@ -346,6 +399,10 @@ class ChatMessageTable extends _is.Table<int?> {
 
   late final _is.ColumnBool isRead;
 
+  late final _is.ColumnBool isFlagged;
+
+  late final _is.ColumnBool isDeletedByModerator;
+
   late final _is.ColumnDateTime createdAt;
 
   late final _is.ColumnBool isEdited;
@@ -360,6 +417,8 @@ class ChatMessageTable extends _is.Table<int?> {
     attachmentUrl,
     attachmentType,
     isRead,
+    isFlagged,
+    isDeletedByModerator,
     createdAt,
     isEdited,
   ];

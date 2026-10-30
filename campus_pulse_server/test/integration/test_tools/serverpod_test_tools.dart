@@ -23,6 +23,8 @@ import 'package:campus_pulse_server/src/generated/campus_event.dart'
     as _iw7ccsb7;
 import 'package:campus_pulse_server/src/generated/chat_message.dart'
     as _iit1n394;
+import 'package:campus_pulse_server/src/generated/chat_report.dart'
+    as _i8osaxbj;
 import 'package:campus_pulse_server/src/generated/chat_room.dart' as _i787pbkv;
 import 'package:campus_pulse_server/src/generated/event_certificate.dart'
     as _iii6sj61;
@@ -1400,6 +1402,8 @@ class _ChatEndpoint {
     String? referenceId,
     required String name,
     required List<_is.UuidValue> participantIds,
+    String? allowedBranch,
+    int? allowedAcademicYear,
   }) async {
     return _ist.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
@@ -1417,6 +1421,8 @@ class _ChatEndpoint {
             'referenceId': referenceId,
             'name': name,
             'participantIds': participantIds,
+            'allowedBranch': allowedBranch,
+            'allowedAcademicYear': allowedAcademicYear,
           }),
           serializationManager: _serializationManager,
         );
@@ -1437,7 +1443,6 @@ class _ChatEndpoint {
     _ist.TestSessionBuilder sessionBuilder, {
     required int roomId,
     required String content,
-    required String senderName,
     String? attachmentUrl,
     String? attachmentType,
   }) async {
@@ -1455,7 +1460,6 @@ class _ChatEndpoint {
           parameters: _ist.testObjectToJson({
             'roomId': roomId,
             'content': content,
-            'senderName': senderName,
             'attachmentUrl': attachmentUrl,
             'attachmentType': attachmentType,
           }),
@@ -1502,6 +1506,140 @@ class _ChatEndpoint {
                   _localCallContext.arguments,
                 )
                 as _ida.Future<List<_iit1n394.ChatMessage>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Stream<_iit1n394.ChatMessage> streamChatMessages(
+    _ist.TestSessionBuilder sessionBuilder,
+    int roomId,
+  ) {
+    var _localTestStreamManager =
+        _ist.TestStreamManager<_iit1n394.ChatMessage>();
+    _ist.callStreamFunctionAndHandleExceptions(
+      () async {
+        var _localUniqueSession =
+            (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+              endpoint: 'chat',
+              method: 'streamChatMessages',
+            );
+        var _localCallContext = await _endpointDispatch
+            .getMethodStreamCallContext(
+              createSessionCallback: (_) => _localUniqueSession,
+              endpointPath: 'chat',
+              methodName: 'streamChatMessages',
+              arguments: {'roomId': roomId},
+              requestedInputStreams: [],
+              serializationManager: _serializationManager,
+            );
+        await _localTestStreamManager.callStreamMethod(
+          _localCallContext,
+          _localUniqueSession,
+          {},
+        );
+      },
+      _localTestStreamManager.outputStreamController,
+    );
+    return _localTestStreamManager.outputStreamController.stream;
+  }
+
+  _ida.Future<_i8osaxbj.ChatReport> reportMessage(
+    _ist.TestSessionBuilder sessionBuilder, {
+    required int messageId,
+    required String reason,
+  }) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'chat',
+            method: 'reportMessage',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'chat',
+          methodName: 'reportMessage',
+          parameters: _ist.testObjectToJson({
+            'messageId': messageId,
+            'reason': reason,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_i8osaxbj.ChatReport>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<List<_i8osaxbj.ChatReport>> listChatReports(
+    _ist.TestSessionBuilder sessionBuilder, {
+    String? status,
+  }) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'chat',
+            method: 'listChatReports',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'chat',
+          methodName: 'listChatReports',
+          parameters: _ist.testObjectToJson({'status': status}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<List<_i8osaxbj.ChatReport>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<bool> resolveChatReport(
+    _ist.TestSessionBuilder sessionBuilder, {
+    required int reportId,
+    required String action,
+  }) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'chat',
+            method: 'resolveChatReport',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'chat',
+          methodName: 'resolveChatReport',
+          parameters: _ist.testObjectToJson({
+            'reportId': reportId,
+            'action': action,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<bool>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();

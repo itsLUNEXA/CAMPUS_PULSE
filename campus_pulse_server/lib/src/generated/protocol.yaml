@@ -37,6 +37,10 @@ chat:
   - getOrCreateRoom:
   - sendMessage:
   - getRoomMessages:
+  - streamChatMessages:
+  - reportMessage:
+  - listChatReports:
+  - resolveChatReport:
   - listMyRooms:
 event:
   - listEvents:
