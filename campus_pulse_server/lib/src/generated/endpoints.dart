@@ -1223,6 +1223,25 @@ class Endpoints extends _is.EndpointDispatch {
                     params['id'],
                   ),
         ),
+        'getRecommendedEvents': _is.MethodConnector(
+          name: 'getRecommendedEvents',
+          params: {
+            'limit': _is.ParameterDescription(
+              name: 'limit',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['event'] as _icw8lb6p.EventEndpoint)
+                  .getRecommendedEvents(
+                    session,
+                    limit: params['limit'],
+                  ),
+        ),
         'createEvent': _is.MethodConnector(
           name: 'createEvent',
           params: {
@@ -1627,6 +1646,11 @@ class Endpoints extends _is.EndpointDispatch {
               type: _is.getType<String?>(),
               nullable: true,
             ),
+            'academicYear': _is.ParameterDescription(
+              name: 'academicYear',
+              type: _is.getType<int?>(),
+              nullable: true,
+            ),
             'limit': _is.ParameterDescription(
               name: 'limit',
               type: _is.getType<int>(),
@@ -1648,6 +1672,7 @@ class Endpoints extends _is.EndpointDispatch {
                         session,
                         subject: params['subject'],
                         branch: params['branch'],
+                        academicYear: params['academicYear'],
                         limit: params['limit'],
                         offset: params['offset'],
                       ),
@@ -1660,6 +1685,16 @@ class Endpoints extends _is.EndpointDispatch {
               type: _is.getType<String?>(),
               nullable: true,
             ),
+            'branch': _is.ParameterDescription(
+              name: 'branch',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+            'academicYear': _is.ParameterDescription(
+              name: 'academicYear',
+              type: _is.getType<int?>(),
+              nullable: true,
+            ),
           },
           call:
               (
@@ -1670,6 +1705,8 @@ class Endpoints extends _is.EndpointDispatch {
                       .getMyRank(
                         session,
                         subject: params['subject'],
+                        branch: params['branch'],
+                        academicYear: params['academicYear'],
                       ),
         ),
         'streamLeaderboardUpdates': _is.MethodStreamConnector(
@@ -1943,6 +1980,16 @@ class Endpoints extends _is.EndpointDispatch {
                     params['submission'],
                   ),
         ),
+        'getRecommendedQuizSubjects': _is.MethodConnector(
+          name: 'getRecommendedQuizSubjects',
+          params: {},
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['quiz'] as _i7z0uw2a.QuizEndpoint)
+                  .getRecommendedQuizSubjects(session),
+        ),
         'getMyAttempts': _is.MethodConnector(
           name: 'getMyAttempts',
           params: {
@@ -2172,6 +2219,21 @@ class Endpoints extends _is.EndpointDispatch {
               type: _is.getType<List<String>>(),
               nullable: false,
             ),
+            'eventInterests': _is.ParameterDescription(
+              name: 'eventInterests',
+              type: _is.getType<List<String>?>(),
+              nullable: true,
+            ),
+            'preferredQuizSubjects': _is.ParameterDescription(
+              name: 'preferredQuizSubjects',
+              type: _is.getType<List<String>?>(),
+              nullable: true,
+            ),
+            'preferredQuizTypes': _is.ParameterDescription(
+              name: 'preferredQuizTypes',
+              type: _is.getType<List<String>?>(),
+              nullable: true,
+            ),
           },
           call:
               (
@@ -2187,6 +2249,40 @@ class Endpoints extends _is.EndpointDispatch {
                     hostelOrArea: params['hostelOrArea'],
                     bio: params['bio'],
                     subjectInterests: params['subjectInterests'],
+                    eventInterests: params['eventInterests'],
+                    preferredQuizSubjects: params['preferredQuizSubjects'],
+                    preferredQuizTypes: params['preferredQuizTypes'],
+                  ),
+        ),
+        'updatePreferences': _is.MethodConnector(
+          name: 'updatePreferences',
+          params: {
+            'eventInterests': _is.ParameterDescription(
+              name: 'eventInterests',
+              type: _is.getType<List<String>?>(),
+              nullable: true,
+            ),
+            'preferredQuizSubjects': _is.ParameterDescription(
+              name: 'preferredQuizSubjects',
+              type: _is.getType<List<String>?>(),
+              nullable: true,
+            ),
+            'preferredQuizTypes': _is.ParameterDescription(
+              name: 'preferredQuizTypes',
+              type: _is.getType<List<String>?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['student'] as _if6txhyr.StudentEndpoint)
+                  .updatePreferences(
+                    session,
+                    eventInterests: params['eventInterests'],
+                    preferredQuizSubjects: params['preferredQuizSubjects'],
+                    preferredQuizTypes: params['preferredQuizTypes'],
                   ),
         ),
         'getPublicProfile': _is.MethodConnector(

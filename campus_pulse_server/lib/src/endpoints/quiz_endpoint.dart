@@ -51,6 +51,7 @@ class QuizEndpoint extends Endpoint {
     );
     final studentName = studentProfile?.fullName ?? 'Student';
     final studentBranch = studentProfile?.branch ?? 'CSE';
+    final academicYear = studentProfile?.academicYear ?? 1;
 
     final attemptKey = submission.attemptId?.trim();
 
@@ -152,6 +153,7 @@ class QuizEndpoint extends Endpoint {
         authUserId: authUserId,
         studentName: studentName,
         studentBranch: studentBranch,
+        academicYear: academicYear,
         subject: submission.subject,
         quizId: submission.quizId ?? submission.subject,
         score: score,
@@ -185,6 +187,55 @@ class QuizEndpoint extends Endpoint {
       completedAt: now,
       items: resultItems,
     );
+  }
+
+  /// Returns ordered recommended quiz subjects based on authenticated student's
+  /// preferredQuizSubjects, subjectInterests, and branch.
+  /// Retains full catalog availability without adding unrequested weak-area logic.
+  Future<List<String>> getRecommendedQuizSubjects(Session session) async {
+    final authUserId = session.authenticated?.authUserId;
+    final recommended = <String>{};
+
+    if (authUserId != null) {
+      final profile = await StudentProfile.db.findFirstRow(
+        session,
+        where: (t) => t.authUserId.equals(authUserId),
+      );
+      if (profile != null) {
+        if (profile.preferredQuizSubjects != null) {
+          recommended.addAll(
+            profile.preferredQuizSubjects!.where((s) => s.trim().isNotEmpty),
+          );
+        }
+        recommended.addAll(
+          profile.subjectInterests.where((s) => s.trim().isNotEmpty),
+        );
+
+        final branch = profile.branch.toUpperCase();
+        if (branch.contains('CSE') || branch.contains('IT')) {
+          recommended.addAll([
+            'DBMS',
+            'Operating Systems',
+            'Data Structures and Algorithms',
+          ]);
+        } else if (branch.contains('ECE')) {
+          recommended.addAll([
+            'Data Structures and Algorithms',
+            'Operating Systems',
+            'DBMS',
+          ]);
+        }
+      }
+    }
+
+    // Default core academic subjects always present
+    recommended.addAll([
+      'DBMS',
+      'Operating Systems',
+      'Data Structures and Algorithms',
+    ]);
+
+    return recommended.toList();
   }
 
   /// Retrieves past attempts for the current user.

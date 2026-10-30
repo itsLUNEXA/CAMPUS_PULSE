@@ -1517,6 +1517,13 @@ class Protocol extends _is.DatabaseSerializationManager {
           dartType: 'String',
         ),
         _isp.ColumnDefinition(
+          name: 'academicYear',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: true,
+          dartType: 'int?',
+          columnDefault: '1',
+        ),
+        _isp.ColumnDefinition(
           name: 'subject',
           columnType: _isp.ColumnType.text,
           isNullable: false,
@@ -1617,6 +1624,23 @@ class Protocol extends _is.DatabaseSerializationManager {
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
               definition: 'authUserId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+        _isp.IndexDefinition(
+          indexName: 'quiz_attempt_branch_year_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'studentBranch',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'academicYear',
             ),
           ],
           type: 'btree',
@@ -2045,6 +2069,24 @@ class Protocol extends _is.DatabaseSerializationManager {
           columnType: _isp.ColumnType.json,
           isNullable: false,
           dartType: 'List<String>',
+        ),
+        _isp.ColumnDefinition(
+          name: 'eventInterests',
+          columnType: _isp.ColumnType.json,
+          isNullable: true,
+          dartType: 'List<String>?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'preferredQuizSubjects',
+          columnType: _isp.ColumnType.json,
+          isNullable: true,
+          dartType: 'List<String>?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'preferredQuizTypes',
+          columnType: _isp.ColumnType.json,
+          isNullable: true,
+          dartType: 'List<String>?',
         ),
         _isp.ColumnDefinition(
           name: 'createdAt',

@@ -24,6 +24,7 @@ class QuizSelectionScreen extends StatefulWidget {
 
 class _QuizSelectionScreenState extends State<QuizSelectionScreen> {
   final Map<String, int> _bestScores = {};
+  Set<String> _recommendedSubjects = {};
   bool _isLoading = true;
 
   final List<Map<String, dynamic>> _quizSubjects = [
@@ -79,6 +80,10 @@ class _QuizSelectionScreenState extends State<QuizSelectionScreen> {
           _bestScores[att.subject] = att.score;
         }
       }
+      try {
+        final recs = await client.quiz.getRecommendedQuizSubjects();
+        _recommendedSubjects = recs.toSet();
+      } catch (_) {}
       if (mounted) setState(() => _isLoading = false);
     } catch (_) {
       if (mounted) setState(() => _isLoading = false);
@@ -238,6 +243,40 @@ class _QuizSelectionScreenState extends State<QuizSelectionScreen> {
                                           ),
                                         ),
                                       ),
+                                      if (_recommendedSubjects.contains(title)) ...[
+                                        const SizedBox(width: 8),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                            vertical: 2,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: AppleTokens.primaryBlue.withValues(alpha: 0.15),
+                                            borderRadius: BorderRadius.circular(
+                                              AppleTokens.radius999,
+                                            ),
+                                          ),
+                                          child: const Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Icon(
+                                                Icons.star,
+                                                size: 11,
+                                                color: AppleTokens.primaryBlue,
+                                              ),
+                                              SizedBox(width: 4),
+                                              Text(
+                                                'Recommended',
+                                                style: TextStyle(
+                                                  fontSize: 11,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: AppleTokens.primaryBlue,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
                                     ],
                                   ),
                                   const SizedBox(height: AppleTokens.space4),

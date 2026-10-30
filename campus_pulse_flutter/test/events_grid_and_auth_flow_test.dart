@@ -66,6 +66,11 @@ void main() {
     });
 
     testWidgets('EventsFeedScreen category filter chip selection toggles cleanly', (tester) async {
+      tester.view.physicalSize = const Size(1280, 960);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
       final authState = AuthState();
       final realtimeService = RealtimeService();
 

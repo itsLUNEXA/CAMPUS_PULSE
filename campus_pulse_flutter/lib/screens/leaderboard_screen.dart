@@ -26,6 +26,7 @@ class LeaderboardScreen extends StatefulWidget {
 class _LeaderboardScreenState extends State<LeaderboardScreen> {
   String _selectedSubject = 'All';
   String _selectedBranch = 'All';
+  int? _selectedYear;
 
   final List<String> _subjects = [
     'All',
@@ -45,6 +46,9 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
   List<LeaderboardEntry> _entries = [];
   LeaderboardEntry? _myRank;
   bool _isLoading = true;
+  int _currentPage = 0;
+  static const int _pageSize = 20;
+  bool _hasNextPage = false;
 
   @override
   void initState() {
@@ -55,29 +59,34 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
 
   void _onRealtimeUpdate() {
     // Refresh ranking on new quiz attempt broadcast
-    _loadLeaderboard();
+    _loadLeaderboard(page: _currentPage);
   }
 
-  Future<void> _loadLeaderboard() async {
+  Future<void> _loadLeaderboard({int page = 0}) async {
     setState(() => _isLoading = true);
     try {
       final list = await client.leaderboard.getLeaderboard(
         subject: _selectedSubject != 'All' ? _selectedSubject : null,
         branch: _selectedBranch != 'All' ? _selectedBranch : null,
-        limit: 50,
-        offset: 0,
+        academicYear: _selectedYear,
+        limit: _pageSize,
+        offset: page * _pageSize,
       );
 
       LeaderboardEntry? rank;
       if (widget.authState.isAuthenticated) {
         rank = await client.leaderboard.getMyRank(
           subject: _selectedSubject != 'All' ? _selectedSubject : null,
+          branch: _selectedBranch != 'All' ? _selectedBranch : null,
+          academicYear: _selectedYear,
         );
       }
 
       if (mounted) {
         setState(() {
+          _currentPage = page;
           _entries = list;
+          _hasNextPage = list.length >= _pageSize;
           _myRank = rank;
           _isLoading = false;
         });
@@ -246,22 +255,66 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                       ),
                       const SizedBox(height: AppleTokens.space12),
 
-                      DropdownButtonFormField<String>(
-                        initialValue: _selectedBranch,
-                        decoration: const InputDecoration(
-                          labelText: 'Filter by Department / Branch',
-                        ),
-                        items: _branches
-                            .map(
-                              (b) => DropdownMenuItem(value: b, child: Text(b)),
-                            )
-                            .toList(),
-                        onChanged: (v) {
-                          if (v != null) {
-                            setState(() => _selectedBranch = v);
-                            _loadLeaderboard();
-                          }
-                        },
+                      Row(
+                        children: [
+                          Expanded(
+                            child: DropdownButtonFormField<String>(
+                              initialValue: _selectedBranch,
+                              decoration: const InputDecoration(
+                                labelText: 'Branch / Department',
+                              ),
+                              items: _branches
+                                  .map(
+                                    (b) => DropdownMenuItem(
+                                      value: b,
+                                      child: Text(b),
+                                    ),
+                                  )
+                                  .toList(),
+                              onChanged: (v) {
+                                if (v != null) {
+                                  setState(() => _selectedBranch = v);
+                                  _loadLeaderboard(page: 0);
+                                }
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: AppleTokens.space12),
+                          Expanded(
+                            child: DropdownButtonFormField<int?>(
+                              initialValue: _selectedYear,
+                              decoration: const InputDecoration(
+                                labelText: 'Academic Year',
+                              ),
+                              items: const [
+                                DropdownMenuItem(
+                                  value: null,
+                                  child: Text('All Years'),
+                                ),
+                                DropdownMenuItem(
+                                  value: 1,
+                                  child: Text('1st Year'),
+                                ),
+                                DropdownMenuItem(
+                                  value: 2,
+                                  child: Text('2nd Year'),
+                                ),
+                                DropdownMenuItem(
+                                  value: 3,
+                                  child: Text('3rd Year'),
+                                ),
+                                DropdownMenuItem(
+                                  value: 4,
+                                  child: Text('4th Year'),
+                                ),
+                              ],
+                              onChanged: (v) {
+                                setState(() => _selectedYear = v);
+                                _loadLeaderboard(page: 0);
+                              },
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -316,6 +369,46 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                       return _leaderboardTile(context, entry, isDark);
                     },
                   ),
+                if (_entries.isNotEmpty) ...[
+                  const SizedBox(height: AppleTokens.space24),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      AppleButton(
+                        label: 'Previous',
+                        icon: Icons.chevron_left,
+                        variant: AppleButtonVariant.subtle,
+                        height: 38,
+                        onPressed:
+                            _currentPage > 0
+                                ? () => _loadLeaderboard(page: _currentPage - 1)
+                                : null,
+                      ),
+                      const SizedBox(width: AppleTokens.space16),
+                      Text(
+                        'Page ${_currentPage + 1}',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color:
+                              isDark
+                                  ? AppleTokens.darkTextPrimary
+                                  : AppleTokens.deepNavy,
+                        ),
+                      ),
+                      const SizedBox(width: AppleTokens.space16),
+                      AppleButton(
+                        label: 'Next',
+                        icon: Icons.chevron_right,
+                        variant: AppleButtonVariant.subtle,
+                        height: 38,
+                        onPressed:
+                            _hasNextPage
+                                ? () => _loadLeaderboard(page: _currentPage + 1)
+                                : null,
+                      ),
+                    ],
+                  ),
+                ],
               ],
             ),
           ),
@@ -399,7 +492,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                     ),
                   ),
                   Text(
-                    '${entry.branch} • ${entry.quizzesTaken} Challenges • ${entry.accuracy}% Accuracy',
+                    '${entry.branch}${entry.academicYear != null ? ' • Year ${entry.academicYear}' : ''} • ${entry.quizzesTaken} Challenges • ${entry.accuracy}% Accuracy',
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],

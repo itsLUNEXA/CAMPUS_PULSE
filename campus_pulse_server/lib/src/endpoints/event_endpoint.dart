@@ -37,6 +37,68 @@ class EventEndpoint extends Endpoint {
     return await CampusEvent.db.findById(session, id);
   }
 
+  /// Returns personalized recommended events based on the authenticated student's saved eventInterests.
+  /// If unauthenticated or no preferences set, returns upcoming approved events ordered by startTime.
+  /// Retains the standard listEvents endpoint for 'Browse All'.
+  Future<List<CampusEvent>> getRecommendedEvents(
+    Session session, {
+    int limit = 10,
+  }) async {
+    final authUserId = session.authenticated?.authUserId;
+    List<String> interests = [];
+
+    if (authUserId != null) {
+      final profile = await StudentProfile.db.findFirstRow(
+        session,
+        where: (t) => t.authUserId.equals(authUserId),
+      );
+      if (profile != null) {
+        if (profile.eventInterests != null && profile.eventInterests!.isNotEmpty) {
+          interests = profile.eventInterests!;
+        } else {
+          interests = profile.subjectInterests;
+        }
+      }
+    }
+
+    final now = DateTime.now().toUtc();
+    final candidates = await CampusEvent.db.find(
+      session,
+      where: (t) => t.approvalStatus.equals('approved') & (t.startTime >= now.subtract(const Duration(hours: 6))),
+      orderBy: (t) => t.startTime,
+      limit: 100,
+    );
+
+    if (interests.isEmpty) {
+      return candidates.take(limit.clamp(1, 50)).toList();
+    }
+
+    final normalizedInterests = interests.map((i) => i.trim().toLowerCase()).where((i) => i.isNotEmpty).toSet();
+
+    final scored = candidates.map((ev) {
+      int score = 0;
+      final cat = ev.category.trim().toLowerCase();
+      if (normalizedInterests.contains(cat)) {
+        score += 100;
+      }
+      final titleLower = ev.title.toLowerCase();
+      final descLower = ev.description.toLowerCase();
+      for (final interest in normalizedInterests) {
+        if (titleLower.contains(interest)) score += 30;
+        if (descLower.contains(interest)) score += 15;
+      }
+      return MapEntry(ev, score);
+    }).toList();
+
+    scored.sort((a, b) {
+      final scoreCmp = b.value.compareTo(a.value);
+      if (scoreCmp != 0) return scoreCmp;
+      return a.key.startTime.compareTo(b.key.startTime);
+    });
+
+    return scored.map((e) => e.key).take(limit.clamp(1, 50)).toList();
+  }
+
   /// Creates a new campus event in 'pending' status awaiting review.
   Future<CampusEvent> createEvent(
     Session session, {

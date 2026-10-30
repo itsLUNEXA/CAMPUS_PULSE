@@ -129,6 +129,9 @@ class AuthState extends ChangeNotifier {
     required String hostelOrArea,
     String? bio,
     required List<String> subjectInterests,
+    List<String>? eventInterests,
+    List<String>? preferredQuizSubjects,
+    List<String>? preferredQuizTypes,
   }) async {
     _isLoading = true;
     _errorMessage = null;
@@ -143,6 +146,36 @@ class AuthState extends ChangeNotifier {
         hostelOrArea: hostelOrArea.trim(),
         bio: bio?.trim(),
         subjectInterests: subjectInterests,
+        eventInterests: eventInterests,
+        preferredQuizSubjects: preferredQuizSubjects,
+        preferredQuizTypes: preferredQuizTypes,
+      );
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _isLoading = false;
+      _errorMessage = _cleanErrorMessage(e.toString());
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// Updates student preferences
+  Future<bool> updatePreferences({
+    List<String>? eventInterests,
+    List<String>? preferredQuizSubjects,
+    List<String>? preferredQuizTypes,
+  }) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      _currentProfile = await client.student.updatePreferences(
+        eventInterests: eventInterests,
+        preferredQuizSubjects: preferredQuizSubjects,
+        preferredQuizTypes: preferredQuizTypes,
       );
       _isLoading = false;
       notifyListeners();

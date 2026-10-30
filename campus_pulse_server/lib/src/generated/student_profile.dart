@@ -25,6 +25,9 @@ abstract class StudentProfile
     required this.hostelOrArea,
     this.bio,
     required this.subjectInterests,
+    this.eventInterests,
+    this.preferredQuizSubjects,
+    this.preferredQuizTypes,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) : createdAt = createdAt ?? DateTime.now(),
@@ -40,6 +43,9 @@ abstract class StudentProfile
     required String hostelOrArea,
     String? bio,
     required List<String> subjectInterests,
+    List<String>? eventInterests,
+    List<String>? preferredQuizSubjects,
+    List<String>? preferredQuizTypes,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) = _StudentProfileImpl;
@@ -59,6 +65,21 @@ abstract class StudentProfile
       subjectInterests: _i2t5n14n.Protocol().deserialize<List<String>>(
         jsonSerialization['subjectInterests'],
       ),
+      eventInterests: jsonSerialization['eventInterests'] == null
+          ? null
+          : _i2t5n14n.Protocol().deserialize<List<String>>(
+              jsonSerialization['eventInterests'],
+            ),
+      preferredQuizSubjects: jsonSerialization['preferredQuizSubjects'] == null
+          ? null
+          : _i2t5n14n.Protocol().deserialize<List<String>>(
+              jsonSerialization['preferredQuizSubjects'],
+            ),
+      preferredQuizTypes: jsonSerialization['preferredQuizTypes'] == null
+          ? null
+          : _i2t5n14n.Protocol().deserialize<List<String>>(
+              jsonSerialization['preferredQuizTypes'],
+            ),
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _is.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
@@ -91,6 +112,12 @@ abstract class StudentProfile
 
   List<String> subjectInterests;
 
+  List<String>? eventInterests;
+
+  List<String>? preferredQuizSubjects;
+
+  List<String>? preferredQuizTypes;
+
   DateTime createdAt;
 
   DateTime updatedAt;
@@ -111,6 +138,9 @@ abstract class StudentProfile
     String? hostelOrArea,
     String? bio,
     List<String>? subjectInterests,
+    List<String>? eventInterests,
+    List<String>? preferredQuizSubjects,
+    List<String>? preferredQuizTypes,
     DateTime? createdAt,
     DateTime? updatedAt,
   });
@@ -127,6 +157,11 @@ abstract class StudentProfile
       'hostelOrArea': hostelOrArea,
       if (bio != null) 'bio': bio,
       'subjectInterests': subjectInterests.toJson(),
+      if (eventInterests != null) 'eventInterests': eventInterests?.toJson(),
+      if (preferredQuizSubjects != null)
+        'preferredQuizSubjects': preferredQuizSubjects?.toJson(),
+      if (preferredQuizTypes != null)
+        'preferredQuizTypes': preferredQuizTypes?.toJson(),
       'createdAt': createdAt.toJson(),
       'updatedAt': updatedAt.toJson(),
     };
@@ -145,6 +180,11 @@ abstract class StudentProfile
       'hostelOrArea': hostelOrArea,
       if (bio != null) 'bio': bio,
       'subjectInterests': subjectInterests.toJson(),
+      if (eventInterests != null) 'eventInterests': eventInterests?.toJson(),
+      if (preferredQuizSubjects != null)
+        'preferredQuizSubjects': preferredQuizSubjects?.toJson(),
+      if (preferredQuizTypes != null)
+        'preferredQuizTypes': preferredQuizTypes?.toJson(),
       'createdAt': createdAt.toJson(),
       'updatedAt': updatedAt.toJson(),
     };
@@ -191,6 +231,9 @@ class _StudentProfileImpl extends StudentProfile {
     required String hostelOrArea,
     String? bio,
     required List<String> subjectInterests,
+    List<String>? eventInterests,
+    List<String>? preferredQuizSubjects,
+    List<String>? preferredQuizTypes,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) : super._(
@@ -203,6 +246,9 @@ class _StudentProfileImpl extends StudentProfile {
          hostelOrArea: hostelOrArea,
          bio: bio,
          subjectInterests: subjectInterests,
+         eventInterests: eventInterests,
+         preferredQuizSubjects: preferredQuizSubjects,
+         preferredQuizTypes: preferredQuizTypes,
          createdAt: createdAt,
          updatedAt: updatedAt,
        );
@@ -221,6 +267,9 @@ class _StudentProfileImpl extends StudentProfile {
     String? hostelOrArea,
     Object? bio = _Undefined,
     List<String>? subjectInterests,
+    Object? eventInterests = _Undefined,
+    Object? preferredQuizSubjects = _Undefined,
+    Object? preferredQuizTypes = _Undefined,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -235,6 +284,15 @@ class _StudentProfileImpl extends StudentProfile {
       bio: bio is String? ? bio : this.bio,
       subjectInterests:
           subjectInterests ?? this.subjectInterests.map((e0) => e0).toList(),
+      eventInterests: eventInterests is List<String>?
+          ? eventInterests
+          : this.eventInterests?.map((e0) => e0).toList(),
+      preferredQuizSubjects: preferredQuizSubjects is List<String>?
+          ? preferredQuizSubjects
+          : this.preferredQuizSubjects?.map((e0) => e0).toList(),
+      preferredQuizTypes: preferredQuizTypes is List<String>?
+          ? preferredQuizTypes
+          : this.preferredQuizTypes?.map((e0) => e0).toList(),
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -288,6 +346,27 @@ class StudentProfileUpdateTable extends _is.UpdateTable<StudentProfileTable> {
     value,
   );
 
+  _is.ColumnValue<List<String>, List<String>> eventInterests(
+    List<String>? value,
+  ) => _is.ColumnValue(
+    table.eventInterests,
+    value,
+  );
+
+  _is.ColumnValue<List<String>, List<String>> preferredQuizSubjects(
+    List<String>? value,
+  ) => _is.ColumnValue(
+    table.preferredQuizSubjects,
+    value,
+  );
+
+  _is.ColumnValue<List<String>, List<String>> preferredQuizTypes(
+    List<String>? value,
+  ) => _is.ColumnValue(
+    table.preferredQuizTypes,
+    value,
+  );
+
   _is.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
       _is.ColumnValue(
         table.createdAt,
@@ -337,6 +416,18 @@ class StudentProfileTable extends _is.Table<int?> {
       'subjectInterests',
       this,
     );
+    eventInterests = _is.ColumnSerializable<List<String>>(
+      'eventInterests',
+      this,
+    );
+    preferredQuizSubjects = _is.ColumnSerializable<List<String>>(
+      'preferredQuizSubjects',
+      this,
+    );
+    preferredQuizTypes = _is.ColumnSerializable<List<String>>(
+      'preferredQuizTypes',
+      this,
+    );
     createdAt = _is.ColumnDateTime(
       'createdAt',
       this,
@@ -367,6 +458,12 @@ class StudentProfileTable extends _is.Table<int?> {
 
   late final _is.ColumnSerializable<List<String>> subjectInterests;
 
+  late final _is.ColumnSerializable<List<String>> eventInterests;
+
+  late final _is.ColumnSerializable<List<String>> preferredQuizSubjects;
+
+  late final _is.ColumnSerializable<List<String>> preferredQuizTypes;
+
   late final _is.ColumnDateTime createdAt;
 
   late final _is.ColumnDateTime updatedAt;
@@ -382,6 +479,9 @@ class StudentProfileTable extends _is.Table<int?> {
     hostelOrArea,
     bio,
     subjectInterests,
+    eventInterests,
+    preferredQuizSubjects,
+    preferredQuizTypes,
     createdAt,
     updatedAt,
   ];

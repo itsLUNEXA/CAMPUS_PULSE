@@ -27,6 +27,9 @@ class _StudentProfileScreenState extends State<StudentProfileScreen> {
   String _branch = 'CSE';
   int _year = 2;
   final Set<String> _subjects = {};
+  final Set<String> _eventInterests = {};
+  final Set<String> _quizSubjects = {};
+  final Set<String> _quizTypes = {};
 
   final List<String> _branches = ['CSE', 'IT', 'ECE', 'Mechanical', 'Civil'];
   final List<String> _availableSubjects = [
@@ -36,6 +39,27 @@ class _StudentProfileScreenState extends State<StudentProfileScreen> {
     'AI',
     'Networks',
     'Web Development',
+  ];
+  final List<String> _availableEventCategories = [
+    'Tech',
+    'Sports',
+    'Cultural',
+    'Workshop',
+    'Hackathon',
+  ];
+  final List<String> _availableQuizSubjects = [
+    'DBMS',
+    'Operating Systems',
+    'Data Structures and Algorithms',
+    'AI',
+    'Computer Networks',
+    'Web Development',
+  ];
+  final List<String> _availableQuizTypes = [
+    'Multiple Choice',
+    'Code Analysis',
+    'Scenario Based',
+    'Conceptual',
   ];
 
   bool _isLoading = false;
@@ -52,6 +76,11 @@ class _StudentProfileScreenState extends State<StudentProfileScreen> {
       _branch = p.branch;
       _year = p.academicYear;
       _subjects.addAll(p.subjectInterests);
+      if (p.eventInterests != null) _eventInterests.addAll(p.eventInterests!);
+      if (p.preferredQuizSubjects != null) {
+        _quizSubjects.addAll(p.preferredQuizSubjects!);
+      }
+      if (p.preferredQuizTypes != null) _quizTypes.addAll(p.preferredQuizTypes!);
     }
   }
 
@@ -78,6 +107,9 @@ class _StudentProfileScreenState extends State<StudentProfileScreen> {
       hostelOrArea: _hostelCtrl.text.trim(),
       bio: _bioCtrl.text.trim(),
       subjectInterests: _subjects.toList(),
+      eventInterests: _eventInterests.toList(),
+      preferredQuizSubjects: _quizSubjects.toList(),
+      preferredQuizTypes: _quizTypes.toList(),
     );
 
     if (mounted) {
@@ -257,6 +289,93 @@ class _StudentProfileScreenState extends State<StudentProfileScreen> {
                                   _subjects.add(sub);
                                 } else {
                                   _subjects.remove(sub);
+                                }
+                              });
+                            },
+                          );
+                        }).toList(),
+                      ),
+                      const SizedBox(height: AppleTokens.space20),
+
+                      Text(
+                        'Event Category Preferences (Tailors event recommendations):',
+                        style: Theme.of(
+                          context,
+                        ).textTheme.titleMedium?.copyWith(fontSize: 14),
+                      ),
+                      const SizedBox(height: AppleTokens.space8),
+                      Wrap(
+                        spacing: AppleTokens.space8,
+                        runSpacing: AppleTokens.space8,
+                        children: _availableEventCategories.map((cat) {
+                          final isSelected = _eventInterests.contains(cat);
+                          return FilterChip(
+                            label: Text(cat),
+                            selected: isSelected,
+                            onSelected: (val) {
+                              setState(() {
+                                if (val) {
+                                  _eventInterests.add(cat);
+                                } else {
+                                  _eventInterests.remove(cat);
+                                }
+                              });
+                            },
+                          );
+                        }).toList(),
+                      ),
+                      const SizedBox(height: AppleTokens.space20),
+
+                      Text(
+                        'Preferred Quiz Subjects:',
+                        style: Theme.of(
+                          context,
+                        ).textTheme.titleMedium?.copyWith(fontSize: 14),
+                      ),
+                      const SizedBox(height: AppleTokens.space8),
+                      Wrap(
+                        spacing: AppleTokens.space8,
+                        runSpacing: AppleTokens.space8,
+                        children: _availableQuizSubjects.map((sub) {
+                          final isSelected = _quizSubjects.contains(sub);
+                          return FilterChip(
+                            label: Text(sub),
+                            selected: isSelected,
+                            onSelected: (val) {
+                              setState(() {
+                                if (val) {
+                                  _quizSubjects.add(sub);
+                                } else {
+                                  _quizSubjects.remove(sub);
+                                }
+                              });
+                            },
+                          );
+                        }).toList(),
+                      ),
+                      const SizedBox(height: AppleTokens.space20),
+
+                      Text(
+                        'Preferred Quiz Question Types:',
+                        style: Theme.of(
+                          context,
+                        ).textTheme.titleMedium?.copyWith(fontSize: 14),
+                      ),
+                      const SizedBox(height: AppleTokens.space8),
+                      Wrap(
+                        spacing: AppleTokens.space8,
+                        runSpacing: AppleTokens.space8,
+                        children: _availableQuizTypes.map((qt) {
+                          final isSelected = _quizTypes.contains(qt);
+                          return FilterChip(
+                            label: Text(qt),
+                            selected: isSelected,
+                            onSelected: (val) {
+                              setState(() {
+                                if (val) {
+                                  _quizTypes.add(qt);
+                                } else {
+                                  _quizTypes.remove(qt);
                                 }
                               });
                             },

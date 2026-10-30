@@ -735,6 +735,17 @@ class EndpointEvent extends _isc.EndpointRef {
         {'id': id},
       );
 
+  /// Returns personalized recommended events based on the authenticated student's saved eventInterests.
+  /// If unauthenticated or no preferences set, returns upcoming approved events ordered by startTime.
+  /// Retains the standard listEvents endpoint for 'Browse All'.
+  _ida.Future<List<_ip4v6fvs.CampusEvent>> getRecommendedEvents({
+    required int limit,
+  }) => caller.callServerEndpoint<List<_ip4v6fvs.CampusEvent>>(
+    'event',
+    'getRecommendedEvents',
+    {'limit': limit},
+  );
+
   /// Creates a new campus event in 'pending' status awaiting review.
   _ida.Future<_ip4v6fvs.CampusEvent> createEvent({
     required String title,
@@ -921,9 +932,22 @@ class EndpointLeaderboard extends _isc.EndpointRef {
   String get name => 'leaderboard';
 
   /// Computes authoritative leaderboard rankings from persisted quiz attempts.
+  ///
+  /// - Repeated attempts on the same quiz only count the student's best score (preventing farming).
+  /// - Distinct quizzes (even within the same subject) are each scored independently (not collapsed).
+  /// - Aggregates globally across all matching attempts before applying pagination.
+  /// - Enforces deterministic tie-breaking:
+  ///   1. Total score (descending)
+  ///   2. Accuracy percentage (descending)
+  ///   3. Cumulative duration (ascending / fastest)
+  ///   4. Distinct quizzes taken (descending)
+  ///   5. Earliest completion timestamp (ascending)
+  ///   6. Student full name (alphabetical)
+  /// - Preserves course (branch) and academic year separation.
   _ida.Future<List<_ipx1rsvs.LeaderboardEntry>> getLeaderboard({
     String? subject,
     String? branch,
+    int? academicYear,
     required int limit,
     required int offset,
   }) => caller.callServerEndpoint<List<_ipx1rsvs.LeaderboardEntry>>(
@@ -932,18 +956,26 @@ class EndpointLeaderboard extends _isc.EndpointRef {
     {
       'subject': subject,
       'branch': branch,
+      'academicYear': academicYear,
       'limit': limit,
       'offset': offset,
     },
   );
 
   /// Retrieves the current student's leaderboard rank and statistics.
-  _ida.Future<_ipx1rsvs.LeaderboardEntry?> getMyRank({String? subject}) =>
-      caller.callServerEndpoint<_ipx1rsvs.LeaderboardEntry?>(
-        'leaderboard',
-        'getMyRank',
-        {'subject': subject},
-      );
+  _ida.Future<_ipx1rsvs.LeaderboardEntry?> getMyRank({
+    String? subject,
+    String? branch,
+    int? academicYear,
+  }) => caller.callServerEndpoint<_ipx1rsvs.LeaderboardEntry?>(
+    'leaderboard',
+    'getMyRank',
+    {
+      'subject': subject,
+      'branch': branch,
+      'academicYear': academicYear,
+    },
+  );
 
   /// Streams real-time leaderboard update notifications to connected clients.
   _ida.Stream<_ivors92c.LeaderboardUpdate> streamLeaderboardUpdates() =>
@@ -1102,6 +1134,16 @@ class EndpointQuiz extends _isc.EndpointRef {
     {'submission': submission},
   );
 
+  /// Returns ordered recommended quiz subjects based on authenticated student's
+  /// preferredQuizSubjects, subjectInterests, and branch.
+  /// Retains full catalog availability without adding unrequested weak-area logic.
+  _ida.Future<List<String>> getRecommendedQuizSubjects() =>
+      caller.callServerEndpoint<List<String>>(
+        'quiz',
+        'getRecommendedQuizSubjects',
+        {},
+      );
+
   /// Retrieves past attempts for the current user.
   _ida.Future<List<_i395nlzx.QuizAttempt>> getMyAttempts({String? subject}) =>
       caller.callServerEndpoint<List<_i395nlzx.QuizAttempt>>(
@@ -1221,6 +1263,9 @@ class EndpointStudent extends _isc.EndpointRef {
     required String hostelOrArea,
     String? bio,
     required List<String> subjectInterests,
+    List<String>? eventInterests,
+    List<String>? preferredQuizSubjects,
+    List<String>? preferredQuizTypes,
   }) => caller.callServerEndpoint<_i66wptcz.StudentProfile>(
     'student',
     'updateProfile',
@@ -1232,6 +1277,24 @@ class EndpointStudent extends _isc.EndpointRef {
       'hostelOrArea': hostelOrArea,
       'bio': bio,
       'subjectInterests': subjectInterests,
+      'eventInterests': eventInterests,
+      'preferredQuizSubjects': preferredQuizSubjects,
+      'preferredQuizTypes': preferredQuizTypes,
+    },
+  );
+
+  /// Updates only the student's personalized preferences (event interests, quiz subjects, quiz types).
+  _ida.Future<_i66wptcz.StudentProfile> updatePreferences({
+    List<String>? eventInterests,
+    List<String>? preferredQuizSubjects,
+    List<String>? preferredQuizTypes,
+  }) => caller.callServerEndpoint<_i66wptcz.StudentProfile>(
+    'student',
+    'updatePreferences',
+    {
+      'eventInterests': eventInterests,
+      'preferredQuizSubjects': preferredQuizSubjects,
+      'preferredQuizTypes': preferredQuizTypes,
     },
   );
 

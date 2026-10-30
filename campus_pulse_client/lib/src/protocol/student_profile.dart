@@ -25,6 +25,9 @@ abstract class StudentProfile
     required this.hostelOrArea,
     this.bio,
     required this.subjectInterests,
+    this.eventInterests,
+    this.preferredQuizSubjects,
+    this.preferredQuizTypes,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) : createdAt = createdAt ?? DateTime.now(),
@@ -40,6 +43,9 @@ abstract class StudentProfile
     required String hostelOrArea,
     String? bio,
     required List<String> subjectInterests,
+    List<String>? eventInterests,
+    List<String>? preferredQuizSubjects,
+    List<String>? preferredQuizTypes,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) = _StudentProfileImpl;
@@ -59,6 +65,21 @@ abstract class StudentProfile
       subjectInterests: _il98xzab.Protocol().deserialize<List<String>>(
         jsonSerialization['subjectInterests'],
       ),
+      eventInterests: jsonSerialization['eventInterests'] == null
+          ? null
+          : _il98xzab.Protocol().deserialize<List<String>>(
+              jsonSerialization['eventInterests'],
+            ),
+      preferredQuizSubjects: jsonSerialization['preferredQuizSubjects'] == null
+          ? null
+          : _il98xzab.Protocol().deserialize<List<String>>(
+              jsonSerialization['preferredQuizSubjects'],
+            ),
+      preferredQuizTypes: jsonSerialization['preferredQuizTypes'] == null
+          ? null
+          : _il98xzab.Protocol().deserialize<List<String>>(
+              jsonSerialization['preferredQuizTypes'],
+            ),
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
@@ -89,6 +110,12 @@ abstract class StudentProfile
 
   List<String> subjectInterests;
 
+  List<String>? eventInterests;
+
+  List<String>? preferredQuizSubjects;
+
+  List<String>? preferredQuizTypes;
+
   DateTime createdAt;
 
   DateTime updatedAt;
@@ -106,6 +133,9 @@ abstract class StudentProfile
     String? hostelOrArea,
     String? bio,
     List<String>? subjectInterests,
+    List<String>? eventInterests,
+    List<String>? preferredQuizSubjects,
+    List<String>? preferredQuizTypes,
     DateTime? createdAt,
     DateTime? updatedAt,
   });
@@ -122,6 +152,11 @@ abstract class StudentProfile
       'hostelOrArea': hostelOrArea,
       if (bio != null) 'bio': bio,
       'subjectInterests': subjectInterests.toJson(),
+      if (eventInterests != null) 'eventInterests': eventInterests?.toJson(),
+      if (preferredQuizSubjects != null)
+        'preferredQuizSubjects': preferredQuizSubjects?.toJson(),
+      if (preferredQuizTypes != null)
+        'preferredQuizTypes': preferredQuizTypes?.toJson(),
       'createdAt': createdAt.toJson(),
       'updatedAt': updatedAt.toJson(),
     };
@@ -140,6 +175,11 @@ abstract class StudentProfile
       'hostelOrArea': hostelOrArea,
       if (bio != null) 'bio': bio,
       'subjectInterests': subjectInterests.toJson(),
+      if (eventInterests != null) 'eventInterests': eventInterests?.toJson(),
+      if (preferredQuizSubjects != null)
+        'preferredQuizSubjects': preferredQuizSubjects?.toJson(),
+      if (preferredQuizTypes != null)
+        'preferredQuizTypes': preferredQuizTypes?.toJson(),
       'createdAt': createdAt.toJson(),
       'updatedAt': updatedAt.toJson(),
     };
@@ -164,6 +204,9 @@ class _StudentProfileImpl extends StudentProfile {
     required String hostelOrArea,
     String? bio,
     required List<String> subjectInterests,
+    List<String>? eventInterests,
+    List<String>? preferredQuizSubjects,
+    List<String>? preferredQuizTypes,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) : super._(
@@ -176,6 +219,9 @@ class _StudentProfileImpl extends StudentProfile {
          hostelOrArea: hostelOrArea,
          bio: bio,
          subjectInterests: subjectInterests,
+         eventInterests: eventInterests,
+         preferredQuizSubjects: preferredQuizSubjects,
+         preferredQuizTypes: preferredQuizTypes,
          createdAt: createdAt,
          updatedAt: updatedAt,
        );
@@ -194,6 +240,9 @@ class _StudentProfileImpl extends StudentProfile {
     String? hostelOrArea,
     Object? bio = _Undefined,
     List<String>? subjectInterests,
+    Object? eventInterests = _Undefined,
+    Object? preferredQuizSubjects = _Undefined,
+    Object? preferredQuizTypes = _Undefined,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -208,6 +257,15 @@ class _StudentProfileImpl extends StudentProfile {
       bio: bio is String? ? bio : this.bio,
       subjectInterests:
           subjectInterests ?? this.subjectInterests.map((e0) => e0).toList(),
+      eventInterests: eventInterests is List<String>?
+          ? eventInterests
+          : this.eventInterests?.map((e0) => e0).toList(),
+      preferredQuizSubjects: preferredQuizSubjects is List<String>?
+          ? preferredQuizSubjects
+          : this.preferredQuizSubjects?.map((e0) => e0).toList(),
+      preferredQuizTypes: preferredQuizTypes is List<String>?
+          ? preferredQuizTypes
+          : this.preferredQuizTypes?.map((e0) => e0).toList(),
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

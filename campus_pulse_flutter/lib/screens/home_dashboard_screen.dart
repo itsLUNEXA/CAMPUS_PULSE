@@ -52,9 +52,15 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
     Object? fetchError;
 
     try {
-      events = await client.event
-          .listEvents(limit: 3, offset: 0)
-          .timeout(const Duration(seconds: 8));
+      if (widget.authState.isAuthenticated) {
+        events = await client.event
+            .getRecommendedEvents(limit: 3)
+            .timeout(const Duration(seconds: 8));
+      } else {
+        events = await client.event
+            .listEvents(limit: 3, offset: 0)
+            .timeout(const Duration(seconds: 8));
+      }
     } catch (e) {
       fetchError = e;
     }

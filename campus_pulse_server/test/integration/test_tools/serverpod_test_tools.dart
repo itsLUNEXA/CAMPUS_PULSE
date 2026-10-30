@@ -1759,6 +1759,37 @@ class _EventEndpoint {
     });
   }
 
+  _ida.Future<List<_iw7ccsb7.CampusEvent>> getRecommendedEvents(
+    _ist.TestSessionBuilder sessionBuilder, {
+    required int limit,
+  }) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'event',
+            method: 'getRecommendedEvents',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'event',
+          methodName: 'getRecommendedEvents',
+          parameters: _ist.testObjectToJson({'limit': limit}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<List<_iw7ccsb7.CampusEvent>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
   _ida.Future<_iw7ccsb7.CampusEvent> createEvent(
     _ist.TestSessionBuilder sessionBuilder, {
     required String title,
@@ -2238,6 +2269,7 @@ class _LeaderboardEndpoint {
     _ist.TestSessionBuilder sessionBuilder, {
     String? subject,
     String? branch,
+    int? academicYear,
     required int limit,
     required int offset,
   }) async {
@@ -2255,6 +2287,7 @@ class _LeaderboardEndpoint {
           parameters: _ist.testObjectToJson({
             'subject': subject,
             'branch': branch,
+            'academicYear': academicYear,
             'limit': limit,
             'offset': offset,
           }),
@@ -2276,6 +2309,8 @@ class _LeaderboardEndpoint {
   _ida.Future<_izc9hvlj.LeaderboardEntry?> getMyRank(
     _ist.TestSessionBuilder sessionBuilder, {
     String? subject,
+    String? branch,
+    int? academicYear,
   }) async {
     return _ist.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
@@ -2288,7 +2323,11 @@ class _LeaderboardEndpoint {
           createSessionCallback: (_) => _localUniqueSession,
           endpointPath: 'leaderboard',
           methodName: 'getMyRank',
-          parameters: _ist.testObjectToJson({'subject': subject}),
+          parameters: _ist.testObjectToJson({
+            'subject': subject,
+            'branch': branch,
+            'academicYear': academicYear,
+          }),
           serializationManager: _serializationManager,
         );
         var _localReturnValue =
@@ -2710,6 +2749,36 @@ class _QuizEndpoint {
     });
   }
 
+  _ida.Future<List<String>> getRecommendedQuizSubjects(
+    _ist.TestSessionBuilder sessionBuilder,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'quiz',
+            method: 'getRecommendedQuizSubjects',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'quiz',
+          methodName: 'getRecommendedQuizSubjects',
+          parameters: _ist.testObjectToJson({}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<List<String>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
   _ida.Future<List<_ii6cu1i5.QuizAttempt>> getMyAttempts(
     _ist.TestSessionBuilder sessionBuilder, {
     String? subject,
@@ -2992,6 +3061,9 @@ class _StudentEndpoint {
     required String hostelOrArea,
     String? bio,
     required List<String> subjectInterests,
+    List<String>? eventInterests,
+    List<String>? preferredQuizSubjects,
+    List<String>? preferredQuizTypes,
   }) async {
     return _ist.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
@@ -3012,6 +3084,46 @@ class _StudentEndpoint {
             'hostelOrArea': hostelOrArea,
             'bio': bio,
             'subjectInterests': subjectInterests,
+            'eventInterests': eventInterests,
+            'preferredQuizSubjects': preferredQuizSubjects,
+            'preferredQuizTypes': preferredQuizTypes,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_iyr83ylc.StudentProfile>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_iyr83ylc.StudentProfile> updatePreferences(
+    _ist.TestSessionBuilder sessionBuilder, {
+    List<String>? eventInterests,
+    List<String>? preferredQuizSubjects,
+    List<String>? preferredQuizTypes,
+  }) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'student',
+            method: 'updatePreferences',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'student',
+          methodName: 'updatePreferences',
+          parameters: _ist.testObjectToJson({
+            'eventInterests': eventInterests,
+            'preferredQuizSubjects': preferredQuizSubjects,
+            'preferredQuizTypes': preferredQuizTypes,
           }),
           serializationManager: _serializationManager,
         );

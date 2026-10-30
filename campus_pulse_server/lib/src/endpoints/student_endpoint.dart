@@ -141,6 +141,9 @@ class StudentEndpoint extends Endpoint {
     required String hostelOrArea,
     String? bio,
     required List<String> subjectInterests,
+    List<String>? eventInterests,
+    List<String>? preferredQuizSubjects,
+    List<String>? preferredQuizTypes,
   }) async {
     final authUserId = session.authenticated?.authUserId;
     if (authUserId == null) {
@@ -186,6 +189,9 @@ class StudentEndpoint extends Endpoint {
         hostelOrArea: hostelOrArea.trim(),
         bio: bio?.trim(),
         subjectInterests: subjectInterests,
+        eventInterests: eventInterests ?? existing.eventInterests,
+        preferredQuizSubjects: preferredQuizSubjects ?? existing.preferredQuizSubjects,
+        preferredQuizTypes: preferredQuizTypes ?? existing.preferredQuizTypes,
         updatedAt: now,
       );
       return await StudentProfile.db.updateRow(session, updated);
@@ -199,11 +205,44 @@ class StudentEndpoint extends Endpoint {
         hostelOrArea: hostelOrArea.trim(),
         bio: bio?.trim(),
         subjectInterests: subjectInterests,
+        eventInterests: eventInterests ?? [],
+        preferredQuizSubjects: preferredQuizSubjects ?? [],
+        preferredQuizTypes: preferredQuizTypes ?? [],
         createdAt: now,
         updatedAt: now,
       );
       return await StudentProfile.db.insertRow(session, newProfile);
     }
+  }
+
+  /// Updates only the student's personalized preferences (event interests, quiz subjects, quiz types).
+  Future<StudentProfile> updatePreferences(
+    Session session, {
+    List<String>? eventInterests,
+    List<String>? preferredQuizSubjects,
+    List<String>? preferredQuizTypes,
+  }) async {
+    final authUserId = session.authenticated?.authUserId;
+    if (authUserId == null) {
+      throw StateError('User must be authenticated to update preferences.');
+    }
+
+    final existing = await StudentProfile.db.findFirstRow(
+      session,
+      where: (t) => t.authUserId.equals(authUserId),
+    );
+    if (existing == null) {
+      throw StateError('Student profile not found.');
+    }
+
+    final updated = existing.copyWith(
+      eventInterests: eventInterests ?? existing.eventInterests,
+      preferredQuizSubjects: preferredQuizSubjects ?? existing.preferredQuizSubjects,
+      preferredQuizTypes: preferredQuizTypes ?? existing.preferredQuizTypes,
+      updatedAt: DateTime.now().toUtc(),
+    );
+
+    return await StudentProfile.db.updateRow(session, updated);
   }
 
   /// Public student profile for matching and discovery (excludes email/private details).

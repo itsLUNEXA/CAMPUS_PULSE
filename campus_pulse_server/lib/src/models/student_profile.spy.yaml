@@ -9,6 +9,9 @@ fields:
   hostelOrArea: String
   bio: String?
   subjectInterests: List<String>
+  eventInterests: List<String>?
+  preferredQuizSubjects: List<String>?
+  preferredQuizTypes: List<String>?
   createdAt: DateTime, default=now
   updatedAt: DateTime, default=now
 

@@ -5,6 +5,7 @@ fields:
   authUserId: UuidValue
   studentName: String
   studentBranch: String
+  academicYear: int?, default=1
   subject: String
   quizId: String?
   score: int
@@ -22,3 +23,5 @@ indexes:
     fields: subject, score
   quiz_attempt_user_idx:
     fields: authUserId
+  quiz_attempt_branch_year_idx:
+    fields: studentBranch, academicYear

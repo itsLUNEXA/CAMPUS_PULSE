@@ -28,6 +28,7 @@ class _EventsFeedScreenState extends State<EventsFeedScreen> {
   String _selectedCategory = 'All';
   final List<String> _categories = [
     'All',
+    'Recommended',
     'Tech',
     'Sports',
     'Cultural',
@@ -127,13 +128,20 @@ class _EventsFeedScreenState extends State<EventsFeedScreen> {
     });
 
     try {
-      final events = await client.event
-          .listEvents(
-            category: _selectedCategory,
-            limit: 50,
-            offset: 0,
-          )
-          .timeout(const Duration(seconds: 10));
+      final List<CampusEvent> events;
+      if (_selectedCategory == 'Recommended') {
+        events = await client.event
+            .getRecommendedEvents(limit: 50)
+            .timeout(const Duration(seconds: 10));
+      } else {
+        events = await client.event
+            .listEvents(
+              category: _selectedCategory,
+              limit: 50,
+              offset: 0,
+            )
+            .timeout(const Duration(seconds: 10));
+      }
 
       final rsvpdIds = <int>{};
       if (widget.authState.isAuthenticated) {

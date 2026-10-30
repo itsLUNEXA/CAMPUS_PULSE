@@ -19,6 +19,7 @@ abstract class LeaderboardEntry
     required this.authUserId,
     required this.studentName,
     required this.branch,
+    this.academicYear,
     required this.score,
     required this.quizzesTaken,
     required this.accuracy,
@@ -29,6 +30,7 @@ abstract class LeaderboardEntry
     required _is.UuidValue authUserId,
     required String studentName,
     required String branch,
+    int? academicYear,
     required int score,
     required int quizzesTaken,
     required double accuracy,
@@ -42,6 +44,7 @@ abstract class LeaderboardEntry
       ),
       studentName: jsonSerialization['studentName'] as String,
       branch: jsonSerialization['branch'] as String,
+      academicYear: jsonSerialization['academicYear'] as int?,
       score: jsonSerialization['score'] as int,
       quizzesTaken: jsonSerialization['quizzesTaken'] as int,
       accuracy: (jsonSerialization['accuracy'] as num).toDouble(),
@@ -55,6 +58,8 @@ abstract class LeaderboardEntry
   String studentName;
 
   String branch;
+
+  int? academicYear;
 
   int score;
 
@@ -70,6 +75,7 @@ abstract class LeaderboardEntry
     _is.UuidValue? authUserId,
     String? studentName,
     String? branch,
+    int? academicYear,
     int? score,
     int? quizzesTaken,
     double? accuracy,
@@ -82,6 +88,7 @@ abstract class LeaderboardEntry
       'authUserId': authUserId.toJson(),
       'studentName': studentName,
       'branch': branch,
+      if (academicYear != null) 'academicYear': academicYear,
       'score': score,
       'quizzesTaken': quizzesTaken,
       'accuracy': accuracy,
@@ -96,6 +103,7 @@ abstract class LeaderboardEntry
       'authUserId': authUserId.toJson(),
       'studentName': studentName,
       'branch': branch,
+      if (academicYear != null) 'academicYear': academicYear,
       'score': score,
       'quizzesTaken': quizzesTaken,
       'accuracy': accuracy,
@@ -108,12 +116,15 @@ abstract class LeaderboardEntry
   }
 }
 
+class _Undefined {}
+
 class _LeaderboardEntryImpl extends LeaderboardEntry {
   _LeaderboardEntryImpl({
     required int rank,
     required _is.UuidValue authUserId,
     required String studentName,
     required String branch,
+    int? academicYear,
     required int score,
     required int quizzesTaken,
     required double accuracy,
@@ -122,6 +133,7 @@ class _LeaderboardEntryImpl extends LeaderboardEntry {
          authUserId: authUserId,
          studentName: studentName,
          branch: branch,
+         academicYear: academicYear,
          score: score,
          quizzesTaken: quizzesTaken,
          accuracy: accuracy,
@@ -136,6 +148,7 @@ class _LeaderboardEntryImpl extends LeaderboardEntry {
     _is.UuidValue? authUserId,
     String? studentName,
     String? branch,
+    Object? academicYear = _Undefined,
     int? score,
     int? quizzesTaken,
     double? accuracy,
@@ -145,6 +158,7 @@ class _LeaderboardEntryImpl extends LeaderboardEntry {
       authUserId: authUserId ?? this.authUserId,
       studentName: studentName ?? this.studentName,
       branch: branch ?? this.branch,
+      academicYear: academicYear is int? ? academicYear : this.academicYear,
       score: score ?? this.score,
       quizzesTaken: quizzesTaken ?? this.quizzesTaken,
       accuracy: accuracy ?? this.accuracy,

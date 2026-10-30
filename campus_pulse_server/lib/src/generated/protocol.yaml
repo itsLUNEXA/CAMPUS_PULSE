@@ -45,6 +45,7 @@ chat:
 event:
   - listEvents:
   - getEvent:
+  - getRecommendedEvents:
   - createEvent:
   - editEvent:
   - reviewEvent:
@@ -75,6 +76,7 @@ points:
 quiz:
   - getQuestionsForSubject:
   - submitQuiz:
+  - getRecommendedQuizSubjects:
   - getMyAttempts:
 search:
   - search:
@@ -86,6 +88,7 @@ student:
   - registerStudent:
   - getProfile:
   - updateProfile:
+  - updatePreferences:
   - getPublicProfile:
   - discoverStudents:
 studyRequest:

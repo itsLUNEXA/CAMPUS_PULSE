@@ -4,6 +4,7 @@ fields:
   authUserId: UuidValue
   studentName: String
   branch: String
+  academicYear: int?
   score: int
   quizzesTaken: int
   accuracy: double

@@ -20,6 +20,7 @@ abstract class QuizAttempt
     required this.authUserId,
     required this.studentName,
     required this.studentBranch,
+    int? academicYear,
     required this.subject,
     this.quizId,
     required this.score,
@@ -29,7 +30,8 @@ abstract class QuizAttempt
     int? attemptNumber,
     bool? isRetake,
     DateTime? completedAt,
-  }) : attemptNumber = attemptNumber ?? 1,
+  }) : academicYear = academicYear ?? 1,
+       attemptNumber = attemptNumber ?? 1,
        isRetake = isRetake ?? false,
        completedAt = completedAt ?? DateTime.now();
 
@@ -39,6 +41,7 @@ abstract class QuizAttempt
     required _is.UuidValue authUserId,
     required String studentName,
     required String studentBranch,
+    int? academicYear,
     required String subject,
     String? quizId,
     required int score,
@@ -59,6 +62,7 @@ abstract class QuizAttempt
       ),
       studentName: jsonSerialization['studentName'] as String,
       studentBranch: jsonSerialization['studentBranch'] as String,
+      academicYear: jsonSerialization['academicYear'] as int?,
       subject: jsonSerialization['subject'] as String,
       quizId: jsonSerialization['quizId'] as String?,
       score: jsonSerialization['score'] as int,
@@ -92,6 +96,8 @@ abstract class QuizAttempt
 
   String studentBranch;
 
+  int? academicYear;
+
   String subject;
 
   String? quizId;
@@ -122,6 +128,7 @@ abstract class QuizAttempt
     _is.UuidValue? authUserId,
     String? studentName,
     String? studentBranch,
+    int? academicYear,
     String? subject,
     String? quizId,
     int? score,
@@ -141,6 +148,7 @@ abstract class QuizAttempt
       'authUserId': authUserId.toJson(),
       'studentName': studentName,
       'studentBranch': studentBranch,
+      if (academicYear != null) 'academicYear': academicYear,
       'subject': subject,
       if (quizId != null) 'quizId': quizId,
       'score': score,
@@ -162,6 +170,7 @@ abstract class QuizAttempt
       'authUserId': authUserId.toJson(),
       'studentName': studentName,
       'studentBranch': studentBranch,
+      if (academicYear != null) 'academicYear': academicYear,
       'subject': subject,
       if (quizId != null) 'quizId': quizId,
       'score': score,
@@ -211,6 +220,7 @@ class _QuizAttemptImpl extends QuizAttempt {
     required _is.UuidValue authUserId,
     required String studentName,
     required String studentBranch,
+    int? academicYear,
     required String subject,
     String? quizId,
     required int score,
@@ -226,6 +236,7 @@ class _QuizAttemptImpl extends QuizAttempt {
          authUserId: authUserId,
          studentName: studentName,
          studentBranch: studentBranch,
+         academicYear: academicYear,
          subject: subject,
          quizId: quizId,
          score: score,
@@ -247,6 +258,7 @@ class _QuizAttemptImpl extends QuizAttempt {
     _is.UuidValue? authUserId,
     String? studentName,
     String? studentBranch,
+    Object? academicYear = _Undefined,
     String? subject,
     Object? quizId = _Undefined,
     int? score,
@@ -263,6 +275,7 @@ class _QuizAttemptImpl extends QuizAttempt {
       authUserId: authUserId ?? this.authUserId,
       studentName: studentName ?? this.studentName,
       studentBranch: studentBranch ?? this.studentBranch,
+      academicYear: academicYear is int? ? academicYear : this.academicYear,
       subject: subject ?? this.subject,
       quizId: quizId is String? ? quizId : this.quizId,
       score: score ?? this.score,
@@ -301,6 +314,11 @@ class QuizAttemptUpdateTable extends _is.UpdateTable<QuizAttemptTable> {
         table.studentBranch,
         value,
       );
+
+  _is.ColumnValue<int, int> academicYear(int? value) => _is.ColumnValue(
+    table.academicYear,
+    value,
+  );
 
   _is.ColumnValue<String, String> subject(String value) => _is.ColumnValue(
     table.subject,
@@ -368,6 +386,11 @@ class QuizAttemptTable extends _is.Table<int?> {
       'studentBranch',
       this,
     );
+    academicYear = _is.ColumnInt(
+      'academicYear',
+      this,
+      hasDefault: true,
+    );
     subject = _is.ColumnString(
       'subject',
       this,
@@ -419,6 +442,8 @@ class QuizAttemptTable extends _is.Table<int?> {
 
   late final _is.ColumnString studentBranch;
 
+  late final _is.ColumnInt academicYear;
+
   late final _is.ColumnString subject;
 
   late final _is.ColumnString quizId;
@@ -444,6 +469,7 @@ class QuizAttemptTable extends _is.Table<int?> {
     authUserId,
     studentName,
     studentBranch,
+    academicYear,
     subject,
     quizId,
     score,
