@@ -61,7 +61,16 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
   void _handleRsvp() async {
     if (!widget.authState.isAuthenticated) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please sign in to RSVP for events.')),
+        const SnackBar(content: Text('Please sign in to register for events.')),
+      );
+      return;
+    }
+
+    final isExpired = _currentEvent.registrationDeadline != null &&
+        DateTime.now().toUtc().isAfter(_currentEvent.registrationDeadline!);
+    if (isExpired && !_isRsvpd) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Registration deadline for this event has passed.')),
       );
       return;
     }
@@ -70,17 +79,17 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
       // Cancellation with accessible confirmation modal (UX feature 14.17)
       final confirmed = await ConfirmationDialog.show(
         context,
-        title: 'Cancel Event Reservation?',
+        title: 'Cancel Event Registration?',
         message:
-            'Are you sure you want to cancel your RSVP for "${_currentEvent.title}"? Your seat will be made available to other students.',
-        confirmLabel: 'Cancel RSVP',
+            'Are you sure you want to cancel your registration for "${_currentEvent.title}"? Your seat will be made available to other students.',
+        confirmLabel: 'Cancel Registration',
         isDestructive: true,
       );
       if (!confirmed) return;
 
       setState(() => _isLoading = true);
       try {
-        await client.event.cancelRsvp(_currentEvent.id!);
+        await client.event.cancelRegistration(_currentEvent.id!);
         final updated = await client.event.getEvent(_currentEvent.id!);
         setState(() {
           _isRsvpd = false;
@@ -91,19 +100,100 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
         setState(() => _isLoading = false);
       }
     } else {
+      if (_currentEvent.isTeamEvent) {
+        _showTeamRegistrationDialog();
+        return;
+      }
+
       setState(() => _isLoading = true);
       try {
-        await client.event.rsvpEvent(_currentEvent.id!);
+        await client.event.registerForEvent(_currentEvent.id!);
         final updated = await client.event.getEvent(_currentEvent.id!);
         setState(() {
           _isRsvpd = true;
           if (updated != null) _currentEvent = updated;
           _isLoading = false;
         });
-      } catch (_) {
+      } catch (e) {
         setState(() => _isLoading = false);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))),
+          );
+        }
       }
     }
+  }
+
+  void _showTeamRegistrationDialog() {
+    final teamNameCtrl = TextEditingController();
+    final memberCtrl = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text('Team Registration (${_currentEvent.minTeamSize}-${_currentEvent.maxTeamSize} Members)'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: teamNameCtrl,
+              decoration: const InputDecoration(labelText: 'Team Name *'),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: memberCtrl,
+              decoration: const InputDecoration(
+                labelText: 'Teammate Name(s) (comma separated)',
+                hintText: 'e.g. John Doe, Jane Smith',
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          ElevatedButton(
+            onPressed: () async {
+              final teamName = teamNameCtrl.text.trim();
+              if (teamName.isEmpty) return;
+
+              final memberNames = memberCtrl.text
+                  .split(',')
+                  .map((s) => s.trim())
+                  .where((s) => s.isNotEmpty)
+                  .toList();
+
+              Navigator.pop(ctx);
+              setState(() => _isLoading = true);
+              try {
+                await client.event.registerForEvent(
+                  _currentEvent.id!,
+                  teamName: teamName,
+                  teamMemberNames: memberNames,
+                );
+                final updated = await client.event.getEvent(_currentEvent.id!);
+                if (mounted) {
+                  setState(() {
+                    _isRsvpd = true;
+                    if (updated != null) _currentEvent = updated;
+                    _isLoading = false;
+                  });
+                }
+              } catch (e) {
+                if (mounted) {
+                  setState(() => _isLoading = false);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))),
+                  );
+                }
+              }
+            },
+            child: const Text('Confirm Registration'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -290,8 +380,8 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                       children: [
                         AppleButton(
                           label: _isRsvpd
-                              ? 'Cancel Reservation'
-                              : 'Reserve My Seat (RSVP)',
+                              ? 'Cancel Registration'
+                              : 'Register for Event',
                           variant: _isRsvpd
                               ? AppleButtonVariant.outline
                               : AppleButtonVariant.primary,

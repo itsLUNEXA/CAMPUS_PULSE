@@ -46,10 +46,17 @@ event:
   - listEvents:
   - getEvent:
   - createEvent:
+  - editEvent:
+  - reviewEvent:
+  - registerForEvent:
   - rsvpEvent:
+  - cancelRegistration:
   - cancelRsvp:
+  - hasUserRegistered:
   - hasUserRsvpd:
+  - getMyRegisteredEventIds:
   - getMyRsvpdEventIds:
+  - getMyOrganizerRegistrations:
   - streamRsvpUpdates:
 leaderboard:
   - getLeaderboard:

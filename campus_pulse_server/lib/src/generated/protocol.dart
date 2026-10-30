@@ -26,6 +26,7 @@ import 'package:campus_pulse_server/src/generated/chat_report.dart'
 import 'package:campus_pulse_server/src/generated/chat_room.dart' as _i787pbkv;
 import 'package:campus_pulse_server/src/generated/event_certificate.dart'
     as _iii6sj61;
+import 'package:campus_pulse_server/src/generated/event_rsvp.dart' as _iemrykml;
 import 'package:campus_pulse_server/src/generated/leaderboard_entry.dart'
     as _izc9hvlj;
 import 'package:campus_pulse_server/src/generated/minutes_of_meeting.dart'
@@ -564,6 +565,53 @@ class Protocol extends _is.DatabaseSerializationManager {
           columnDefault: '0',
         ),
         _isp.ColumnDefinition(
+          name: 'approvalStatus',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+          columnDefault: '\'approved\'',
+        ),
+        _isp.ColumnDefinition(
+          name: 'rejectionReason',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'registrationDeadline',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: true,
+          dartType: 'DateTime?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'isTeamEvent',
+          columnType: _isp.ColumnType.boolean,
+          isNullable: false,
+          dartType: 'bool',
+          columnDefault: 'false',
+        ),
+        _isp.ColumnDefinition(
+          name: 'minTeamSize',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+          columnDefault: '1',
+        ),
+        _isp.ColumnDefinition(
+          name: 'maxTeamSize',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+          columnDefault: '1',
+        ),
+        _isp.ColumnDefinition(
+          name: 'submissionVersion',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+          columnDefault: '1',
+        ),
+        _isp.ColumnDefinition(
           name: 'createdAt',
           columnType: _isp.ColumnType.timestampWithoutTimeZone,
           isNullable: false,
@@ -600,6 +648,19 @@ class Protocol extends _is.DatabaseSerializationManager {
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
               definition: 'startTime',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+        _isp.IndexDefinition(
+          indexName: 'event_approval_status_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'approvalStatus',
             ),
           ],
           type: 'btree',
@@ -1194,6 +1255,24 @@ class Protocol extends _is.DatabaseSerializationManager {
           dartType: 'String',
         ),
         _isp.ColumnDefinition(
+          name: 'teamName',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'teamMemberNames',
+          columnType: _isp.ColumnType.json,
+          isNullable: true,
+          dartType: 'List<String>?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'teamMemberEmails',
+          columnType: _isp.ColumnType.json,
+          isNullable: true,
+          dartType: 'List<String>?',
+        ),
+        _isp.ColumnDefinition(
           name: 'createdAt',
           columnType: _isp.ColumnType.timestampWithoutTimeZone,
           isNullable: false,
@@ -1215,7 +1294,7 @@ class Protocol extends _is.DatabaseSerializationManager {
       ],
       indexes: [
         _isp.IndexDefinition(
-          indexName: 'event_student_rsvp_idx',
+          indexName: 'event_rsvp_unique_idx',
           tableSpace: null,
           elements: [
             _isp.IndexElementDefinition(
@@ -1229,19 +1308,6 @@ class Protocol extends _is.DatabaseSerializationManager {
           ],
           type: 'btree',
           isUnique: true,
-          isPrimary: false,
-        ),
-        _isp.IndexDefinition(
-          indexName: 'rsvp_user_idx',
-          tableSpace: null,
-          elements: [
-            _isp.IndexElementDefinition(
-              type: _isp.IndexElementDefinitionType.column,
-              definition: 'authUserId',
-            ),
-          ],
-          type: 'btree',
-          isUnique: false,
           isPrimary: false,
         ),
       ],
@@ -2637,6 +2703,12 @@ class Protocol extends _is.DatabaseSerializationManager {
     if (t == List<String>) {
       return (data as List).map((e) => deserialize<String>(e)).toList() as T;
     }
+    if (t == _is.getType<List<String>?>()) {
+      return (data != null
+              ? (data as List).map((e) => deserialize<String>(e)).toList()
+              : null)
+          as T;
+    }
     if (t == List<_i1u2fv9w.QuizResultItem>) {
       return (data as List)
               .map((e) => deserialize<_i1u2fv9w.QuizResultItem>(e))
@@ -2722,8 +2794,20 @@ class Protocol extends _is.DatabaseSerializationManager {
               .toList()
           as T;
     }
+    if (t == _is.getType<List<String>?>()) {
+      return (data != null
+              ? (data as List).map((e) => deserialize<String>(e)).toList()
+              : null)
+          as T;
+    }
     if (t == List<int>) {
       return (data as List).map((e) => deserialize<int>(e)).toList() as T;
+    }
+    if (t == List<_iemrykml.EventRsvp>) {
+      return (data as List)
+              .map((e) => deserialize<_iemrykml.EventRsvp>(e))
+              .toList()
+          as T;
     }
     if (t == List<_izc9hvlj.LeaderboardEntry>) {
       return (data as List)

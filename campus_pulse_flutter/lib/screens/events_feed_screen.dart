@@ -189,7 +189,7 @@ class _EventsFeedScreenState extends State<EventsFeedScreen> {
     if (!widget.authState.isAuthenticated) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please sign in to RSVP for events.'),
+          content: Text('Please sign in to register for events.'),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -857,7 +857,7 @@ class _EventsFeedScreenState extends State<EventsFeedScreen> {
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         ),
                         child: Text(
-                          isRsvpd ? 'Going ✓' : 'RSVP',
+                          isRsvpd ? 'Registered ✓' : 'Register',
                           style: _sansText(
                             fontSize: 12,
                             fontWeight: FontWeight.w700,

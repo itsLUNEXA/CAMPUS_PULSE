@@ -20,6 +20,10 @@ void main() {
           category: 'Tech',
           startTime: now.add(const Duration(days: 2)),
           venue: 'Lab 3, CS Department',
+          approvalStatus: 'approved',
+          isTeamEvent: false,
+          minTeamSize: 1,
+          maxTeamSize: 1,
         );
 
         expect(event.id, isNotNull);
@@ -29,6 +33,7 @@ void main() {
         final list = await endpoints.event.listEvents(
           sessionBuilder,
           category: 'Tech',
+          approvalStatus: 'approved',
           limit: 20,
           offset: 0,
         );
@@ -38,6 +43,7 @@ void main() {
         final listAll = await endpoints.event.listEvents(
           sessionBuilder,
           category: 'All',
+          approvalStatus: 'approved',
           limit: 20,
           offset: 0,
         );
@@ -47,6 +53,7 @@ void main() {
         final listNull = await endpoints.event.listEvents(
           sessionBuilder,
           category: null,
+          approvalStatus: 'approved',
           limit: 20,
           offset: 0,
         );
@@ -65,6 +72,10 @@ void main() {
           category: 'Sports',
           startTime: now.add(const Duration(days: 4)),
           venue: 'Main Stadium',
+          approvalStatus: 'approved',
+          isTeamEvent: false,
+          minTeamSize: 1,
+          maxTeamSize: 1,
         );
 
         // First RSVP

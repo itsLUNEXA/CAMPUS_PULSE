@@ -10,6 +10,7 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'package:campus_pulse_client/src/protocol/protocol.dart' as _il98xzab;
 import 'package:serverpod_client/serverpod_client.dart' as _isc;
 
 abstract class EventRsvp
@@ -19,6 +20,9 @@ abstract class EventRsvp
     required this.eventId,
     required this.authUserId,
     required this.studentName,
+    this.teamName,
+    this.teamMemberNames,
+    this.teamMemberEmails,
     DateTime? createdAt,
   }) : createdAt = createdAt ?? DateTime.now();
 
@@ -27,6 +31,9 @@ abstract class EventRsvp
     required int eventId,
     required _isc.UuidValue authUserId,
     required String studentName,
+    String? teamName,
+    List<String>? teamMemberNames,
+    List<String>? teamMemberEmails,
     DateTime? createdAt,
   }) = _EventRsvpImpl;
 
@@ -38,6 +45,17 @@ abstract class EventRsvp
         jsonSerialization['authUserId'],
       ),
       studentName: jsonSerialization['studentName'] as String,
+      teamName: jsonSerialization['teamName'] as String?,
+      teamMemberNames: jsonSerialization['teamMemberNames'] == null
+          ? null
+          : _il98xzab.Protocol().deserialize<List<String>>(
+              jsonSerialization['teamMemberNames'],
+            ),
+      teamMemberEmails: jsonSerialization['teamMemberEmails'] == null
+          ? null
+          : _il98xzab.Protocol().deserialize<List<String>>(
+              jsonSerialization['teamMemberEmails'],
+            ),
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
@@ -55,6 +73,12 @@ abstract class EventRsvp
 
   String studentName;
 
+  String? teamName;
+
+  List<String>? teamMemberNames;
+
+  List<String>? teamMemberEmails;
+
   DateTime createdAt;
 
   /// Returns a shallow copy of this [EventRsvp]
@@ -65,6 +89,9 @@ abstract class EventRsvp
     int? eventId,
     _isc.UuidValue? authUserId,
     String? studentName,
+    String? teamName,
+    List<String>? teamMemberNames,
+    List<String>? teamMemberEmails,
     DateTime? createdAt,
   });
   @override
@@ -75,6 +102,10 @@ abstract class EventRsvp
       'eventId': eventId,
       'authUserId': authUserId.toJson(),
       'studentName': studentName,
+      if (teamName != null) 'teamName': teamName,
+      if (teamMemberNames != null) 'teamMemberNames': teamMemberNames?.toJson(),
+      if (teamMemberEmails != null)
+        'teamMemberEmails': teamMemberEmails?.toJson(),
       'createdAt': createdAt.toJson(),
     };
   }
@@ -87,6 +118,10 @@ abstract class EventRsvp
       'eventId': eventId,
       'authUserId': authUserId.toJson(),
       'studentName': studentName,
+      if (teamName != null) 'teamName': teamName,
+      if (teamMemberNames != null) 'teamMemberNames': teamMemberNames?.toJson(),
+      if (teamMemberEmails != null)
+        'teamMemberEmails': teamMemberEmails?.toJson(),
       'createdAt': createdAt.toJson(),
     };
   }
@@ -105,12 +140,18 @@ class _EventRsvpImpl extends EventRsvp {
     required int eventId,
     required _isc.UuidValue authUserId,
     required String studentName,
+    String? teamName,
+    List<String>? teamMemberNames,
+    List<String>? teamMemberEmails,
     DateTime? createdAt,
   }) : super._(
          id: id,
          eventId: eventId,
          authUserId: authUserId,
          studentName: studentName,
+         teamName: teamName,
+         teamMemberNames: teamMemberNames,
+         teamMemberEmails: teamMemberEmails,
          createdAt: createdAt,
        );
 
@@ -123,6 +164,9 @@ class _EventRsvpImpl extends EventRsvp {
     int? eventId,
     _isc.UuidValue? authUserId,
     String? studentName,
+    Object? teamName = _Undefined,
+    Object? teamMemberNames = _Undefined,
+    Object? teamMemberEmails = _Undefined,
     DateTime? createdAt,
   }) {
     return EventRsvp(
@@ -130,6 +174,13 @@ class _EventRsvpImpl extends EventRsvp {
       eventId: eventId ?? this.eventId,
       authUserId: authUserId ?? this.authUserId,
       studentName: studentName ?? this.studentName,
+      teamName: teamName is String? ? teamName : this.teamName,
+      teamMemberNames: teamMemberNames is List<String>?
+          ? teamMemberNames
+          : this.teamMemberNames?.map((e0) => e0).toList(),
+      teamMemberEmails: teamMemberEmails is List<String>?
+          ? teamMemberEmails
+          : this.teamMemberEmails?.map((e0) => e0).toList(),
       createdAt: createdAt ?? this.createdAt,
     );
   }

@@ -11,6 +11,13 @@ fields:
   organizerAuthUserId: UuidValue
   organizerName: String
   rsvpCount: int, default=0
+  approvalStatus: String, default='approved' # 'pending', 'approved', 'rejected'
+  rejectionReason: String?
+  registrationDeadline: DateTime?
+  isTeamEvent: bool, default=false
+  minTeamSize: int, default=1
+  maxTeamSize: int, default=1
+  submissionVersion: int, default=1
   createdAt: DateTime, default=now
   updatedAt: DateTime, default=now
 
@@ -19,4 +26,5 @@ indexes:
     fields: category
   event_start_time_idx:
     fields: startTime
-
+  event_approval_status_idx:
+    fields: approvalStatus

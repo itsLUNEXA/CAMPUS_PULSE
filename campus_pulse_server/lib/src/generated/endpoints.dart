@@ -1175,6 +1175,11 @@ class Endpoints extends _is.EndpointDispatch {
               type: _is.getType<String?>(),
               nullable: true,
             ),
+            'approvalStatus': _is.ParameterDescription(
+              name: 'approvalStatus',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
             'limit': _is.ParameterDescription(
               name: 'limit',
               type: _is.getType<int>(),
@@ -1194,6 +1199,7 @@ class Endpoints extends _is.EndpointDispatch {
                   (endpoints['event'] as _icw8lb6p.EventEndpoint).listEvents(
                     session,
                     category: params['category'],
+                    approvalStatus: params['approvalStatus'],
                     limit: params['limit'],
                     offset: params['offset'],
                   ),
@@ -1255,6 +1261,31 @@ class Endpoints extends _is.EndpointDispatch {
               type: _is.getType<String?>(),
               nullable: true,
             ),
+            'registrationDeadline': _is.ParameterDescription(
+              name: 'registrationDeadline',
+              type: _is.getType<DateTime?>(),
+              nullable: true,
+            ),
+            'isTeamEvent': _is.ParameterDescription(
+              name: 'isTeamEvent',
+              type: _is.getType<bool>(),
+              nullable: false,
+            ),
+            'minTeamSize': _is.ParameterDescription(
+              name: 'minTeamSize',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'maxTeamSize': _is.ParameterDescription(
+              name: 'maxTeamSize',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'approvalStatus': _is.ParameterDescription(
+              name: 'approvalStatus',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
           },
           call:
               (
@@ -1270,6 +1301,164 @@ class Endpoints extends _is.EndpointDispatch {
                     endTime: params['endTime'],
                     venue: params['venue'],
                     bannerUrl: params['bannerUrl'],
+                    registrationDeadline: params['registrationDeadline'],
+                    isTeamEvent: params['isTeamEvent'],
+                    minTeamSize: params['minTeamSize'],
+                    maxTeamSize: params['maxTeamSize'],
+                    approvalStatus: params['approvalStatus'],
+                  ),
+        ),
+        'editEvent': _is.MethodConnector(
+          name: 'editEvent',
+          params: {
+            'eventId': _is.ParameterDescription(
+              name: 'eventId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'title': _is.ParameterDescription(
+              name: 'title',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'description': _is.ParameterDescription(
+              name: 'description',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'category': _is.ParameterDescription(
+              name: 'category',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'startTime': _is.ParameterDescription(
+              name: 'startTime',
+              type: _is.getType<DateTime>(),
+              nullable: false,
+            ),
+            'endTime': _is.ParameterDescription(
+              name: 'endTime',
+              type: _is.getType<DateTime?>(),
+              nullable: true,
+            ),
+            'venue': _is.ParameterDescription(
+              name: 'venue',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'bannerUrl': _is.ParameterDescription(
+              name: 'bannerUrl',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+            'registrationDeadline': _is.ParameterDescription(
+              name: 'registrationDeadline',
+              type: _is.getType<DateTime?>(),
+              nullable: true,
+            ),
+            'isTeamEvent': _is.ParameterDescription(
+              name: 'isTeamEvent',
+              type: _is.getType<bool>(),
+              nullable: false,
+            ),
+            'minTeamSize': _is.ParameterDescription(
+              name: 'minTeamSize',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'maxTeamSize': _is.ParameterDescription(
+              name: 'maxTeamSize',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['event'] as _icw8lb6p.EventEndpoint).editEvent(
+                    session,
+                    eventId: params['eventId'],
+                    title: params['title'],
+                    description: params['description'],
+                    category: params['category'],
+                    startTime: params['startTime'],
+                    endTime: params['endTime'],
+                    venue: params['venue'],
+                    bannerUrl: params['bannerUrl'],
+                    registrationDeadline: params['registrationDeadline'],
+                    isTeamEvent: params['isTeamEvent'],
+                    minTeamSize: params['minTeamSize'],
+                    maxTeamSize: params['maxTeamSize'],
+                  ),
+        ),
+        'reviewEvent': _is.MethodConnector(
+          name: 'reviewEvent',
+          params: {
+            'eventId': _is.ParameterDescription(
+              name: 'eventId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'decision': _is.ParameterDescription(
+              name: 'decision',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'rejectionReason': _is.ParameterDescription(
+              name: 'rejectionReason',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['event'] as _icw8lb6p.EventEndpoint).reviewEvent(
+                    session,
+                    eventId: params['eventId'],
+                    decision: params['decision'],
+                    rejectionReason: params['rejectionReason'],
+                  ),
+        ),
+        'registerForEvent': _is.MethodConnector(
+          name: 'registerForEvent',
+          params: {
+            'eventId': _is.ParameterDescription(
+              name: 'eventId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'teamName': _is.ParameterDescription(
+              name: 'teamName',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+            'teamMemberNames': _is.ParameterDescription(
+              name: 'teamMemberNames',
+              type: _is.getType<List<String>?>(),
+              nullable: true,
+            ),
+            'teamMemberEmails': _is.ParameterDescription(
+              name: 'teamMemberEmails',
+              type: _is.getType<List<String>?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['event'] as _icw8lb6p.EventEndpoint)
+                  .registerForEvent(
+                    session,
+                    params['eventId'],
+                    teamName: params['teamName'],
+                    teamMemberNames: params['teamMemberNames'],
+                    teamMemberEmails: params['teamMemberEmails'],
                   ),
         ),
         'rsvpEvent': _is.MethodConnector(
@@ -1287,6 +1476,25 @@ class Endpoints extends _is.EndpointDispatch {
                 Map<String, dynamic> params,
               ) async =>
                   (endpoints['event'] as _icw8lb6p.EventEndpoint).rsvpEvent(
+                    session,
+                    params['eventId'],
+                  ),
+        ),
+        'cancelRegistration': _is.MethodConnector(
+          name: 'cancelRegistration',
+          params: {
+            'eventId': _is.ParameterDescription(
+              name: 'eventId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['event'] as _icw8lb6p.EventEndpoint)
+                  .cancelRegistration(
                     session,
                     params['eventId'],
                   ),
@@ -1310,6 +1518,25 @@ class Endpoints extends _is.EndpointDispatch {
                     params['eventId'],
                   ),
         ),
+        'hasUserRegistered': _is.MethodConnector(
+          name: 'hasUserRegistered',
+          params: {
+            'eventId': _is.ParameterDescription(
+              name: 'eventId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['event'] as _icw8lb6p.EventEndpoint)
+                  .hasUserRegistered(
+                    session,
+                    params['eventId'],
+                  ),
+        ),
         'hasUserRsvpd': _is.MethodConnector(
           name: 'hasUserRsvpd',
           params: {
@@ -1329,6 +1556,16 @@ class Endpoints extends _is.EndpointDispatch {
                     params['eventId'],
                   ),
         ),
+        'getMyRegisteredEventIds': _is.MethodConnector(
+          name: 'getMyRegisteredEventIds',
+          params: {},
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['event'] as _icw8lb6p.EventEndpoint)
+                  .getMyRegisteredEventIds(session),
+        ),
         'getMyRsvpdEventIds': _is.MethodConnector(
           name: 'getMyRsvpdEventIds',
           params: {},
@@ -1338,6 +1575,25 @@ class Endpoints extends _is.EndpointDispatch {
                 Map<String, dynamic> params,
               ) async => (endpoints['event'] as _icw8lb6p.EventEndpoint)
                   .getMyRsvpdEventIds(session),
+        ),
+        'getMyOrganizerRegistrations': _is.MethodConnector(
+          name: 'getMyOrganizerRegistrations',
+          params: {
+            'eventId': _is.ParameterDescription(
+              name: 'eventId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['event'] as _icw8lb6p.EventEndpoint)
+                  .getMyOrganizerRegistrations(
+                    session,
+                    params['eventId'],
+                  ),
         ),
         'streamRsvpUpdates': _is.MethodStreamConnector(
           name: 'streamRsvpUpdates',

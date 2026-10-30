@@ -25,6 +25,7 @@ import 'package:campus_pulse_client/src/protocol/chat_report.dart' as _izhvp4kh;
 import 'package:campus_pulse_client/src/protocol/chat_room.dart' as _i69co3yd;
 import 'package:campus_pulse_client/src/protocol/event_certificate.dart'
     as _ihpqvest;
+import 'package:campus_pulse_client/src/protocol/event_rsvp.dart' as _in2xsmyl;
 import 'package:campus_pulse_client/src/protocol/leaderboard_entry.dart'
     as _ipx1rsvs;
 import 'package:campus_pulse_client/src/protocol/minutes_of_meeting.dart'
@@ -376,6 +377,12 @@ class Protocol extends _isc.SerializationManager {
     if (t == List<String>) {
       return (data as List).map((e) => deserialize<String>(e)).toList() as T;
     }
+    if (t == _isc.getType<List<String>?>()) {
+      return (data != null
+              ? (data as List).map((e) => deserialize<String>(e)).toList()
+              : null)
+          as T;
+    }
     if (t == List<_i1u2fv9w.QuizResultItem>) {
       return (data as List)
               .map((e) => deserialize<_i1u2fv9w.QuizResultItem>(e))
@@ -461,8 +468,20 @@ class Protocol extends _isc.SerializationManager {
               .toList()
           as T;
     }
+    if (t == _isc.getType<List<String>?>()) {
+      return (data != null
+              ? (data as List).map((e) => deserialize<String>(e)).toList()
+              : null)
+          as T;
+    }
     if (t == List<int>) {
       return (data as List).map((e) => deserialize<int>(e)).toList() as T;
+    }
+    if (t == List<_in2xsmyl.EventRsvp>) {
+      return (data as List)
+              .map((e) => deserialize<_in2xsmyl.EventRsvp>(e))
+              .toList()
+          as T;
     }
     if (t == List<_ipx1rsvs.LeaderboardEntry>) {
       return (data as List)

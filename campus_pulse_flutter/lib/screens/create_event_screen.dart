@@ -40,6 +40,9 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   final DateTime _startDate = DateTime.now().add(
     const Duration(days: 2, hours: 10),
   );
+  bool _isTeamEvent = false;
+  int _minTeamSize = 1;
+  int _maxTeamSize = 1;
   bool _isLoading = false;
   String? _errorMessage;
 
@@ -78,6 +81,9 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
         bannerUrl: _bannerCtrl.text.trim().isNotEmpty
             ? _bannerCtrl.text.trim()
             : null,
+        isTeamEvent: _isTeamEvent,
+        minTeamSize: _minTeamSize,
+        maxTeamSize: _maxTeamSize,
       );
 
       setState(() => _isLoading = false);
@@ -197,6 +203,37 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                         ),
                       ),
                       const SizedBox(height: AppleTokens.space16),
+
+                      SwitchListTile(
+                        title: const Text('Team Event Mode', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                        subtitle: const Text('Require students to register as a team with designated teammates.'),
+                        value: _isTeamEvent,
+                        onChanged: (val) => setState(() => _isTeamEvent = val),
+                      ),
+                      if (_isTeamEvent) ...[
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextFormField(
+                                initialValue: '2',
+                                decoration: const InputDecoration(labelText: 'Min Team Size'),
+                                keyboardType: TextInputType.number,
+                                onChanged: (val) => setState(() => _minTeamSize = int.tryParse(val) ?? 2),
+                              ),
+                            ),
+                            const SizedBox(width: AppleTokens.space16),
+                            Expanded(
+                              child: TextFormField(
+                                initialValue: '4',
+                                decoration: const InputDecoration(labelText: 'Max Team Size'),
+                                keyboardType: TextInputType.number,
+                                onChanged: (val) => setState(() => _maxTeamSize = int.tryParse(val) ?? 4),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: AppleTokens.space16),
+                      ],
 
                       TextFormField(
                         controller: _descCtrl,

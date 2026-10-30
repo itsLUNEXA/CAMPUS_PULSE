@@ -25,6 +25,7 @@ import 'package:campus_pulse_client/src/protocol/chat_report.dart' as _izhvp4kh;
 import 'package:campus_pulse_client/src/protocol/chat_room.dart' as _i69co3yd;
 import 'package:campus_pulse_client/src/protocol/event_certificate.dart'
     as _ihpqvest;
+import 'package:campus_pulse_client/src/protocol/event_rsvp.dart' as _in2xsmyl;
 import 'package:campus_pulse_client/src/protocol/greetings/greeting.dart'
     as _itza125m;
 import 'package:campus_pulse_client/src/protocol/leaderboard_entry.dart'
@@ -708,9 +709,11 @@ class EndpointEvent extends _isc.EndpointRef {
   @override
   String get name => 'event';
 
-  /// Lists campus events with category filtering and pagination.
+  /// Lists campus events with category filtering and approval check.
+  /// By default returns only approved events for regular students.
   _ida.Future<List<_ip4v6fvs.CampusEvent>> listEvents({
     String? category,
+    String? approvalStatus,
     required int limit,
     required int offset,
   }) => caller.callServerEndpoint<List<_ip4v6fvs.CampusEvent>>(
@@ -718,6 +721,7 @@ class EndpointEvent extends _isc.EndpointRef {
     'listEvents',
     {
       'category': category,
+      'approvalStatus': approvalStatus,
       'limit': limit,
       'offset': offset,
     },
@@ -731,7 +735,7 @@ class EndpointEvent extends _isc.EndpointRef {
         {'id': id},
       );
 
-  /// Creates a new campus event.
+  /// Creates a new campus event in 'pending' status awaiting review.
   _ida.Future<_ip4v6fvs.CampusEvent> createEvent({
     required String title,
     required String description,
@@ -740,6 +744,11 @@ class EndpointEvent extends _isc.EndpointRef {
     DateTime? endTime,
     required String venue,
     String? bannerUrl,
+    DateTime? registrationDeadline,
+    required bool isTeamEvent,
+    required int minTeamSize,
+    required int maxTeamSize,
+    String? approvalStatus,
   }) => caller.callServerEndpoint<_ip4v6fvs.CampusEvent>(
     'event',
     'createEvent',
@@ -751,24 +760,114 @@ class EndpointEvent extends _isc.EndpointRef {
       'endTime': endTime,
       'venue': venue,
       'bannerUrl': bannerUrl,
+      'registrationDeadline': registrationDeadline,
+      'isTeamEvent': isTeamEvent,
+      'minTeamSize': minTeamSize,
+      'maxTeamSize': maxTeamSize,
+      'approvalStatus': approvalStatus,
     },
   );
 
-  /// RSVP to an event transactionally with duplicate check and real-time broadcast.
+  /// Edits an existing event.
+  /// Material edits (title, venue, timing, deadline, category, team rules) to approved events
+  /// reset approvalStatus to 'pending' and require reapproval.
+  _ida.Future<_ip4v6fvs.CampusEvent> editEvent({
+    required int eventId,
+    required String title,
+    required String description,
+    required String category,
+    required DateTime startTime,
+    DateTime? endTime,
+    required String venue,
+    String? bannerUrl,
+    DateTime? registrationDeadline,
+    required bool isTeamEvent,
+    required int minTeamSize,
+    required int maxTeamSize,
+  }) => caller.callServerEndpoint<_ip4v6fvs.CampusEvent>(
+    'event',
+    'editEvent',
+    {
+      'eventId': eventId,
+      'title': title,
+      'description': description,
+      'category': category,
+      'startTime': startTime,
+      'endTime': endTime,
+      'venue': venue,
+      'bannerUrl': bannerUrl,
+      'registrationDeadline': registrationDeadline,
+      'isTeamEvent': isTeamEvent,
+      'minTeamSize': minTeamSize,
+      'maxTeamSize': maxTeamSize,
+    },
+  );
+
+  /// Review event (Admin only: approve or reject with reason)
+  _ida.Future<_ip4v6fvs.CampusEvent> reviewEvent({
+    required int eventId,
+    required String decision,
+    String? rejectionReason,
+  }) => caller.callServerEndpoint<_ip4v6fvs.CampusEvent>(
+    'event',
+    'reviewEvent',
+    {
+      'eventId': eventId,
+      'decision': decision,
+      'rejectionReason': rejectionReason,
+    },
+  );
+
+  /// Registers a student or team for an event transactionally.
+  /// Enforces approval status, registration deadlines, team size validation,
+  /// and concurrent duplicate prevention.
+  _ida.Future<bool> registerForEvent(
+    int eventId, {
+    String? teamName,
+    List<String>? teamMemberNames,
+    List<String>? teamMemberEmails,
+  }) => caller.callServerEndpoint<bool>(
+    'event',
+    'registerForEvent',
+    {
+      'eventId': eventId,
+      'teamName': teamName,
+      'teamMemberNames': teamMemberNames,
+      'teamMemberEmails': teamMemberEmails,
+    },
+  );
+
+  /// Backward-compatible alias for registerForEvent
   _ida.Future<bool> rsvpEvent(int eventId) => caller.callServerEndpoint<bool>(
     'event',
     'rsvpEvent',
     {'eventId': eventId},
   );
 
-  /// Cancels an RSVP transactionally.
+  /// Cancels a registration transactionally.
+  _ida.Future<bool> cancelRegistration(int eventId) =>
+      caller.callServerEndpoint<bool>(
+        'event',
+        'cancelRegistration',
+        {'eventId': eventId},
+      );
+
+  /// Backward-compatible alias for cancelRegistration
   _ida.Future<bool> cancelRsvp(int eventId) => caller.callServerEndpoint<bool>(
     'event',
     'cancelRsvp',
     {'eventId': eventId},
   );
 
-  /// Checks whether the authenticated user has RSVP'd to this event.
+  /// Checks whether the authenticated user has registered for this event.
+  _ida.Future<bool> hasUserRegistered(int eventId) =>
+      caller.callServerEndpoint<bool>(
+        'event',
+        'hasUserRegistered',
+        {'eventId': eventId},
+      );
+
+  /// Backward-compatible alias
   _ida.Future<bool> hasUserRsvpd(int eventId) =>
       caller.callServerEndpoint<bool>(
         'event',
@@ -776,7 +875,15 @@ class EndpointEvent extends _isc.EndpointRef {
         {'eventId': eventId},
       );
 
-  /// Returns all event IDs that the current authenticated student has RSVP'd to.
+  /// Returns all event IDs that the current student has registered for.
+  _ida.Future<List<int>> getMyRegisteredEventIds() =>
+      caller.callServerEndpoint<List<int>>(
+        'event',
+        'getMyRegisteredEventIds',
+        {},
+      );
+
+  /// Backward-compatible alias
   _ida.Future<List<int>> getMyRsvpdEventIds() =>
       caller.callServerEndpoint<List<int>>(
         'event',
@@ -784,7 +891,16 @@ class EndpointEvent extends _isc.EndpointRef {
         {},
       );
 
-  /// Streams real-time RSVP updates to connected clients.
+  /// Retrieves participant registration details for the owning organizer or an admin.
+  _ida.Future<List<_in2xsmyl.EventRsvp>> getMyOrganizerRegistrations(
+    int eventId,
+  ) => caller.callServerEndpoint<List<_in2xsmyl.EventRsvp>>(
+    'event',
+    'getMyOrganizerRegistrations',
+    {'eventId': eventId},
+  );
+
+  /// Streams real-time registration updates to connected clients.
   _ida.Stream<_i2m6gzec.RsvpUpdate> streamRsvpUpdates() =>
       caller.callStreamingServerEndpoint<
         _ida.Stream<_i2m6gzec.RsvpUpdate>,

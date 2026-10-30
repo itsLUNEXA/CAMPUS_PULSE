@@ -4,12 +4,12 @@ fields:
   eventId: int, relation(parent=campus_event, onDelete=Cascade)
   authUserId: UuidValue
   studentName: String
+  teamName: String?
+  teamMemberNames: List<String>?
+  teamMemberEmails: List<String>?
   createdAt: DateTime, default=now
 
 indexes:
-  event_student_rsvp_idx:
+  event_rsvp_unique_idx:
     fields: eventId, authUserId
     unique: true
-  rsvp_user_idx:
-    fields: authUserId
-

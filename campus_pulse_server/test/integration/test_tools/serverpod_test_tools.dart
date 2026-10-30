@@ -28,6 +28,7 @@ import 'package:campus_pulse_server/src/generated/chat_report.dart'
 import 'package:campus_pulse_server/src/generated/chat_room.dart' as _i787pbkv;
 import 'package:campus_pulse_server/src/generated/event_certificate.dart'
     as _iii6sj61;
+import 'package:campus_pulse_server/src/generated/event_rsvp.dart' as _iemrykml;
 import 'package:campus_pulse_server/src/generated/greetings/greeting.dart'
     as _iwzyf8be;
 import 'package:campus_pulse_server/src/generated/leaderboard_entry.dart'
@@ -1691,6 +1692,7 @@ class _EventEndpoint {
   _ida.Future<List<_iw7ccsb7.CampusEvent>> listEvents(
     _ist.TestSessionBuilder sessionBuilder, {
     String? category,
+    String? approvalStatus,
     required int limit,
     required int offset,
   }) async {
@@ -1707,6 +1709,7 @@ class _EventEndpoint {
           methodName: 'listEvents',
           parameters: _ist.testObjectToJson({
             'category': category,
+            'approvalStatus': approvalStatus,
             'limit': limit,
             'offset': offset,
           }),
@@ -1765,6 +1768,11 @@ class _EventEndpoint {
     DateTime? endTime,
     required String venue,
     String? bannerUrl,
+    DateTime? registrationDeadline,
+    required bool isTeamEvent,
+    required int minTeamSize,
+    required int maxTeamSize,
+    String? approvalStatus,
   }) async {
     return _ist.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
@@ -1785,6 +1793,11 @@ class _EventEndpoint {
             'endTime': endTime,
             'venue': venue,
             'bannerUrl': bannerUrl,
+            'registrationDeadline': registrationDeadline,
+            'isTeamEvent': isTeamEvent,
+            'minTeamSize': minTeamSize,
+            'maxTeamSize': maxTeamSize,
+            'approvalStatus': approvalStatus,
           }),
           serializationManager: _serializationManager,
         );
@@ -1794,6 +1807,137 @@ class _EventEndpoint {
                   _localCallContext.arguments,
                 )
                 as _ida.Future<_iw7ccsb7.CampusEvent>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_iw7ccsb7.CampusEvent> editEvent(
+    _ist.TestSessionBuilder sessionBuilder, {
+    required int eventId,
+    required String title,
+    required String description,
+    required String category,
+    required DateTime startTime,
+    DateTime? endTime,
+    required String venue,
+    String? bannerUrl,
+    DateTime? registrationDeadline,
+    required bool isTeamEvent,
+    required int minTeamSize,
+    required int maxTeamSize,
+  }) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'event',
+            method: 'editEvent',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'event',
+          methodName: 'editEvent',
+          parameters: _ist.testObjectToJson({
+            'eventId': eventId,
+            'title': title,
+            'description': description,
+            'category': category,
+            'startTime': startTime,
+            'endTime': endTime,
+            'venue': venue,
+            'bannerUrl': bannerUrl,
+            'registrationDeadline': registrationDeadline,
+            'isTeamEvent': isTeamEvent,
+            'minTeamSize': minTeamSize,
+            'maxTeamSize': maxTeamSize,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_iw7ccsb7.CampusEvent>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_iw7ccsb7.CampusEvent> reviewEvent(
+    _ist.TestSessionBuilder sessionBuilder, {
+    required int eventId,
+    required String decision,
+    String? rejectionReason,
+  }) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'event',
+            method: 'reviewEvent',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'event',
+          methodName: 'reviewEvent',
+          parameters: _ist.testObjectToJson({
+            'eventId': eventId,
+            'decision': decision,
+            'rejectionReason': rejectionReason,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_iw7ccsb7.CampusEvent>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<bool> registerForEvent(
+    _ist.TestSessionBuilder sessionBuilder,
+    int eventId, {
+    String? teamName,
+    List<String>? teamMemberNames,
+    List<String>? teamMemberEmails,
+  }) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'event',
+            method: 'registerForEvent',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'event',
+          methodName: 'registerForEvent',
+          parameters: _ist.testObjectToJson({
+            'eventId': eventId,
+            'teamName': teamName,
+            'teamMemberNames': teamMemberNames,
+            'teamMemberEmails': teamMemberEmails,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<bool>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1816,6 +1960,37 @@ class _EventEndpoint {
           createSessionCallback: (_) => _localUniqueSession,
           endpointPath: 'event',
           methodName: 'rsvpEvent',
+          parameters: _ist.testObjectToJson({'eventId': eventId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<bool>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<bool> cancelRegistration(
+    _ist.TestSessionBuilder sessionBuilder,
+    int eventId,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'event',
+            method: 'cancelRegistration',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'event',
+          methodName: 'cancelRegistration',
           parameters: _ist.testObjectToJson({'eventId': eventId}),
           serializationManager: _serializationManager,
         );
@@ -1863,6 +2038,37 @@ class _EventEndpoint {
     });
   }
 
+  _ida.Future<bool> hasUserRegistered(
+    _ist.TestSessionBuilder sessionBuilder,
+    int eventId,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'event',
+            method: 'hasUserRegistered',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'event',
+          methodName: 'hasUserRegistered',
+          parameters: _ist.testObjectToJson({'eventId': eventId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<bool>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
   _ida.Future<bool> hasUserRsvpd(
     _ist.TestSessionBuilder sessionBuilder,
     int eventId,
@@ -1894,6 +2100,36 @@ class _EventEndpoint {
     });
   }
 
+  _ida.Future<List<int>> getMyRegisteredEventIds(
+    _ist.TestSessionBuilder sessionBuilder,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'event',
+            method: 'getMyRegisteredEventIds',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'event',
+          methodName: 'getMyRegisteredEventIds',
+          parameters: _ist.testObjectToJson({}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<List<int>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
   _ida.Future<List<int>> getMyRsvpdEventIds(
     _ist.TestSessionBuilder sessionBuilder,
   ) async {
@@ -1917,6 +2153,37 @@ class _EventEndpoint {
                   _localCallContext.arguments,
                 )
                 as _ida.Future<List<int>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<List<_iemrykml.EventRsvp>> getMyOrganizerRegistrations(
+    _ist.TestSessionBuilder sessionBuilder,
+    int eventId,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'event',
+            method: 'getMyOrganizerRegistrations',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'event',
+          methodName: 'getMyOrganizerRegistrations',
+          parameters: _ist.testObjectToJson({'eventId': eventId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<List<_iemrykml.EventRsvp>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();

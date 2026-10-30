@@ -26,9 +26,21 @@ abstract class CampusEvent
     required this.organizerAuthUserId,
     required this.organizerName,
     int? rsvpCount,
+    String? approvalStatus,
+    this.rejectionReason,
+    this.registrationDeadline,
+    bool? isTeamEvent,
+    int? minTeamSize,
+    int? maxTeamSize,
+    int? submissionVersion,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) : rsvpCount = rsvpCount ?? 0,
+       approvalStatus = approvalStatus ?? 'approved',
+       isTeamEvent = isTeamEvent ?? false,
+       minTeamSize = minTeamSize ?? 1,
+       maxTeamSize = maxTeamSize ?? 1,
+       submissionVersion = submissionVersion ?? 1,
        createdAt = createdAt ?? DateTime.now(),
        updatedAt = updatedAt ?? DateTime.now();
 
@@ -44,6 +56,13 @@ abstract class CampusEvent
     required _is.UuidValue organizerAuthUserId,
     required String organizerName,
     int? rsvpCount,
+    String? approvalStatus,
+    String? rejectionReason,
+    DateTime? registrationDeadline,
+    bool? isTeamEvent,
+    int? minTeamSize,
+    int? maxTeamSize,
+    int? submissionVersion,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) = _CampusEventImpl;
@@ -67,6 +86,19 @@ abstract class CampusEvent
       ),
       organizerName: jsonSerialization['organizerName'] as String,
       rsvpCount: jsonSerialization['rsvpCount'] as int?,
+      approvalStatus: jsonSerialization['approvalStatus'] as String?,
+      rejectionReason: jsonSerialization['rejectionReason'] as String?,
+      registrationDeadline: jsonSerialization['registrationDeadline'] == null
+          ? null
+          : _is.DateTimeJsonExtension.fromJson(
+              jsonSerialization['registrationDeadline'],
+            ),
+      isTeamEvent: jsonSerialization['isTeamEvent'] == null
+          ? null
+          : _is.BoolJsonExtension.fromJson(jsonSerialization['isTeamEvent']),
+      minTeamSize: jsonSerialization['minTeamSize'] as int?,
+      maxTeamSize: jsonSerialization['maxTeamSize'] as int?,
+      submissionVersion: jsonSerialization['submissionVersion'] as int?,
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _is.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
@@ -103,6 +135,20 @@ abstract class CampusEvent
 
   int rsvpCount;
 
+  String approvalStatus;
+
+  String? rejectionReason;
+
+  DateTime? registrationDeadline;
+
+  bool isTeamEvent;
+
+  int minTeamSize;
+
+  int maxTeamSize;
+
+  int submissionVersion;
+
   DateTime createdAt;
 
   DateTime updatedAt;
@@ -125,6 +171,13 @@ abstract class CampusEvent
     _is.UuidValue? organizerAuthUserId,
     String? organizerName,
     int? rsvpCount,
+    String? approvalStatus,
+    String? rejectionReason,
+    DateTime? registrationDeadline,
+    bool? isTeamEvent,
+    int? minTeamSize,
+    int? maxTeamSize,
+    int? submissionVersion,
     DateTime? createdAt,
     DateTime? updatedAt,
   });
@@ -143,6 +196,14 @@ abstract class CampusEvent
       'organizerAuthUserId': organizerAuthUserId.toJson(),
       'organizerName': organizerName,
       'rsvpCount': rsvpCount,
+      'approvalStatus': approvalStatus,
+      if (rejectionReason != null) 'rejectionReason': rejectionReason,
+      if (registrationDeadline != null)
+        'registrationDeadline': registrationDeadline?.toJson(),
+      'isTeamEvent': isTeamEvent,
+      'minTeamSize': minTeamSize,
+      'maxTeamSize': maxTeamSize,
+      'submissionVersion': submissionVersion,
       'createdAt': createdAt.toJson(),
       'updatedAt': updatedAt.toJson(),
     };
@@ -163,6 +224,14 @@ abstract class CampusEvent
       'organizerAuthUserId': organizerAuthUserId.toJson(),
       'organizerName': organizerName,
       'rsvpCount': rsvpCount,
+      'approvalStatus': approvalStatus,
+      if (rejectionReason != null) 'rejectionReason': rejectionReason,
+      if (registrationDeadline != null)
+        'registrationDeadline': registrationDeadline?.toJson(),
+      'isTeamEvent': isTeamEvent,
+      'minTeamSize': minTeamSize,
+      'maxTeamSize': maxTeamSize,
+      'submissionVersion': submissionVersion,
       'createdAt': createdAt.toJson(),
       'updatedAt': updatedAt.toJson(),
     };
@@ -211,6 +280,13 @@ class _CampusEventImpl extends CampusEvent {
     required _is.UuidValue organizerAuthUserId,
     required String organizerName,
     int? rsvpCount,
+    String? approvalStatus,
+    String? rejectionReason,
+    DateTime? registrationDeadline,
+    bool? isTeamEvent,
+    int? minTeamSize,
+    int? maxTeamSize,
+    int? submissionVersion,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) : super._(
@@ -225,6 +301,13 @@ class _CampusEventImpl extends CampusEvent {
          organizerAuthUserId: organizerAuthUserId,
          organizerName: organizerName,
          rsvpCount: rsvpCount,
+         approvalStatus: approvalStatus,
+         rejectionReason: rejectionReason,
+         registrationDeadline: registrationDeadline,
+         isTeamEvent: isTeamEvent,
+         minTeamSize: minTeamSize,
+         maxTeamSize: maxTeamSize,
+         submissionVersion: submissionVersion,
          createdAt: createdAt,
          updatedAt: updatedAt,
        );
@@ -245,6 +328,13 @@ class _CampusEventImpl extends CampusEvent {
     _is.UuidValue? organizerAuthUserId,
     String? organizerName,
     int? rsvpCount,
+    String? approvalStatus,
+    Object? rejectionReason = _Undefined,
+    Object? registrationDeadline = _Undefined,
+    bool? isTeamEvent,
+    int? minTeamSize,
+    int? maxTeamSize,
+    int? submissionVersion,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -260,6 +350,17 @@ class _CampusEventImpl extends CampusEvent {
       organizerAuthUserId: organizerAuthUserId ?? this.organizerAuthUserId,
       organizerName: organizerName ?? this.organizerName,
       rsvpCount: rsvpCount ?? this.rsvpCount,
+      approvalStatus: approvalStatus ?? this.approvalStatus,
+      rejectionReason: rejectionReason is String?
+          ? rejectionReason
+          : this.rejectionReason,
+      registrationDeadline: registrationDeadline is DateTime?
+          ? registrationDeadline
+          : this.registrationDeadline,
+      isTeamEvent: isTeamEvent ?? this.isTeamEvent,
+      minTeamSize: minTeamSize ?? this.minTeamSize,
+      maxTeamSize: maxTeamSize ?? this.maxTeamSize,
+      submissionVersion: submissionVersion ?? this.submissionVersion,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -324,6 +425,44 @@ class CampusEventUpdateTable extends _is.UpdateTable<CampusEventTable> {
     value,
   );
 
+  _is.ColumnValue<String, String> approvalStatus(String value) =>
+      _is.ColumnValue(
+        table.approvalStatus,
+        value,
+      );
+
+  _is.ColumnValue<String, String> rejectionReason(String? value) =>
+      _is.ColumnValue(
+        table.rejectionReason,
+        value,
+      );
+
+  _is.ColumnValue<DateTime, DateTime> registrationDeadline(DateTime? value) =>
+      _is.ColumnValue(
+        table.registrationDeadline,
+        value,
+      );
+
+  _is.ColumnValue<bool, bool> isTeamEvent(bool value) => _is.ColumnValue(
+    table.isTeamEvent,
+    value,
+  );
+
+  _is.ColumnValue<int, int> minTeamSize(int value) => _is.ColumnValue(
+    table.minTeamSize,
+    value,
+  );
+
+  _is.ColumnValue<int, int> maxTeamSize(int value) => _is.ColumnValue(
+    table.maxTeamSize,
+    value,
+  );
+
+  _is.ColumnValue<int, int> submissionVersion(int value) => _is.ColumnValue(
+    table.submissionVersion,
+    value,
+  );
+
   _is.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
       _is.ColumnValue(
         table.createdAt,
@@ -381,6 +520,39 @@ class CampusEventTable extends _is.Table<int?> {
       this,
       hasDefault: true,
     );
+    approvalStatus = _is.ColumnString(
+      'approvalStatus',
+      this,
+      hasDefault: true,
+    );
+    rejectionReason = _is.ColumnString(
+      'rejectionReason',
+      this,
+    );
+    registrationDeadline = _is.ColumnDateTime(
+      'registrationDeadline',
+      this,
+    );
+    isTeamEvent = _is.ColumnBool(
+      'isTeamEvent',
+      this,
+      hasDefault: true,
+    );
+    minTeamSize = _is.ColumnInt(
+      'minTeamSize',
+      this,
+      hasDefault: true,
+    );
+    maxTeamSize = _is.ColumnInt(
+      'maxTeamSize',
+      this,
+      hasDefault: true,
+    );
+    submissionVersion = _is.ColumnInt(
+      'submissionVersion',
+      this,
+      hasDefault: true,
+    );
     createdAt = _is.ColumnDateTime(
       'createdAt',
       this,
@@ -415,6 +587,20 @@ class CampusEventTable extends _is.Table<int?> {
 
   late final _is.ColumnInt rsvpCount;
 
+  late final _is.ColumnString approvalStatus;
+
+  late final _is.ColumnString rejectionReason;
+
+  late final _is.ColumnDateTime registrationDeadline;
+
+  late final _is.ColumnBool isTeamEvent;
+
+  late final _is.ColumnInt minTeamSize;
+
+  late final _is.ColumnInt maxTeamSize;
+
+  late final _is.ColumnInt submissionVersion;
+
   late final _is.ColumnDateTime createdAt;
 
   late final _is.ColumnDateTime updatedAt;
@@ -432,6 +618,13 @@ class CampusEventTable extends _is.Table<int?> {
     organizerAuthUserId,
     organizerName,
     rsvpCount,
+    approvalStatus,
+    rejectionReason,
+    registrationDeadline,
+    isTeamEvent,
+    minTeamSize,
+    maxTeamSize,
+    submissionVersion,
     createdAt,
     updatedAt,
   ];
