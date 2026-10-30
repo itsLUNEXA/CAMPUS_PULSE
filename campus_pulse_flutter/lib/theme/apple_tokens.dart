@@ -1,206 +1,259 @@
 import 'package:flutter/material.dart';
 
-/// Centralized Design System Tokens for Campus Pulse.
-/// Inspired by the DesignCode cosmic midnight-violet and vibrant sunset gradient visual aesthetic.
+/// Centralized Design System Tokens for CAMPULSE.
+/// Clean, soft mint-and-teal palette with near-black text and CTA buttons:
+/// - Page background: #EFF7F7
+/// - Cards and surfaces: #FFFFFF
+/// - Primary teal: #3E9FA0 (active navigation, links, progress indicators, selected states)
+/// - Teal hover/active: #308586
+/// - Light mint: #BFF1E5 (icon containers, badges, subtle backgrounds)
+/// - Light cyan: #CEF0F3 (icon containers, badges, subtle backgrounds)
+/// - Light blue: #D6ECFA
+/// - Light lavender: #ECE5FA
+/// - Primary text: #0B0E17 (near-black, readable body & headings)
+/// - Secondary text: #555D65
+/// - Muted text: #899398
+/// - Borders and dividers: #E3ECEC
+/// - Primary button: #080D19 (near-black CTA buttons)
+/// - Primary button text: #FFFFFF
+/// - Highlight blue: #249ED0
 class AppleTokens {
-  // --- MANDATORY APPLE COLOR TOKENS (Preserved for backwards compatibility with tests) ---
-  static const Color primaryBlue = Color(0xFF0071E3);
-  static const Color secondaryBlue = Color(0xFF2997FF);
-  static const Color accentBlue = Color(0xFF24568E);
-  static const Color primaryText = Color(0xFF1D1D1F);
-  static const Color black = Color(0xFF000000);
-  static const Color lightNeutral = Color(0xFFE8E8ED);
-  static const Color white = Color(0xFFFFFFFF);
-  static const Color secondaryText = Color(0xFF86868B);
-  static const Color tertiaryText = Color(0xFF6E6E73);
+  // --- MINT & TEAL THEME TOKENS ---
+  static const Color pageBackground = Color(0xFFEFF7F7); // #EFF7F7
+  static const Color cardSurface = Color(0xFFFFFFFF); // #FFFFFF
+  static const Color primaryTeal = Color(0xFF3E9FA0); // #3E9FA0
+  static const Color tealHover = Color(0xFF308586); // #308586
+  static const Color lightMint = Color(0xFFBFF1E5); // #BFF1E5
+  static const Color lightCyan = Color(0xFFCEF0F3); // #CEF0F3
+  static const Color lightBlue = Color(0xFFD6ECFA); // #D6ECFA
+  static const Color lightLavender = Color(0xFFECE5FA); // #ECE5FA
+  static const Color primaryText = Color(0xFF0B0E17); // #0B0E17
+  static const Color secondaryText = Color(0xFF555D65); // #555D65
+  static const Color mutedText = Color(0xFF899398); // #899398
+  static const Color borderAndDivider = Color(0xFFE3ECEC); // #E3ECEC
+  static const Color primaryButton = Color(0xFF080D19); // #080D19
+  static const Color primaryButtonText = Color(0xFFFFFFFF); // #FFFFFF
+  static const Color highlightBlue = Color(0xFF249ED0); // #249ED0
 
-  // --- CORE PASTEL MOBILE DESIGN SYSTEM (Inspired by Reference Screenshot) ---
-  static const Color lavenderBg = Color(0xFFE6DFFF); // Soft lavender canvas & decorative surfaces: #E6DFFF
-  static const Color softLavender = Color(0xFFB9A0FF); // Featured cards & hero highlights: #B9A0FF
-  static const Color paleLavender = Color(0xFFF1EDFF); // Soft sections, tags, pill highlights: #F1EDFF
-  static const Color warmWhite = Color(0xFFFAFAF8); // Main content background & card surfaces: #FAFAF8
-  static const Color pastelYellow = Color(0xFFFFC45B); // Featured events & plan card: #FFC45B
-  static const Color pastelBlue = Color(0xFFA9CCFF); // Secondary cards & info panels: #A9CCFF
-  static const Color pastelPink = Color(0xFFF18CE5); // Community accents & social actions: #F18CE5
-  static const Color darkNavy = Color(0xFF10111C); // Main text, headings, floating nav: #10111C
-  static const Color textMutedGrey = Color(0xFF777783); // Secondary text, metadata: #777783
-  static const Color borderPastel = Color(0xFFE9E6EF); // Subtle input borders & dividers: #E9E6EF
-  static const Color pureWhite = Color(0xFFFFFFFF); // Card surfaces & contrast elements: #FFFFFF
+  // Timetable Slot Status Palette (Class / Free / Occupied / Unset)
+  static const Color occupiedBackground = Color(
+    0xFFFDE2E2,
+  ); // Light pastel red / coral
+  static const Color occupiedText = Color(0xFF9B1C1C); // Dark red text
+  static const Color occupiedBorder = Color(
+    0xFFFCA5A5,
+  ); // Visible pastel red border
+  static const Color classBackground = Color(0xFFD6ECFA); // Light blue
+  static const Color classText = Color(0xFF0B0E17); // Dark text
+  static const Color classBorder = Color(0xFF93C5FD); // Blue border
+  static const Color freeBackground = Color(0xFFE6F9F4); // Subtle mint
+  static const Color freeText = Color(0xFF0F5B5C); // Dark teal text
+  static const Color freeBorder = Color(0xFF8CE5D0); // Mint border
+  static const Color unsetSlotBorder = Color(0xFFE3ECEC); // Neutral grid line
 
-  // --- GLOBAL SYSTEM TOKENS ---
-  static const Color primary = softLavender;
-  static const Color primaryContainer = paleLavender;
-  static const Color secondary = pastelBlue;
-  static const Color accent = pastelYellow;
-  static const Color background = warmWhite; // #FAFAF8
-  static const Color canvasAlt = lavenderBg; // #E6DFFF
-  static const Color cardBg = pureWhite; // #FFFFFF
-  static const Color cardElevated = warmWhite; // #FAFAF8
-  static const Color border = borderPastel; // #E9E6EF
-  static const Color borderLight = Color(0xFFDFDAE7);
-  static const Color surface = pureWhite;
+  // --- BRAND ROLES ---
+  static const Color primary = primaryTeal;
+  static const Color secondary = tealHover;
+  static const Color accent = primaryTeal;
 
-  // Typography
-  static const Color textPrimary = darkNavy; // #10111C
-  static const Color textSecondary = textMutedGrey; // #777783
-  static const Color textMuted = Color(0xFF9E9EAA);
-  static const Color textDark = darkNavy;
-  static const Color textLight = pureWhite;
+  // --- BACKWARD-COMPATIBILITY ALIASES (Seamless transition) ---
+  static const Color deepViolet = primaryTeal;
+  static const Color purple = tealHover;
+  static const Color lightPink = lightMint;
+  static const Color softLavender = primaryTeal;
+  static const Color paleLavender = lightCyan;
+  static const Color lavenderBg = pageBackground;
+  static const Color lavender = lightCyan;
+  static const Color palePurple = lightLavender;
+  static const Color warmCream = lightMint;
+  static const Color paleGreenContainer = lightMint;
+  static const Color paleCyanContainer = lightCyan;
+  static const Color pastelPink = lightMint;
+  static const Color pastelYellow = lightCyan;
+  static const Color pastelBlue = lightBlue;
+  static const Color softBlue = lightBlue;
+  static const Color yellowAccent = primaryTeal;
+  static const Color yellowSoft = lightMint;
+  static const Color accentPurple = primaryTeal;
 
-  // Vibrant Accents & Semantic Colors
-  static const Color coralPink = pastelPink; // #F18CE5
-  static const Color sunsetOrange = pastelYellow; // #FFC45B
-  static const Color electricBlue = pastelBlue; // #A9CCFF
-  static const Color royalBlue = softLavender; // #B9A0FF
-  static const Color vividPurple = softLavender; // #B9A0FF
-  static const Color deepPurple = darkNavy; // #10111C
-  static const Color mintCyan = Color(0xFFA8E6CF); // Soft pastel mint
-  static const Color amberGold = pastelYellow; // #FFC45B
+  static const Color primaryBlue = primaryTeal;
+  static const Color secondaryBlue = tealHover;
+  static const Color accentBlue = highlightBlue;
+  static const Color lineaPrimary = primaryButton;
+  static const Color lineaSecondary = primaryTeal;
+  static const Color lineaAccent = highlightBlue;
 
-  // Compatibility aliases for landing page & existing components
-  static const Color deepNavyColor = darkNavy;
-  static const Color deepNavy = darkNavy;
-  static const Color bodyText = textMutedGrey;
-  static const Color accentPurple = softLavender;
-  static const Color lavender = paleLavender;
-  static const Color palePurple = paleLavender;
-  static const Color warmCream = pastelYellow;
-  static const Color softBlue = pastelBlue;
-  static const Color yellowAccent = pastelYellow;
-  static const Color yellowSoft = Color(0xFFFFF3D6);
+  // Neutrals aliases
+  static const Color neutralDark = primaryText;
+  static const Color neutralBlack = primaryButton;
+  static const Color neutralBrown = secondaryText;
+  static const Color neutralSand = mutedText;
+  static const Color neutralSilver = borderAndDivider;
+  static const Color neutralSlate = mutedText;
+  static const Color warmWhite = cardSurface;
+  static const Color surfaceMuted = pageBackground;
+  static const Color borderSubtle = borderAndDivider;
+  static const Color borderPastel = borderAndDivider;
+  static const Color pureWhite = cardSurface;
+  static const Color white = cardSurface;
+  static const Color black = primaryButton;
 
-  // Backward compatibility aliases for previous theme tokens
-  static const Color sageGreen = softLavender;
-  static const Color deepForest = darkNavy;
-  static const Color softSage = paleLavender;
-  static const Color mutedGrey = textMutedGrey;
-  static const Color lightConcrete = borderPastel;
-  static const Color burntAmber = pastelYellow;
-  static const Color paleSage = warmWhite;
-  static const Color charcoal = darkNavy;
+  static const Color darkNavy = primaryText;
+  static const Color deepNavy = primaryText;
+  static const Color deepNavyColor = primaryText;
+  static const Color deepForest = primaryText;
+  static const Color charcoal = primaryText;
+  static const Color burntAmber = primaryTeal;
+  static const Color sageGreen = primaryTeal;
+  static const Color softSage = lightMint;
+  static const Color paleSage = pageBackground;
+  static const Color lightConcrete = borderAndDivider;
+  static const Color mutedGrey = secondaryText;
 
-  // Dark Mode Shades (Adapted with deep navy surfaces & pastel accents)
-  static const Color darkBackground = Color(0xFF141422); // Deep navy background
-  static const Color darkSurface = Color(0xFF1C1C2E); // Deep navy surface
-  static const Color darkSurfaceElevated = Color(0xFF26263D); // Elevated surface
-  static const Color darkBorder = Color(0xFF33334F);
-  static const Color darkTextPrimary = Color(0xFFFAFAF8);
-  static const Color darkTextSecondary = Color(0xFFA5A5BA);
-  static const Color darkAccentPurple = softLavender;
+  // Surfaces & Backgrounds
+  static const Color background = pageBackground;
+  static const Color canvasAlt = pageBackground;
+  static const Color cardBg = cardSurface;
+  static const Color cardElevated = cardSurface;
+  static const Color surface = cardSurface;
+  static const Color lightBackground = pageBackground;
+  static const Color lightSurface = cardSurface;
+  static const Color lightSurfaceElevated = cardSurface;
+  static const Color lightBorder = borderAndDivider;
+  static const Color border = borderAndDivider;
+  static const Color borderLight = borderAndDivider;
 
-  // Light Mode Surfaces
-  static const Color lightBackground = warmWhite;
-  static const Color lightSurface = pureWhite;
-  static const Color lightSurfaceElevated = warmWhite;
-  static const Color lightBorder = borderPastel;
+  // Typography Tokens
+  static const Color textPrimary = primaryText;
+  static const Color textSecondary = secondaryText;
+  static const Color textMuted = mutedText;
+  static const Color textMutedGrey = secondaryText;
+  static const Color textDark = primaryText;
+  static const Color textLight = Color(0xFFFFFFFF);
+  static const Color bodyText = secondaryText;
+  static const Color tertiaryText = mutedText;
+  static const Color lightNeutral = borderAndDivider;
 
-  // Semantic Feedback Colors
-  static const Color success = Color(0xFF34C759); // Crisp pastel green
-  static const Color warning = pastelYellow; // #FFC45B
-  static const Color error = Color(0xFFFF453A); // Apple accessible red
+  // --- DARK MODE PALETTE (Complementary dark teal/slate, preserving contrast) ---
+  static const Color darkBackground = Color(
+    0xFF0D1416,
+  ); // Deep charcoal with dark teal tint
+  static const Color darkSurface = Color(0xFF131D20);
+  static const Color darkSurfaceElevated = Color(0xFF1A262B);
+  static const Color darkBorder = Color(0xFF26363D);
+  static const Color darkTextPrimary = Color(0xFFEFF7F7);
+  static const Color darkTextSecondary = Color(0xFF8FA3A9);
+  static const Color darkAccentPurple = Color(0xFF4EBABA);
+  static const Color darkTeal = Color(0xFF4EBABA);
 
-  // --- SIGNATURE PASTEL GRADIENTS ---
-  static const LinearGradient lavenderHeroGradient = LinearGradient(
+  // Semantic Feedback
+  static const Color success = Color(0xFF2E7D32);
+  static const Color warning = Color(0xFFED6C02);
+  static const Color error = Color(0xFFD32F2F);
+
+  // --- SUBTLE GRADIENTS (Mint to Cyan, used sparingly) ---
+  static const LinearGradient mintCyanGradient = LinearGradient(
+    colors: [lightMint, lightCyan],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [lavenderBg, paleLavender, warmWhite],
+  );
+
+  static const LinearGradient subtleMintGradient = LinearGradient(
+    colors: [pageBackground, lightCyan],
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+  );
+
+  static const LinearGradient lavenderHeroGradient = LinearGradient(
+    colors: [pageBackground, cardSurface],
   );
 
   static const LinearGradient challengeCardGradient = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [softLavender, Color(0xFFC7B2FF)],
+    colors: [primaryTeal, tealHover],
   );
 
   static const LinearGradient yellowCardGradient = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [pastelYellow, Color(0xFFFFD180)],
+    colors: [lightMint, lightCyan],
   );
 
   static const LinearGradient blueCardGradient = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [pastelBlue, Color(0xFFBDD8FF)],
+    colors: [lightCyan, lightBlue],
   );
 
   static const LinearGradient pinkCardGradient = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [pastelPink, Color(0xFFF7A8EE)],
+    colors: [lightMint, lightMint],
   );
 
   static const LinearGradient sunsetGradient = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [pastelYellow, pastelPink],
+    colors: [primaryTeal, highlightBlue],
   );
 
   static const LinearGradient cyberBlueGradient = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [pastelBlue, softLavender],
+    colors: [highlightBlue, primaryTeal],
   );
 
   static const LinearGradient electricVioletGradient = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [softLavender, pastelPink],
-  );
-
-  static const LinearGradient mintCyanGradient = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [Color(0xFFA8E6CF), pastelBlue],
+    colors: [primaryTeal, tealHover],
   );
 
   static const LinearGradient amberSunsetGradient = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [pastelYellow, pastelPink],
+    colors: [primaryTeal, highlightBlue],
   );
 
-  // --- MANDATORY SPACING SCALE ---
-  // Scale: 1, 24, 26, 28, 30, 32, 37, 40, 44, 48, 53, 56
+  // --- SPACING SCALE ---
   static const double space1 = 1.0;
-  static const double space24 = 24.0;
-  static const double space26 = 26.0;
-  static const double space28 = 28.0;
-  static const double space30 = 30.0;
-  static const double space32 = 32.0;
-  static const double space37 = 37.0;
-  static const double space40 = 40.0;
-  static const double space44 = 44.0;
-  static const double space48 = 48.0;
-  static const double space53 = 53.0;
-  static const double space56 = 56.0;
-
-  // Documented compact tokens for dense interfaces
   static const double space4 = 4.0;
   static const double space8 = 8.0;
   static const double space12 = 12.0;
   static const double space16 = 16.0;
   static const double space20 = 20.0;
+  static const double space24 = 24.0;
+  static const double space26 = 26.0;
+  static const double space28 = 28.0;
+  static const double space30 = 30.0;
+  static const double space31 = 31.0;
+  static const double space32 = 32.0;
+  static const double space36 = 36.0;
+  static const double space37 = 36.0;
+  static const double space40 = 40.0;
+  static const double space44 = 44.0;
+  static const double space48 = 48.0;
+  static const double space51 = 51.0;
+  static const double space53 = 52.0;
+  static const double space54 = 54.0;
+  static const double space56 = 56.0;
+  static const double space64 = 64.0;
+  static const double space72 = 72.0;
+  static const double space77 = 77.0;
+  static const double space88 = 88.0;
+  static const double space102 = 102.0;
 
-  // --- MANDATORY RADII SCALE ---
-  // Scale: 5, 8, 50, 980, 999
-  static const double radius5 = 5.0;
+  // --- MODEST CONSISTENT RADII SCALE ---
+  static const double radius2 = 2.0;
+  static const double radius5 = 4.0;
   static const double radius8 = 8.0;
-  static const double radius12 = 12.0;
-  static const double radius16 = 16.0;
-  static const double radius20 = 20.0;
-  static const double radius24 = 24.0;
-  static const double radius50 = 50.0;
-  static const double radius980 = 980.0;
-  static const double radius999 = 999.0;
+  static const double radius11 = 8.0;
+  static const double radius12 = 8.0;
+  static const double radius14 = 10.0;
+  static const double radius16 = 10.0;
+  static const double radius20 = 12.0;
+  static const double radius24 = 12.0;
+  static const double radius28 = 12.0;
+  static const double radius34 = 12.0;
+  static const double radius50 = 12.0;
+  static const double radius980 = 12.0;
+  static const double radius999 = 8.0;
 
   // --- MOTION SCALE ---
-  static const Duration duration20 = Duration(milliseconds: 20);
-  static const Duration duration100 = Duration(milliseconds: 100);
+  static const Duration durationFast = Duration(milliseconds: 200);
+  static const Duration durationNormal = Duration(milliseconds: 300);
+
+  static const Duration duration20 = Duration(milliseconds: 150);
+  static const Duration duration100 = Duration(milliseconds: 150);
   static const Duration duration160 = Duration(milliseconds: 160);
   static const Duration duration300 = Duration(milliseconds: 300);
 
-  static const Curve defaultCurve = Curves.easeInOutCubic;
+  static const Curve defaultCurve = Curves.easeInOut;
 }
 
 /// Convenience alias

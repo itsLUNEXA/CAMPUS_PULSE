@@ -21,17 +21,17 @@ class FloatingContactButton extends StatelessWidget {
       heroTag: 'campus_pulse_contact_fab',
       onPressed: () => _openContactDialog(context),
       backgroundColor: isDark
-          ? AppleTokens.secondaryBlue
-          : AppleTokens.primaryBlue,
-      foregroundColor: isDark ? AppleTokens.black : AppleTokens.white,
-      elevation: 4,
+          ? AppleTokens.darkSurfaceElevated
+          : AppleTokens.deepViolet,
+      foregroundColor: Colors.white,
+      elevation: 2,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppleTokens.radius999),
+        borderRadius: BorderRadius.circular(AppleTokens.radius8),
       ),
-      icon: const Icon(Icons.help_outline_rounded, size: 20),
+      icon: const Icon(Icons.help_outline_rounded, size: 18),
       label: const Text(
         'Campus Support',
-        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
       ),
     );
   }
@@ -147,7 +147,7 @@ class _ContactDialogState extends State<_ContactDialog> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Campus Pulse Help & Support',
+                            'CAMPULSE Help & Support',
                             style: Theme.of(context).textTheme.titleLarge
                                 ?.copyWith(fontWeight: FontWeight.w700),
                           ),

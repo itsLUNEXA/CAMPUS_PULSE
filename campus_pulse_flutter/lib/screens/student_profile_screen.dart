@@ -80,7 +80,8 @@ class _StudentProfileScreenState extends State<StudentProfileScreen> {
       if (p.preferredQuizSubjects != null) {
         _quizSubjects.addAll(p.preferredQuizSubjects!);
       }
-      if (p.preferredQuizTypes != null) _quizTypes.addAll(p.preferredQuizTypes!);
+      if (p.preferredQuizTypes != null)
+        _quizTypes.addAll(p.preferredQuizTypes!);
     }
   }
 

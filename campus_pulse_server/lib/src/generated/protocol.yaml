@@ -12,15 +12,23 @@ jwtRefresh:
 academicResource:
   - uploadResource:
   - filterResources:
+  - listPendingResources:
   - setApprovalStatus:
   - recordDownload:
   - getSubjectSyllabus:
+  - uploadPdf:
+  - downloadPdf:
+  - isPdfAvailable:
 admin:
   - loginAdmin:
   - loginMasterAdminDemo:
   - verifyAdminSession:
   - getDashboardOverview:
   - assignRole:
+  - revokeRole:
+  - getUserRoles:
+  - listStudents:
+  - getStudentCount:
   - getMyRoles:
   - listAuditLogs:
 attendance:
@@ -42,6 +50,16 @@ chat:
   - listChatReports:
   - resolveChatReport:
   - listMyRooms:
+  - createCustomRoom:
+  - joinRoom:
+  - listAllAccessibleRooms:
+club:
+  - listClubs:
+  - getClub:
+  - submitClubQuery:
+  - getMyClubQueries:
+  - getClubQueries:
+  - respondToClubQuery:
 event:
   - listEvents:
   - getEvent:
@@ -59,19 +77,49 @@ event:
   - getMyRsvpdEventIds:
   - getMyOrganizerRegistrations:
   - streamRsvpUpdates:
+  - getPendingEvents:
+  - getPendingEventsCount:
+  - getMyEvents:
+interviewPrep:
+  - listCompanies:
+  - listSeniorExperiences:
+  - requestMockInterview:
+  - getMyMockInterviewSlots:
+  - updateMockInterviewStatus:
 leaderboard:
   - getLeaderboard:
   - getMyRank:
   - streamLeaderboardUpdates:
+library:
+  - getStaffProfile:
+  - getAvailableCounters:
+  - getLibraryRequests:
+  - updateRequestStatus:
+  - verifyCollection:
+  - getStudentPrintRequests:
+  - createPrintRequest:
+  - retryPrintPayment:
+  - getStudentPointWallet:
+  - getPointTransactions:
 mom:
   - createMom:
   - listMoms:
   - getMomDetail:
+notification:
+  - getMyNotifications:
+  - getUnreadCount:
+  - markAsRead:
+  - markAllAsRead:
+  - streamMyNotifications:
 points:
   - checkInWithQrToken:
   - getMyPointsAndStreak:
   - listRewards:
   - addRewardPerk:
+  - listAllRewards:
+  - updateRewardPerk:
+  - deleteRewardPerk:
+  - listRedemptions:
   - redeemReward:
 quiz:
   - getQuestionsForSubject:
@@ -85,6 +133,7 @@ seed:
   - seedData:
 student:
   - loginDemo:
+  - loginDemoStudent2:
   - registerStudent:
   - getProfile:
   - updateProfile:
@@ -98,9 +147,13 @@ studyRequest:
   - updateRequestStatus:
 timetable:
   - addSectionTimetable:
+  - updateSectionTimetable:
+  - deleteSectionTimetable:
+  - listAllTimetables:
   - getSectionTimetable:
   - getMyFreeSlots:
   - updateFreeSlot:
+  - clearFreeSlot:
   - findTimetableStudyMatches:
 greeting:
   - hello:

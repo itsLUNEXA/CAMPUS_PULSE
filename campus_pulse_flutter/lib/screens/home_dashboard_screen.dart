@@ -156,7 +156,9 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                               style: GoogleFonts.inter(
                                 fontSize: 20,
                                 fontWeight: FontWeight.w800,
-                                color: isDark ? AppleTokens.darkTextPrimary : AppleTokens.darkNavy,
+                                color: isDark
+                                    ? AppleTokens.darkTextPrimary
+                                    : AppleTokens.darkNavy,
                                 letterSpacing: -0.5,
                               ),
                             ),
@@ -165,7 +167,9 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                               style: GoogleFonts.inter(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w500,
-                                color: isDark ? AppleTokens.darkTextSecondary : AppleTokens.textMutedGrey,
+                                color: isDark
+                                    ? AppleTokens.darkTextSecondary
+                                    : AppleTokens.textMutedGrey,
                               ),
                             ),
                           ],
@@ -176,7 +180,9 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                       icon: Icon(
                         Icons.search_rounded,
                         size: 24,
-                        color: isDark ? AppleTokens.darkTextPrimary : AppleTokens.darkNavy,
+                        color: isDark
+                            ? AppleTokens.darkTextPrimary
+                            : AppleTokens.darkNavy,
                       ),
                       onPressed: () => widget.onNavigate('events', Container()),
                     ),
@@ -199,7 +205,9 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
                     letterSpacing: -0.5,
-                    color: isDark ? AppleTokens.darkTextPrimary : AppleTokens.darkNavy,
+                    color: isDark
+                        ? AppleTokens.darkTextPrimary
+                        : AppleTokens.darkNavy,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -215,7 +223,9 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                       style: GoogleFonts.inter(
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
-                        color: isDark ? AppleTokens.darkTextPrimary : AppleTokens.darkNavy,
+                        color: isDark
+                            ? AppleTokens.darkTextPrimary
+                            : AppleTokens.darkNavy,
                       ),
                     ),
                     TextButton(
@@ -287,7 +297,9 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                       style: GoogleFonts.inter(
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
-                        color: isDark ? AppleTokens.darkTextPrimary : AppleTokens.darkNavy,
+                        color: isDark
+                            ? AppleTokens.darkTextPrimary
+                            : AppleTokens.darkNavy,
                       ),
                     ),
                     TextButton(
@@ -330,18 +342,22 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
   Widget _buildDailyChallengeCard(BuildContext context, bool isDark) {
     return InkWell(
       onTap: () => widget.onNavigate('quizzes', Container()),
-      borderRadius: BorderRadius.circular(28),
+      borderRadius: BorderRadius.circular(AppleTokens.radius12),
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(26),
+        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: AppleTokens.softLavender,
-          borderRadius: BorderRadius.circular(28),
-          boxShadow: [
+          color: isDark ? AppleTokens.darkSurface : Colors.white,
+          borderRadius: BorderRadius.circular(AppleTokens.radius12),
+          border: Border.all(
+            color: isDark ? AppleTokens.darkBorder : AppleTokens.borderSubtle,
+            width: 1.0,
+          ),
+          boxShadow: const [
             BoxShadow(
-              color: AppleTokens.softLavender.withValues(alpha: 0.35),
-              blurRadius: 20,
-              offset: const Offset(0, 8),
+              color: Color(0x08000000),
+              blurRadius: 4,
+              offset: Offset(0, 2),
             ),
           ],
         ),
@@ -351,49 +367,73 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Daily\nchallenge',
-                    style: GoogleFonts.inter(
-                      fontSize: 26,
-                      fontWeight: FontWeight.w900,
-                      color: AppleTokens.darkNavy,
-                      height: 1.15,
-                      letterSpacing: -0.6,
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppleTokens.lightMint,
+                      borderRadius: BorderRadius.circular(AppleTokens.radius8),
+                    ),
+                    child: Text(
+                      'Syllabus Quiz',
+                      style: GoogleFonts.inter(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: AppleTokens.primaryTeal,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    'Test your knowledge before 09:00 PM',
+                    'Daily Academic Challenge',
                     style: GoogleFonts.inter(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: AppleTokens.darkNavy.withValues(alpha: 0.8),
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: isDark
+                          ? AppleTokens.darkTextPrimary
+                          : AppleTokens.neutralDark,
+                      letterSpacing: -0.4,
                     ),
                   ),
-                  const SizedBox(height: 18),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Test your course subject knowledge before 09:00 PM',
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w400,
+                      color: isDark
+                          ? AppleTokens.darkTextSecondary
+                          : AppleTokens.neutralBrown,
+                    ),
+                  ),
+                  const SizedBox(height: 14),
 
                   // Participant Avatars Row
                   Row(
                     children: [
-                      _stackedAvatar('A', AppleTokens.pastelPink),
-                      _stackedAvatar('M', AppleTokens.pastelYellow, offset: -8),
-                      _stackedAvatar('T', AppleTokens.pastelBlue, offset: -8),
+                      _stackedAvatar('A', AppleTokens.lightMint),
+                      _stackedAvatar('M', AppleTokens.lightMint, offset: -8),
+                      _stackedAvatar('T', AppleTokens.lightMint, offset: -8),
                       Container(
                         margin: const EdgeInsets.only(left: 4),
                         padding: const EdgeInsets.symmetric(
                           horizontal: 8,
-                          vertical: 4,
+                          vertical: 3,
                         ),
                         decoration: BoxDecoration(
-                          color: AppleTokens.darkNavy.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(999),
+                          color: AppleTokens.lightMint,
+                          borderRadius: BorderRadius.circular(
+                            AppleTokens.radius8,
+                          ),
                         ),
                         child: Text(
-                          '+4',
+                          '+4 peers',
                           style: GoogleFonts.inter(
                             fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            color: AppleTokens.darkNavy,
+                            fontWeight: FontWeight.w600,
+                            color: AppleTokens.primaryTeal,
                           ),
                         ),
                       ),
@@ -403,12 +443,20 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
               ),
             ),
 
-            // 3D Shapes Geometric Illustration
-            SizedBox(
-              width: 110,
-              height: 110,
-              child: CustomPaint(
-                painter: _DailyChallengeShapesPainter(),
+            // Functional icon badge instead of decorative 3D shapes painter
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: AppleTokens.lightMint,
+                borderRadius: BorderRadius.circular(AppleTokens.radius8),
+              ),
+              child: const Center(
+                child: Icon(
+                  Icons.quiz_rounded,
+                  size: 28,
+                  color: AppleTokens.primaryTeal,
+                ),
               ),
             ),
           ],
@@ -433,8 +481,8 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
             text,
             style: const TextStyle(
               fontSize: 12,
-              fontWeight: FontWeight.w800,
-              color: AppleTokens.darkNavy,
+              fontWeight: FontWeight.w700,
+              color: AppleTokens.primaryTeal,
             ),
           ),
         ),
@@ -443,7 +491,11 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
   }
 
   // --- 3. HORIZONTAL DATE SELECTOR STRIP ---
-  Widget _buildDateSelectorStrip(BuildContext context, bool isDark, DateTime now) {
+  Widget _buildDateSelectorStrip(
+    BuildContext context,
+    bool isDark,
+    DateTime now,
+  ) {
     const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     final currentDayIndex = now.weekday % 7; // Sunday=0, Monday=1...
 
@@ -455,13 +507,13 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
           final dateNum = now.day - (currentDayIndex - i);
 
           if (isSelected) {
-            // Selected Black/Navy Pill with Notification Dot
+            // Selected Pill
             return Container(
               margin: const EdgeInsets.symmetric(horizontal: 4),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
-                color: AppleTokens.darkNavy,
-                borderRadius: BorderRadius.circular(24),
+                color: AppleTokens.primaryTeal,
+                borderRadius: BorderRadius.circular(AppleTokens.radius8),
               ),
               child: Column(
                 children: [
@@ -479,10 +531,10 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                     style: GoogleFonts.inter(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
-                      color: Colors.white.withValues(alpha: 0.7),
+                      color: Colors.white.withValues(alpha: 0.8),
                     ),
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 4),
                   Text(
                     '$dateNum',
                     style: GoogleFonts.inter(
@@ -499,12 +551,14 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
           // Unselected Date Pill
           return Container(
             margin: const EdgeInsets.symmetric(horizontal: 4),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
-              color: isDark ? AppleTokens.darkSurface : AppleTokens.warmWhite,
-              borderRadius: BorderRadius.circular(24),
+              color: isDark ? AppleTokens.darkSurface : Colors.white,
+              borderRadius: BorderRadius.circular(AppleTokens.radius8),
               border: Border.all(
-                color: isDark ? AppleTokens.darkBorder : AppleTokens.borderPastel,
+                color: isDark
+                    ? AppleTokens.darkBorder
+                    : AppleTokens.borderSubtle,
               ),
             ),
             child: Column(
@@ -515,16 +569,20 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                   style: GoogleFonts.inter(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
-                    color: isDark ? AppleTokens.darkTextSecondary : AppleTokens.textMutedGrey,
+                    color: isDark
+                        ? AppleTokens.darkTextSecondary
+                        : AppleTokens.neutralBrown,
                   ),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 4),
                 Text(
                   '$dateNum',
                   style: GoogleFonts.inter(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
-                    color: isDark ? AppleTokens.darkTextPrimary : AppleTokens.darkNavy,
+                    color: isDark
+                        ? AppleTokens.darkTextPrimary
+                        : AppleTokens.neutralDark,
                   ),
                 ),
               ],
@@ -535,7 +593,7 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
     );
   }
 
-  // --- 4. "YOUR PLAN" GRID (Yellow, Blue, Pink Cards) ---
+  // --- 4. "YOUR PLAN" GRID ---
   Widget _buildYourPlanGrid(BuildContext context, bool isDark) {
     final firstEvent = _events.isNotEmpty ? _events.first : null;
     final secondEvent = _events.length > 1 ? _events[1] : null;
@@ -543,30 +601,40 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final isWide = constraints.maxWidth >= 640;
-        final leftWidth = isWide ? (constraints.maxWidth - 16) * 0.5 : constraints.maxWidth;
-        final rightWidth = isWide ? (constraints.maxWidth - 16) * 0.5 : constraints.maxWidth;
+        final leftWidth = isWide
+            ? (constraints.maxWidth - 16) * 0.5
+            : constraints.maxWidth;
+        final rightWidth = isWide
+            ? (constraints.maxWidth - 16) * 0.5
+            : constraints.maxWidth;
 
         return Wrap(
           spacing: 16,
           runSpacing: 16,
           children: [
-            // Left Card: Pastel Yellow (Event Spotlight)
+            // Left Card (Event Spotlight)
             SizedBox(
               width: leftWidth,
               height: 270,
               child: InkWell(
                 onTap: () => widget.onNavigate('events', Container()),
-                borderRadius: BorderRadius.circular(28),
+                borderRadius: BorderRadius.circular(AppleTokens.radius12),
                 child: Container(
-                  padding: const EdgeInsets.all(24),
+                  padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: AppleTokens.pastelYellow,
-                    borderRadius: BorderRadius.circular(28),
-                    boxShadow: [
+                    color: isDark ? AppleTokens.darkSurface : Colors.white,
+                    borderRadius: BorderRadius.circular(AppleTokens.radius12),
+                    border: Border.all(
+                      color: isDark
+                          ? AppleTokens.darkBorder
+                          : AppleTokens.borderSubtle,
+                      width: 1.0,
+                    ),
+                    boxShadow: const [
                       BoxShadow(
-                        color: AppleTokens.pastelYellow.withValues(alpha: 0.35),
-                        blurRadius: 18,
-                        offset: const Offset(0, 6),
+                        color: Color(0x08000000),
+                        blurRadius: 4,
+                        offset: Offset(0, 2),
                       ),
                     ],
                   ),
@@ -576,36 +644,40 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                       // Tag Pill
                       Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 5,
+                          horizontal: 10,
+                          vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.55),
-                          borderRadius: BorderRadius.circular(999),
+                          color: AppleTokens.lightMint,
+                          borderRadius: BorderRadius.circular(
+                            AppleTokens.radius8,
+                          ),
                         ),
                         child: Text(
                           firstEvent?.category ?? 'Featured Session',
                           style: GoogleFonts.inter(
                             fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            color: AppleTokens.darkNavy,
+                            fontWeight: FontWeight.w600,
+                            color: AppleTokens.primaryTeal,
                           ),
                         ),
                       ),
-                      const SizedBox(height: 18),
+                      const SizedBox(height: 14),
 
                       Text(
                         firstEvent?.title ?? 'HackPulse Prep & Coding Meet',
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.inter(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w800,
-                          color: AppleTokens.darkNavy,
-                          letterSpacing: -0.5,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                          color: isDark
+                              ? AppleTokens.darkTextPrimary
+                              : AppleTokens.neutralDark,
+                          letterSpacing: -0.4,
                         ),
                       ),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 8),
 
                       Text(
                         firstEvent != null
@@ -613,8 +685,10 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                             : '25 Nov. 14:00-15:00',
                         style: GoogleFonts.inter(
                           fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: AppleTokens.darkNavy.withValues(alpha: 0.8),
+                          fontWeight: FontWeight.w500,
+                          color: isDark
+                              ? AppleTokens.darkTextSecondary
+                              : AppleTokens.neutralBrown,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -623,8 +697,8 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                         firstEvent?.venue ?? 'A5 Room • Innovation Hub',
                         style: GoogleFonts.inter(
                           fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          color: AppleTokens.darkNavy.withValues(alpha: 0.7),
+                          fontWeight: FontWeight.w400,
+                          color: AppleTokens.neutralSlate,
                         ),
                       ),
 
@@ -635,13 +709,15 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                         children: [
                           CircleAvatar(
                             radius: 16,
-                            backgroundColor: Colors.white,
+                            backgroundColor: AppleTokens.lightMint,
                             child: Text(
-                              firstEvent?.title.isNotEmpty == true ? firstEvent!.title[0] : 'H',
+                              firstEvent?.title.isNotEmpty == true
+                                  ? firstEvent!.title[0]
+                                  : 'H',
                               style: const TextStyle(
                                 fontSize: 13,
-                                fontWeight: FontWeight.w800,
-                                color: AppleTokens.darkNavy,
+                                fontWeight: FontWeight.w700,
+                                color: AppleTokens.primaryTeal,
                               ),
                             ),
                           ),
@@ -654,15 +730,17 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                                 style: GoogleFonts.inter(
                                   fontSize: 10,
                                   fontWeight: FontWeight.w500,
-                                  color: AppleTokens.darkNavy.withValues(alpha: 0.6),
+                                  color: AppleTokens.neutralSlate,
                                 ),
                               ),
                               Text(
                                 '${firstEvent?.rsvpCount ?? 32} Students Attending',
                                 style: GoogleFonts.inter(
                                   fontSize: 12,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppleTokens.darkNavy,
+                                  fontWeight: FontWeight.w600,
+                                  color: isDark
+                                      ? AppleTokens.darkTextPrimary
+                                      : AppleTokens.neutralDark,
                                 ),
                               ),
                             ],
@@ -675,27 +753,37 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
               ),
             ),
 
-            // Right Column: Blue Card (Top) + Pink Card (Bottom)
+            // Right Column: Quiz Card (Top) + Community Actions (Bottom)
             SizedBox(
               width: rightWidth,
               height: 270,
               child: Column(
                 children: [
-                  // Blue Card (Quiz / Academic Challenge)
+                  // Quiz Card
                   Expanded(
                     child: InkWell(
                       onTap: () => widget.onNavigate('quizzes', Container()),
-                      borderRadius: BorderRadius.circular(24),
+                      borderRadius: BorderRadius.circular(AppleTokens.radius12),
                       child: Container(
-                        padding: const EdgeInsets.all(18),
+                        padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: AppleTokens.pastelBlue,
-                          borderRadius: BorderRadius.circular(24),
-                          boxShadow: [
+                          color: isDark
+                              ? AppleTokens.darkSurface
+                              : Colors.white,
+                          borderRadius: BorderRadius.circular(
+                            AppleTokens.radius12,
+                          ),
+                          border: Border.all(
+                            color: isDark
+                                ? AppleTokens.darkBorder
+                                : AppleTokens.borderSubtle,
+                            width: 1.0,
+                          ),
+                          boxShadow: const [
                             BoxShadow(
-                              color: AppleTokens.pastelBlue.withValues(alpha: 0.3),
-                              blurRadius: 14,
-                              offset: const Offset(0, 4),
+                              color: Color(0x08000000),
+                              blurRadius: 4,
+                              offset: Offset(0, 2),
                             ),
                           ],
                         ),
@@ -708,19 +796,21 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                                 children: [
                                   Container(
                                     padding: const EdgeInsets.symmetric(
-                                      horizontal: 10,
+                                      horizontal: 8,
                                       vertical: 3,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: Colors.white.withValues(alpha: 0.55),
-                                      borderRadius: BorderRadius.circular(999),
+                                      color: AppleTokens.lightMint,
+                                      borderRadius: BorderRadius.circular(
+                                        AppleTokens.radius8,
+                                      ),
                                     ),
                                     child: Text(
                                       'Academic',
                                       style: GoogleFonts.inter(
                                         fontSize: 10,
-                                        fontWeight: FontWeight.w700,
-                                        color: AppleTokens.darkNavy,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppleTokens.primaryTeal,
                                       ),
                                     ),
                                   ),
@@ -730,10 +820,12 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: GoogleFonts.inter(
-                                      fontSize: 17,
-                                      fontWeight: FontWeight.w800,
-                                      color: AppleTokens.darkNavy,
-                                      letterSpacing: -0.4,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w700,
+                                      color: isDark
+                                          ? AppleTokens.darkTextPrimary
+                                          : AppleTokens.neutralDark,
+                                      letterSpacing: -0.3,
                                     ),
                                   ),
                                   const SizedBox(height: 4),
@@ -743,24 +835,26 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                                         : 'Compete & Climb Ranks',
                                     style: GoogleFonts.inter(
                                       fontSize: 11,
-                                      fontWeight: FontWeight.w500,
-                                      color: AppleTokens.darkNavy.withValues(alpha: 0.7),
+                                      fontWeight: FontWeight.w400,
+                                      color: AppleTokens.neutralBrown,
                                     ),
                                   ),
                                 ],
                               ),
                             ),
                             Container(
-                              width: 48,
-                              height: 48,
-                              decoration: const BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
+                              width: 44,
+                              height: 44,
+                              decoration: BoxDecoration(
+                                color: AppleTokens.lightMint,
+                                borderRadius: BorderRadius.circular(
+                                  AppleTokens.radius8,
+                                ),
                               ),
                               child: const Icon(
                                 Icons.emoji_events_rounded,
-                                color: AppleTokens.darkNavy,
-                                size: 26,
+                                color: AppleTokens.primaryTeal,
+                                size: 22,
                               ),
                             ),
                           ],
@@ -770,21 +864,29 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                   ),
                   const SizedBox(height: 12),
 
-                  // Pink Card (Community Quick Actions)
+                  // Quick Actions Card
                   Expanded(
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 14,
+                        horizontal: 16,
+                        vertical: 12,
                       ),
                       decoration: BoxDecoration(
-                        color: AppleTokens.pastelPink,
-                        borderRadius: BorderRadius.circular(24),
-                        boxShadow: [
+                        color: isDark ? AppleTokens.darkSurface : Colors.white,
+                        borderRadius: BorderRadius.circular(
+                          AppleTokens.radius12,
+                        ),
+                        border: Border.all(
+                          color: isDark
+                              ? AppleTokens.darkBorder
+                              : AppleTokens.borderSubtle,
+                          width: 1.0,
+                        ),
+                        boxShadow: const [
                           BoxShadow(
-                            color: AppleTokens.pastelPink.withValues(alpha: 0.3),
-                            blurRadius: 14,
-                            offset: const Offset(0, 4),
+                            color: Color(0x08000000),
+                            blurRadius: 4,
+                            offset: Offset(0, 2),
                           ),
                         ],
                       ),
@@ -792,19 +894,28 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
                           _socialCircleButton(
-                            icon: Icons.chat_bubble_outline_rounded,
-                            tooltip: 'Study Requests',
-                            onTap: () => widget.onNavigate('study_requests', Container()),
+                            icon: Icons.groups_outlined,
+                            tooltip: 'Campus Clubs',
+                            onTap: () =>
+                                widget.onNavigate('clubs', Container()),
+                          ),
+                          _socialCircleButton(
+                            icon: Icons.school_outlined,
+                            tooltip: 'Placement Mocks',
+                            onTap: () =>
+                                widget.onNavigate('interview_prep', Container()),
                           ),
                           _socialCircleButton(
                             icon: Icons.people_outline_rounded,
                             tooltip: 'Find Buddies',
-                            onTap: () => widget.onNavigate('study_buddies', Container()),
+                            onTap: () =>
+                                widget.onNavigate('study_buddies', Container()),
                           ),
                           _socialCircleButton(
                             icon: Icons.leaderboard_outlined,
                             tooltip: 'Leaderboard',
-                            onTap: () => widget.onNavigate('leaderboard', Container()),
+                            onTap: () =>
+                                widget.onNavigate('leaderboard', Container()),
                           ),
                         ],
                       ),
@@ -828,17 +939,17 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
       message: tooltip,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(999),
+        borderRadius: BorderRadius.circular(AppleTokens.radius8),
         child: Container(
-          width: 42,
-          height: 42,
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            shape: BoxShape.circle,
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: AppleTokens.lightMint,
+            borderRadius: BorderRadius.circular(AppleTokens.radius8),
           ),
           child: Icon(
             icon,
-            color: AppleTokens.darkNavy,
+            color: AppleTokens.primaryTeal,
             size: 20,
           ),
         ),
@@ -858,10 +969,9 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
               width: 50,
               height: 50,
               decoration: BoxDecoration(
-                color:
-                    isDark
-                        ? AppleTokens.darkSurfaceElevated
-                        : AppleTokens.palePurple,
+                color: isDark
+                    ? AppleTokens.darkSurfaceElevated
+                    : AppleTokens.palePurple,
                 borderRadius: BorderRadius.circular(AppleTokens.radius12),
               ),
               child: Center(
@@ -873,10 +983,9 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                       style: TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 16,
-                        color:
-                            isDark
-                                ? AppleTokens.darkTextPrimary
-                                : AppleTokens.deepNavy,
+                        color: isDark
+                            ? AppleTokens.darkTextPrimary
+                            : AppleTokens.deepNavy,
                       ),
                     ),
                     Text(
@@ -884,10 +993,9 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
-                        color:
-                            isDark
-                                ? AppleTokens.darkAccentPurple
-                                : AppleTokens.accentPurple,
+                        color: isDark
+                            ? AppleTokens.darkAccentPurple
+                            : AppleTokens.accentPurple,
                       ),
                     ),
                   ],
@@ -1072,91 +1180,4 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
     ];
     return months[(month - 1).clamp(0, 11)];
   }
-}
-
-/// Custom painter for the 3D pastel geometric illustration on the Daily Challenge card
-class _DailyChallengeShapesPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final w = size.width;
-    final h = size.height;
-
-    // 1. Dark Grey-Slate Ring/Cylinder on left
-    final cylinderPaint = Paint()
-      ..shader = const LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [Color(0xFF5A6075), Color(0xFF35394B)],
-      ).createShader(Rect.fromLTWH(w * 0.05, h * 0.22, w * 0.42, h * 0.42));
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromLTWH(w * 0.05, h * 0.22, w * 0.42, h * 0.42),
-        const Radius.circular(16),
-      ),
-      cylinderPaint,
-    );
-    final holePaint = Paint()..color = const Color(0xFF2B2E3D);
-    canvas.drawCircle(Offset(w * 0.26, h * 0.43), w * 0.1, holePaint);
-
-    // 2. Yellow Upright Torus on Top Right
-    final yellowPaint = Paint()
-      ..shader = const LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [Color(0xFFFFD56B), Color(0xFFFF9E1B)],
-      ).createShader(Rect.fromLTWH(w * 0.45, h * 0.02, w * 0.48, h * 0.48));
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromLTWH(w * 0.45, h * 0.02, w * 0.48, h * 0.48),
-        const Radius.circular(22),
-      ),
-      yellowPaint,
-    );
-    final yellowHolePaint = Paint()..color = const Color(0xFFD47C00);
-    canvas.drawCircle(Offset(w * 0.69, h * 0.26), w * 0.12, yellowHolePaint);
-
-    // 3. Pastel Lilac / Clay Sphere/Block in Center
-    final lilacPaint = Paint()
-      ..shader = const LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [Color(0xFFE2D6FF), Color(0xFFBCA6F8)],
-      ).createShader(Rect.fromLTWH(w * 0.42, h * 0.32, w * 0.38, h * 0.38));
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromLTWH(w * 0.42, h * 0.32, w * 0.38, h * 0.38),
-        const Radius.circular(14),
-      ),
-      lilacPaint,
-    );
-
-    // 4. Yellow Mini Torus / Ring at bottom left
-    final miniYellowPaint = Paint()
-      ..shader = const LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [Color(0xFFFFE082), Color(0xFFFFB300)],
-      ).createShader(Rect.fromLTWH(w * 0.08, h * 0.66, w * 0.28, h * 0.28));
-    canvas.drawCircle(Offset(w * 0.22, h * 0.8), w * 0.14, miniYellowPaint);
-    final miniHolePaint = Paint()..color = AppleTokens.softLavender;
-    canvas.drawCircle(Offset(w * 0.22, h * 0.8), w * 0.06, miniHolePaint);
-
-    // 5. Dark Graphite Pill at Bottom Right
-    final darkPillPaint = Paint()
-      ..shader = const LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [Color(0xFF6B6E7E), Color(0xFF383B47)],
-      ).createShader(Rect.fromLTWH(w * 0.44, h * 0.52, w * 0.42, h * 0.44));
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromLTWH(w * 0.44, h * 0.52, w * 0.42, h * 0.44),
-        const Radius.circular(18),
-      ),
-      darkPillPaint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

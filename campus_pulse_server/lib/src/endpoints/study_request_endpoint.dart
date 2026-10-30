@@ -1,6 +1,7 @@
 import 'package:serverpod/serverpod.dart';
 import 'package:serverpod_auth_idp_server/core.dart';
 import '../generated/protocol.dart';
+import '../services/notification_service.dart';
 
 class StudyRequestEndpoint extends Endpoint {
   /// Sends a study match request to another student.
@@ -52,7 +53,23 @@ class StudyRequestEndpoint extends Endpoint {
       updatedAt: now,
     );
 
-    return await StudyRequest.db.insertRow(session, request);
+    final saved = await StudyRequest.db.insertRow(session, request);
+
+    try {
+      await NotificationService.sendNotification(
+        session,
+        authUserId: recipientAuthUserId,
+        title: 'New Study Buddy Request',
+        message:
+            '$senderName sent you a study buddy request for "$subject" ($urgency priority).',
+        type: 'study_request',
+        targetRoute: 'study_buddies',
+        targetId: saved.id.toString(),
+        eventIdTag: 'study_req_send_${saved.id}',
+      );
+    } catch (_) {}
+
+    return saved;
   }
 
   /// Retrieves all study requests received by the current student.
@@ -121,6 +138,37 @@ class StudyRequestEndpoint extends Endpoint {
       updatedAt: DateTime.now().toUtc(),
     );
 
-    return await StudyRequest.db.updateRow(session, updated);
+    final saved = await StudyRequest.db.updateRow(session, updated);
+
+    // Send notifications based on status change
+    try {
+      if (newStatus == 'accepted') {
+        await NotificationService.sendNotification(
+          session,
+          authUserId: req.senderAuthUserId,
+          title: 'Study Buddy Request Accepted! 🎉',
+          message:
+              '${req.recipientName} accepted your study buddy request for "${req.subject}". You can now coordinate study sessions together.',
+          type: 'study_request',
+          targetRoute: 'study_buddies',
+          targetId: saved.id.toString(),
+          eventIdTag: 'study_req_accepted_${saved.id}',
+        );
+      } else if (newStatus == 'declined') {
+        await NotificationService.sendNotification(
+          session,
+          authUserId: req.senderAuthUserId,
+          title: 'Study Buddy Request Declined',
+          message:
+              '${req.recipientName} was unable to accept your study buddy request for "${req.subject}".',
+          type: 'study_request',
+          targetRoute: 'study_buddies',
+          targetId: saved.id.toString(),
+          eventIdTag: 'study_req_declined_${saved.id}',
+        );
+      }
+    } catch (_) {}
+
+    return saved;
   }
 }

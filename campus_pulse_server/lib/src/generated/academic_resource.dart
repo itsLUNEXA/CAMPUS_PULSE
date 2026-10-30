@@ -33,6 +33,7 @@ abstract class AcademicResource
     required this.uploaderName,
     bool? isApproved,
     this.approvedByUserId,
+    this.rejectionReason,
     DateTime? createdAt,
     int? downloadCount,
   }) : isApproved = isApproved ?? false,
@@ -58,6 +59,7 @@ abstract class AcademicResource
     required String uploaderName,
     bool? isApproved,
     _is.UuidValue? approvedByUserId,
+    String? rejectionReason,
     DateTime? createdAt,
     int? downloadCount,
   }) = _AcademicResourceImpl;
@@ -90,6 +92,7 @@ abstract class AcademicResource
           : _is.UuidValueJsonExtension.fromJson(
               jsonSerialization['approvedByUserId'],
             ),
+      rejectionReason: jsonSerialization['rejectionReason'] as String?,
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _is.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
@@ -138,6 +141,8 @@ abstract class AcademicResource
 
   _is.UuidValue? approvedByUserId;
 
+  String? rejectionReason;
+
   DateTime createdAt;
 
   int downloadCount;
@@ -167,6 +172,7 @@ abstract class AcademicResource
     String? uploaderName,
     bool? isApproved,
     _is.UuidValue? approvedByUserId,
+    String? rejectionReason,
     DateTime? createdAt,
     int? downloadCount,
   });
@@ -193,6 +199,7 @@ abstract class AcademicResource
       'isApproved': isApproved,
       if (approvedByUserId != null)
         'approvedByUserId': approvedByUserId?.toJson(),
+      if (rejectionReason != null) 'rejectionReason': rejectionReason,
       'createdAt': createdAt.toJson(),
       'downloadCount': downloadCount,
     };
@@ -221,6 +228,7 @@ abstract class AcademicResource
       'isApproved': isApproved,
       if (approvedByUserId != null)
         'approvedByUserId': approvedByUserId?.toJson(),
+      if (rejectionReason != null) 'rejectionReason': rejectionReason,
       'createdAt': createdAt.toJson(),
       'downloadCount': downloadCount,
     };
@@ -276,6 +284,7 @@ class _AcademicResourceImpl extends AcademicResource {
     required String uploaderName,
     bool? isApproved,
     _is.UuidValue? approvedByUserId,
+    String? rejectionReason,
     DateTime? createdAt,
     int? downloadCount,
   }) : super._(
@@ -297,6 +306,7 @@ class _AcademicResourceImpl extends AcademicResource {
          uploaderName: uploaderName,
          isApproved: isApproved,
          approvedByUserId: approvedByUserId,
+         rejectionReason: rejectionReason,
          createdAt: createdAt,
          downloadCount: downloadCount,
        );
@@ -324,6 +334,7 @@ class _AcademicResourceImpl extends AcademicResource {
     String? uploaderName,
     bool? isApproved,
     Object? approvedByUserId = _Undefined,
+    Object? rejectionReason = _Undefined,
     DateTime? createdAt,
     int? downloadCount,
   }) {
@@ -348,6 +359,9 @@ class _AcademicResourceImpl extends AcademicResource {
       approvedByUserId: approvedByUserId is _is.UuidValue?
           ? approvedByUserId
           : this.approvedByUserId,
+      rejectionReason: rejectionReason is String?
+          ? rejectionReason
+          : this.rejectionReason,
       createdAt: createdAt ?? this.createdAt,
       downloadCount: downloadCount ?? this.downloadCount,
     );
@@ -447,6 +461,12 @@ class AcademicResourceUpdateTable
     value,
   );
 
+  _is.ColumnValue<String, String> rejectionReason(String? value) =>
+      _is.ColumnValue(
+        table.rejectionReason,
+        value,
+      );
+
   _is.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
       _is.ColumnValue(
         table.createdAt,
@@ -532,6 +552,10 @@ class AcademicResourceTable extends _is.Table<int?> {
       'approvedByUserId',
       this,
     );
+    rejectionReason = _is.ColumnString(
+      'rejectionReason',
+      this,
+    );
     createdAt = _is.ColumnDateTime(
       'createdAt',
       this,
@@ -580,6 +604,8 @@ class AcademicResourceTable extends _is.Table<int?> {
 
   late final _is.ColumnUuid approvedByUserId;
 
+  late final _is.ColumnString rejectionReason;
+
   late final _is.ColumnDateTime createdAt;
 
   late final _is.ColumnInt downloadCount;
@@ -604,6 +630,7 @@ class AcademicResourceTable extends _is.Table<int?> {
     uploaderName,
     isApproved,
     approvedByUserId,
+    rejectionReason,
     createdAt,
     downloadCount,
   ];

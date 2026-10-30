@@ -18,9 +18,9 @@ class FaqHelpScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final faqItems = [
       const FaqItem(
-        question: 'What is Campus Pulse?',
+        question: 'What is CAMPULSE?',
         answer:
-            'Campus Pulse is an all-in-one fullstack platform for university students. It combines verified campus events with instant RSVP, smart peer study matching, timed academic quizzes, and real-time streaming leaderboards built with Flutter and Serverpod.',
+            'CAMPULSE is an all-in-one platform for college students. It combines verified campus events with instant RSVP, peer study matching, timed academic quizzes, and real-time streaming leaderboards built with Flutter and Serverpod.',
       ),
       const FaqItem(
         question:
@@ -54,10 +54,9 @@ class FaqHelpScreen extends StatelessWidget {
             'Leaderboards use deterministic tie-breaking: first by highest total score, second by number of quizzes completed, third by lowest total time taken in seconds, and fourth by alphabetical student name.',
       ),
       const FaqItem(
-        question:
-            'Does Campus Pulse work offline or handle network disconnects?',
+        question: 'Does CAMPULSE work offline or handle network disconnects?',
         answer:
-            'Campus Pulse features automatic retry backoff, connection state monitoring, and optimistic UI updates for RSVPs, ensuring seamless recovery when network connectivity is restored.',
+            'CAMPULSE features automatic retry backoff, connection state monitoring, and optimistic UI updates for RSVPs, ensuring seamless recovery when network connectivity is restored.',
       ),
     ];
 
@@ -89,7 +88,7 @@ class FaqHelpScreen extends StatelessWidget {
               ),
               const SizedBox(height: AppleTokens.space4),
               const Text(
-                'Everything you need to know about navigating and collaborating on Campus Pulse.',
+                'Everything you need to know about navigating and collaborating on CAMPULSE.',
               ),
               const SizedBox(height: AppleTokens.space24),
 

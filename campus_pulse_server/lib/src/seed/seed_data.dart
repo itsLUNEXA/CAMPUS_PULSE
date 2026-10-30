@@ -52,6 +52,329 @@ class SeedDataService {
       }
     } catch (_) {}
 
+    // Seed Master Admin if not present
+    try {
+      const adminEmail = 'admin@campuspulse.edu';
+      const adminPassword = 'AdminMasterPassword2026!';
+      var adminAccount = await EmailAccount.db.findFirstRow(
+        session,
+        where: (t) => t.email.equals(adminEmail),
+      );
+      UuidValue adminUserId;
+      if (adminAccount == null) {
+        final authUser = await const AuthUsers().create(session);
+        adminUserId = authUser.id;
+        await AuthServices.instance.emailIdp.admin.createEmailAuthentication(
+          session,
+          authUserId: adminUserId,
+          email: adminEmail,
+          password: adminPassword,
+        );
+      } else {
+        adminUserId = adminAccount.authUserId;
+      }
+
+      final existingAdminRole = await UserRole.db.findFirstRow(
+        session,
+        where: (t) => t.authUserId.equals(adminUserId) & t.role.equals('admin'),
+      );
+      if (existingAdminRole == null) {
+        await UserRole.db.insertRow(
+          session,
+          UserRole(
+            authUserId: adminUserId,
+            role: 'admin',
+            assignedScope: 'master_control',
+            grantedAt: DateTime.now().toUtc(),
+          ),
+        );
+      }
+
+      final existingAdminProfile = await StudentProfile.db.findFirstRow(
+        session,
+        where: (t) => t.authUserId.equals(adminUserId),
+      );
+      if (existingAdminProfile == null) {
+        final now = DateTime.now().toUtc();
+        await StudentProfile.db.insertRow(
+          session,
+          StudentProfile(
+            authUserId: adminUserId,
+            fullName: 'Master Administrator',
+            email: adminEmail,
+            branch: 'Admin',
+            academicYear: 4,
+            hostelOrArea: 'Campus Administration',
+            subjectInterests: ['System Management'],
+            createdAt: now,
+            updatedAt: now,
+          ),
+        );
+      }
+    } catch (_) {}
+
+    // Seed Library Staff if not present
+    try {
+      const staffEmail = 'library@campuspulse.edu';
+      const staffPassword = 'LibraryStaff2026!';
+      var staffAccount = await EmailAccount.db.findFirstRow(
+        session,
+        where: (t) => t.email.equals(staffEmail),
+      );
+      UuidValue staffUserId;
+      if (staffAccount == null) {
+        final authUser = await const AuthUsers().create(session);
+        staffUserId = authUser.id;
+        await AuthServices.instance.emailIdp.admin.createEmailAuthentication(
+          session,
+          authUserId: staffUserId,
+          email: staffEmail,
+          password: staffPassword,
+        );
+      } else {
+        staffUserId = staffAccount.authUserId;
+      }
+
+      final existingStaffRole = await UserRole.db.findFirstRow(
+        session,
+        where: (t) =>
+            t.authUserId.equals(staffUserId) & t.role.equals('library_staff'),
+      );
+      if (existingStaffRole == null) {
+        await UserRole.db.insertRow(
+          session,
+          UserRole(
+            authUserId: staffUserId,
+            role: 'library_staff',
+            assignedScope: 'Central Library Main Counter',
+            grantedAt: DateTime.now().toUtc(),
+          ),
+        );
+      }
+
+      final existingStaffProfile = await StudentProfile.db.findFirstRow(
+        session,
+        where: (t) => t.authUserId.equals(staffUserId),
+      );
+      if (existingStaffProfile == null) {
+        final now = DateTime.now().toUtc();
+        await StudentProfile.db.insertRow(
+          session,
+          StudentProfile(
+            authUserId: staffUserId,
+            fullName: 'Meera Sen (Library Staff)',
+            email: staffEmail,
+            branch: 'Central Library Services',
+            academicYear: 4,
+            hostelOrArea: 'Library Ground Floor Counter',
+            subjectInterests: ['Library Operations', 'Digital Print Services'],
+            createdAt: now,
+            updatedAt: now,
+          ),
+        );
+      }
+    } catch (_) {}
+
+    // Seed Sample Print Requests and Point Wallets if not present
+    try {
+      final existingRequestsCount = await PrintRequest.db.count(session);
+      if (existingRequestsCount == 0) {
+        final now = DateTime.now().toUtc();
+        final student = await StudentProfile.db.findFirstRow(session);
+        final studentId =
+            student?.authUserId ??
+            UuidValue.fromString('550e8400-e29b-41d4-a716-446655440021');
+        final studentName = student?.fullName ?? 'Aarav Sharma';
+        final branch = student?.branch ?? 'CSE';
+        final year = student?.academicYear ?? 3;
+        final hostel = student?.hostelOrArea ?? 'Kaveri Hostel Block B';
+
+        // Initialize Student Wallet with 40 starter points
+        final existingWallet = await PrintPointWallet.db.findFirstRow(
+          session,
+          where: (t) => t.authUserId.equals(studentId),
+        );
+        if (existingWallet == null) {
+          await PrintPointWallet.db.insertRow(
+            session,
+            PrintPointWallet(
+              authUserId: studentId,
+              studentName: studentName,
+              balance: 40,
+              lifetimeEarned: 40,
+              lifetimeRedeemed: 0,
+              updatedAt: now,
+            ),
+          );
+
+          await PrintPointTransaction.db.insertRow(
+            session,
+            PrintPointTransaction(
+              authUserId: studentId,
+              type: 'EARNED',
+              points: 40,
+              balanceAfter: 40,
+              description: 'Campus Pulse Welcome Bonus (2 free pages)',
+              createdAt: now,
+            ),
+          );
+        }
+
+        // Seed diverse requests
+        await PrintRequest.db.insert(session, [
+          PrintRequest(
+            studentAuthUserId: studentId,
+            studentName: studentName,
+            studentBranch: branch,
+            studentYear: year,
+            hostelOrLocation: hostel,
+            fileName: 'Compiler_Design_Unit_3_Notes.pdf',
+            fileUrl: 'https://campus.edu/docs/compiler_notes.pdf',
+            fileSizeBytes: 2450000,
+            pageCount: 14,
+            copies: 1,
+            totalPages: 14,
+            printType: 'Black & White',
+            paperSize: 'A4',
+            printSide: 'Double-side',
+            binding: 'Staple',
+            deliveryMode: 'Library pickup',
+            counterName: 'Central Library Main Counter',
+            amountPaid: 26.0,
+            pointsUsed: 0,
+            pointsEarned: 14,
+            pointsAwarded: false,
+            paymentStatus: 'SUCCESS',
+            paymentTransactionId: 'TXN_9918231',
+            status: 'QUEUED',
+            createdAt: now.subtract(const Duration(minutes: 25)),
+            updatedAt: now.subtract(const Duration(minutes: 25)),
+          ),
+          PrintRequest(
+            studentAuthUserId: studentId,
+            studentName: studentName,
+            studentBranch: branch,
+            studentYear: year,
+            hostelOrLocation: hostel,
+            fileName: 'Database_Systems_Lab_Assignment_4.pdf',
+            fileUrl: 'https://campus.edu/docs/dbms_lab4.pdf',
+            fileSizeBytes: 1820000,
+            pageCount: 8,
+            copies: 2,
+            totalPages: 16,
+            printType: 'Colour',
+            paperSize: 'A4',
+            printSide: 'Single-side',
+            binding: 'Spiral',
+            deliveryMode: 'Library pickup',
+            counterName: 'Central Library Main Counter',
+            amountPaid: 190.0,
+            pointsUsed: 0,
+            pointsEarned: 16,
+            pointsAwarded: false,
+            paymentStatus: 'SUCCESS',
+            paymentTransactionId: 'TXN_9918232',
+            status: 'PRINTING',
+            processedByStaffName: 'Meera Sen (Library Staff)',
+            createdAt: now.subtract(const Duration(hours: 1, minutes: 10)),
+            updatedAt: now.subtract(const Duration(minutes: 15)),
+          ),
+          PrintRequest(
+            studentAuthUserId: studentId,
+            studentName: studentName,
+            studentBranch: branch,
+            studentYear: year,
+            hostelOrLocation: hostel,
+            fileName: 'Capstone_Project_Synopsis_Final.pdf',
+            fileUrl: 'https://campus.edu/docs/capstone_synopsis.pdf',
+            fileSizeBytes: 4120000,
+            pageCount: 22,
+            copies: 1,
+            totalPages: 22,
+            printType: 'Black & White',
+            paperSize: 'A4',
+            printSide: 'Double-side',
+            binding: 'Spiral',
+            deliveryMode: 'Library pickup',
+            counterName: 'Central Library Main Counter',
+            amountPaid: 63.0,
+            pointsUsed: 20, // 20 points redeemed = 1 page free
+            pointsEarned: 22,
+            pointsAwarded: false,
+            paymentStatus: 'SUCCESS',
+            paymentTransactionId: 'TXN_9918233',
+            status: 'READY',
+            collectionCode: '729401',
+            collectionQrToken: 'CAMPUS-PRINT-729401-3',
+            processedByStaffName: 'Meera Sen (Library Staff)',
+            createdAt: now.subtract(const Duration(hours: 2, minutes: 40)),
+            updatedAt: now.subtract(const Duration(minutes: 45)),
+          ),
+          PrintRequest(
+            studentAuthUserId: studentId,
+            studentName: studentName,
+            studentBranch: branch,
+            studentYear: year,
+            hostelOrLocation: hostel,
+            fileName: 'Machine_Learning_Term_Paper.pdf',
+            fileUrl: 'https://campus.edu/docs/ml_term_paper.pdf',
+            fileSizeBytes: 3100000,
+            pageCount: 10,
+            copies: 1,
+            totalPages: 10,
+            printType: 'Colour',
+            paperSize: 'A4',
+            printSide: 'Single-side',
+            binding: 'None',
+            deliveryMode: 'Library pickup',
+            counterName: 'Central Library Main Counter',
+            amountPaid: 100.0,
+            pointsUsed: 0,
+            pointsEarned: 10,
+            pointsAwarded: true,
+            paymentStatus: 'SUCCESS',
+            paymentTransactionId: 'TXN_9918234',
+            status: 'COLLECTED',
+            collectionCode: '610283',
+            collectionQrToken: 'CAMPUS-PRINT-610283-4',
+            processedByStaffName: 'Meera Sen (Library Staff)',
+            createdAt: now.subtract(const Duration(days: 1, hours: 3)),
+            updatedAt: now.subtract(const Duration(days: 1, hours: 2)),
+            collectedAt: now.subtract(const Duration(days: 1, hours: 2)),
+          ),
+          PrintRequest(
+            studentAuthUserId: studentId,
+            studentName: studentName,
+            studentBranch: branch,
+            studentYear: year,
+            hostelOrLocation: hostel,
+            fileName: 'Operating_Systems_PYQ_Solved_2025.pdf',
+            fileUrl: 'https://campus.edu/docs/os_pyq.pdf',
+            fileSizeBytes: 5200000,
+            pageCount: 30,
+            copies: 1,
+            totalPages: 30,
+            printType: 'Black & White',
+            paperSize: 'A4',
+            printSide: 'Double-side',
+            binding: 'Spiral',
+            deliveryMode: 'Hostel delivery',
+            counterName: 'Central Library Main Counter',
+            amountPaid: 90.0,
+            pointsUsed: 0,
+            pointsEarned: 30,
+            pointsAwarded: false,
+            paymentStatus: 'FAILED',
+            paymentFailureReason:
+                'Card payment declined by issuing bank (Insufficient funds)',
+            status: 'CANCELLED',
+            createdAt: now.subtract(const Duration(hours: 3)),
+            updatedAt: now.subtract(const Duration(hours: 3)),
+          ),
+        ]);
+      }
+    } catch (_) {}
+
     // 2. Seed Peer Students for Discovery if not present
     try {
       final now = DateTime.now().toUtc();

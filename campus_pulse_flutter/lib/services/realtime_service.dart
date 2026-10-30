@@ -6,16 +6,19 @@ import '../client.dart';
 class RealtimeService extends ChangeNotifier {
   StreamSubscription<RsvpUpdate>? _rsvpSubscription;
   StreamSubscription<LeaderboardUpdate>? _leaderboardSubscription;
+  StreamSubscription<CampusNotification>? _notificationSubscription;
 
   final List<RsvpUpdate> _recentRsvps = [];
   final List<LeaderboardUpdate> _recentLeaderboardUpdates = [];
   final List<CampusNotification> _notifications = [];
+  int _unreadCount = 0;
 
   List<RsvpUpdate> get recentRsvps => List.unmodifiable(_recentRsvps);
   List<LeaderboardUpdate> get recentLeaderboardUpdates =>
       List.unmodifiable(_recentLeaderboardUpdates);
   List<CampusNotification> get notifications =>
       List.unmodifiable(_notifications);
+  int get unreadCount => _unreadCount;
 
   bool _isConnecting = false;
   bool _isConnected = false;
@@ -34,19 +37,6 @@ class RealtimeService extends ChangeNotifier {
           _isConnected = true;
           _recentRsvps.insert(0, update);
           if (_recentRsvps.length > 50) _recentRsvps.removeLast();
-
-          _notifications.insert(
-            0,
-            CampusNotification(
-              id: DateTime.now().millisecondsSinceEpoch.toString(),
-              title: update.action == 'rsvp' ? 'New RSVP' : 'RSVP Cancelled',
-              message:
-                  'Event #${update.eventId} now has ${update.rsvpCount} RSVPs',
-              type: 'event',
-              timestamp: DateTime.now(),
-            ),
-          );
-          if (_notifications.length > 50) _notifications.removeLast();
           notifyListeners();
         },
         onError: (err) {
@@ -69,19 +59,6 @@ class RealtimeService extends ChangeNotifier {
           if (_recentLeaderboardUpdates.length > 50) {
             _recentLeaderboardUpdates.removeLast();
           }
-
-          _notifications.insert(
-            0,
-            CampusNotification(
-              id: DateTime.now().millisecondsSinceEpoch.toString(),
-              title: 'Leaderboard Update',
-              message:
-                  '${update.studentName} scored ${update.score} in ${update.subject}!',
-              type: 'quiz',
-              timestamp: DateTime.now(),
-            ),
-          );
-          if (_notifications.length > 50) _notifications.removeLast();
           notifyListeners();
         },
         onError: (err) {
@@ -92,6 +69,12 @@ class RealtimeService extends ChangeNotifier {
         },
       );
 
+      // 3. Subscribe to real-time personal notifications stream
+      _startNotificationStream();
+
+      // Fetch initial notifications
+      refreshNotifications();
+
       _isConnecting = false;
       _isConnected = true;
       notifyListeners();
@@ -100,6 +83,91 @@ class RealtimeService extends ChangeNotifier {
       _isConnected = false;
       _scheduleReconnect();
     }
+  }
+
+  void _startNotificationStream() {
+    try {
+      _notificationSubscription?.cancel();
+      final notifStream = client.notification.streamMyNotifications();
+      _notificationSubscription = notifStream.listen(
+        (notif) {
+          // Deduplicate if already present
+          final idx = _notifications.indexWhere((n) => n.id == notif.id);
+          if (idx >= 0) {
+            _notifications[idx] = notif;
+          } else {
+            _notifications.insert(0, notif);
+            if (!notif.isRead) {
+              _unreadCount++;
+            }
+          }
+          if (_notifications.length > 100) _notifications.removeLast();
+          notifyListeners();
+        },
+        onError: (_) {},
+        onDone: () {},
+      );
+    } catch (_) {}
+  }
+
+  /// Fetches persistent notifications and unread count from Serverpod PostgreSQL
+  Future<void> refreshNotifications({String? type}) async {
+    try {
+      final notifs = await client.notification.getMyNotifications(
+        limit: 50,
+        offset: 0,
+        type: type,
+      );
+      final unread = await client.notification.getUnreadCount();
+
+      _notifications.clear();
+      _notifications.addAll(notifs);
+      _unreadCount = unread;
+      notifyListeners();
+    } catch (_) {
+      // Offline / unauthenticated fallback
+    }
+  }
+
+  /// Marks a specific notification as read
+  Future<void> markAsRead(int notificationId) async {
+    // Optimistic update
+    final index = _notifications.indexWhere((n) => n.id == notificationId);
+    if (index != -1) {
+      final old = _notifications[index];
+      if (!old.isRead) {
+        _notifications[index] = old.copyWith(isRead: true);
+        if (_unreadCount > 0) _unreadCount--;
+        notifyListeners();
+      }
+    }
+
+    try {
+      await client.notification.markAsRead(notificationId);
+    } catch (_) {}
+  }
+
+  /// Marks all notifications as read
+  Future<void> markAllAsRead() async {
+    // Optimistic update
+    for (int i = 0; i < _notifications.length; i++) {
+      _notifications[i] = _notifications[i].copyWith(isRead: true);
+    }
+    _unreadCount = 0;
+    notifyListeners();
+
+    try {
+      await client.notification.markAllAsRead();
+    } catch (_) {}
+  }
+
+  /// Clears previous account-specific state and cancels personal notification stream
+  void clearSession() {
+    _notificationSubscription?.cancel();
+    _notificationSubscription = null;
+    _notifications.clear();
+    _unreadCount = 0;
+    notifyListeners();
   }
 
   void _scheduleReconnect() {
@@ -112,6 +180,7 @@ class RealtimeService extends ChangeNotifier {
   void dispose() {
     _rsvpSubscription?.cancel();
     _leaderboardSubscription?.cancel();
+    _notificationSubscription?.cancel();
     super.dispose();
   }
 }

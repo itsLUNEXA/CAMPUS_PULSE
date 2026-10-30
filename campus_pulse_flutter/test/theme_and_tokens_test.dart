@@ -6,17 +6,18 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  group('Apple Design Tokens & Themes', () {
-    test('verifies mandatory Apple color token values', () {
-      expect(AppleTokens.primaryBlue, const Color(0xFF0071E3));
-      expect(AppleTokens.secondaryBlue, const Color(0xFF2997FF));
-      expect(AppleTokens.accentBlue, const Color(0xFF24568E));
-      expect(AppleTokens.primaryText, const Color(0xFF1D1D1F));
-      expect(AppleTokens.black, const Color(0xFF000000));
-      expect(AppleTokens.lightNeutral, const Color(0xFFE8E8ED));
-      expect(AppleTokens.white, const Color(0xFFFFFFFF));
-      expect(AppleTokens.secondaryText, const Color(0xFF86868B));
-      expect(AppleTokens.tertiaryText, const Color(0xFF6E6E73));
+  group('Campus Pulse Mint & Teal Tokens & Themes', () {
+    test('verifies primary Mint & Teal brand color token values', () {
+      expect(AppleTokens.primaryTeal, const Color(0xFF3E9FA0));
+      expect(AppleTokens.tealHover, const Color(0xFF308586));
+      expect(AppleTokens.lightMint, const Color(0xFFBFF1E5));
+      expect(AppleTokens.lightCyan, const Color(0xFFCEF0F3));
+      expect(AppleTokens.primaryText, const Color(0xFF0B0E17));
+      expect(AppleTokens.secondaryText, const Color(0xFF555D65));
+      expect(AppleTokens.mutedText, const Color(0xFF899398));
+      expect(AppleTokens.border, const Color(0xFFE3ECEC));
+      expect(AppleTokens.primaryButton, const Color(0xFF080D19));
+      expect(AppleTokens.primaryButtonText, const Color(0xFFFFFFFF));
     });
 
     test('verifies spacing scale', () {
@@ -31,18 +32,17 @@ void main() {
     });
 
     test('verifies radii scale', () {
-      expect(AppleTokens.radius5, 5.0);
+      expect(AppleTokens.radius5, 4.0);
       expect(AppleTokens.radius8, 8.0);
-      expect(AppleTokens.radius50, 50.0);
-      expect(AppleTokens.radius980, 980.0);
-      expect(AppleTokens.radius999, 999.0);
+      expect(AppleTokens.radius50, 12.0);
+      expect(AppleTokens.radius980, 12.0);
+      expect(AppleTokens.radius999, 8.0);
     });
 
     test('verifies motion durations', () {
-      expect(AppleTokens.duration20.inMilliseconds, 20);
-      expect(AppleTokens.duration100.inMilliseconds, 100);
-      expect(AppleTokens.duration160.inMilliseconds, 160);
       expect(AppleTokens.duration300.inMilliseconds, 300);
+      expect(AppleTokens.durationFast.inMilliseconds, 200);
+      expect(AppleTokens.durationNormal.inMilliseconds, 300);
     });
 
     test('verifies light and dark ThemeData properties', () {
@@ -50,10 +50,10 @@ void main() {
       final dark = AppTheme.darkTheme;
 
       expect(light.brightness, Brightness.light);
-      expect(light.colorScheme.primary, AppleTokens.primaryBlue);
+      expect(light.colorScheme.primary, AppleTokens.primaryTeal);
 
       expect(dark.brightness, Brightness.dark);
-      expect(dark.colorScheme.primary, AppleTokens.secondaryBlue);
+      expect(dark.colorScheme.primary, AppleTokens.darkTeal);
     });
   });
 }

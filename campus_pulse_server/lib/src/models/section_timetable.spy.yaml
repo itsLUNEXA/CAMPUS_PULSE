@@ -10,9 +10,9 @@ fields:
   endTime: String
   subject: String
   room: String
+  faculty: String?
   createdAt: DateTime, default=now
 
 indexes:
   section_schedule_idx:
     fields: branch, semester, section, dayOfWeek
-

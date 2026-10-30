@@ -6,11 +6,14 @@ class AdminAuthState extends ChangeNotifier {
   bool _isLoading = false;
   String? _errorMessage;
   bool _isAdminAuthenticated = false;
+  bool _isLibraryStaff = false;
   String? _adminEmail;
 
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
-  bool get isAdminAuthenticated => _isAdminAuthenticated && client.auth.isAuthenticated;
+  bool get isAdminAuthenticated =>
+      _isAdminAuthenticated && client.auth.isAuthenticated;
+  bool get isLibraryStaff => _isLibraryStaff && client.auth.isAuthenticated;
   String? get adminEmail => _adminEmail;
 
   AdminAuthState() {
@@ -100,6 +103,33 @@ class AdminAuthState extends ChangeNotifier {
     }
   }
 
+  /// 1-Click Library Counter Staff Demo Login
+  Future<bool> loginLibraryStaffDemo() async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final authSuccess = await client.emailIdp.login(
+        email: 'library@campuspulse.edu',
+        password: 'LibraryStaff2026!',
+      );
+      await client.auth.updateSignedInUser(authSuccess);
+      _isAdminAuthenticated = false;
+      _isLibraryStaff = true;
+      _adminEmail = 'library@campuspulse.edu';
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _isLoading = false;
+      _isLibraryStaff = false;
+      _errorMessage = _cleanError(e.toString());
+      notifyListeners();
+      return false;
+    }
+  }
+
   /// Admin Sign Out: Clears administrative credentials and revokes session
   Future<void> signOutAdmin() async {
     try {
@@ -118,7 +148,10 @@ class AdminAuthState extends ChangeNotifier {
     if (raw.contains('invalidCredentials')) {
       return 'Invalid admin email or password.';
     }
-    return raw.replaceAll('Exception:', '').replaceAll('StateError:', '').trim();
+    return raw
+        .replaceAll('Exception:', '')
+        .replaceAll('StateError:', '')
+        .trim();
   }
 
   @override
@@ -127,4 +160,3 @@ class AdminAuthState extends ChangeNotifier {
     super.dispose();
   }
 }
-

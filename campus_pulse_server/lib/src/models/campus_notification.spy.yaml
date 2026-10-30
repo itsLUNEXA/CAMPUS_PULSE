@@ -1,8 +1,18 @@
 class: CampusNotification
+table: campus_notifications
 fields:
-  id: String
+  authUserId: UuidValue
   title: String
   message: String
   type: String
-  timestamp: DateTime
+  targetRoute: String?
+  targetId: String?
+  isRead: bool, default=false
+  createdAt: DateTime, default=now
+  eventIdTag: String?
 
+indexes:
+  notif_user_read_idx:
+    fields: authUserId, isRead
+  notif_dedup_idx:
+    fields: authUserId, eventIdTag

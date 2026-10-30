@@ -1,0 +1,23 @@
+class: CampusClub
+table: campus_clubs
+fields:
+  name: String
+  tagline: String
+  category: String
+  description: String
+  logoUrl: String?
+  leadName: String
+  leadEmail: String
+  techTeamLead: String
+  techTeamEmail: String
+  managementLead: String
+  managementEmail: String
+  membersCount: int, default=0
+  recruitmentOpen: bool, default=false
+  meetingSchedule: String?
+  createdAt: DateTime, default=now
+
+indexes:
+  club_category_idx:
+    fields: category
+

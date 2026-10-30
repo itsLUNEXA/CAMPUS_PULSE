@@ -50,6 +50,71 @@ class StudentEndpoint extends Endpoint {
       );
     }
 
+    // Ensure demo student account never retains elevated admin roles
+    await UserRole.db.deleteWhere(
+      session,
+      where: (t) => t.authUserId.equals(authUserId) & t.role.equals('admin'),
+    );
+
+    return await AuthServices.instance.emailIdp.login(
+      session,
+      email: demoEmail,
+      password: 'password123',
+    );
+  }
+
+  /// 1-click instant demo login for Priya Patel (CSE Year 3) - Student Demo 2
+  Future<AuthSuccess> loginDemoStudent2(Session session) async {
+    const demoEmail = 'priya.patel@campus.edu';
+    var emailAccount = await EmailAccount.db.findFirstRow(
+      session,
+      where: (t) => t.email.equals(demoEmail),
+    );
+
+    UuidValue authUserId;
+    if (emailAccount == null) {
+      final authUser = await const AuthUsers().create(session);
+      authUserId = authUser.id;
+      await AuthServices.instance.emailIdp.admin.createEmailAuthentication(
+        session,
+        authUserId: authUserId,
+        email: demoEmail,
+        password: 'password123',
+      );
+    } else {
+      authUserId = emailAccount.authUserId;
+    }
+
+    final existingProfile = await StudentProfile.db.findFirstRow(
+      session,
+      where: (t) => t.authUserId.equals(authUserId),
+    );
+
+    if (existingProfile == null) {
+      final now = DateTime.now().toUtc();
+      await StudentProfile.db.insertRow(
+        session,
+        StudentProfile(
+          authUserId: authUserId,
+          fullName: 'Priya Patel',
+          email: demoEmail,
+          branch: 'CSE',
+          academicYear: 3,
+          hostelOrArea: 'Kaveri Hostel Block B',
+          bio: 'Passionate about Algorithms, System Design and Open Source.',
+          subjectInterests: ['DSA', 'Operating Systems', 'System Design'],
+          createdAt: now,
+          updatedAt: now,
+        ),
+      );
+    }
+
+    // Ensure demo student account never retains elevated admin roles
+    await UserRole.db.deleteWhere(
+      session,
+      where: (t) => t.authUserId.equals(authUserId) & t.role.equals('admin'),
+    );
+
     return await AuthServices.instance.emailIdp.login(
       session,
       email: demoEmail,
@@ -190,7 +255,8 @@ class StudentEndpoint extends Endpoint {
         bio: bio?.trim(),
         subjectInterests: subjectInterests,
         eventInterests: eventInterests ?? existing.eventInterests,
-        preferredQuizSubjects: preferredQuizSubjects ?? existing.preferredQuizSubjects,
+        preferredQuizSubjects:
+            preferredQuizSubjects ?? existing.preferredQuizSubjects,
         preferredQuizTypes: preferredQuizTypes ?? existing.preferredQuizTypes,
         updatedAt: now,
       );
@@ -237,7 +303,8 @@ class StudentEndpoint extends Endpoint {
 
     final updated = existing.copyWith(
       eventInterests: eventInterests ?? existing.eventInterests,
-      preferredQuizSubjects: preferredQuizSubjects ?? existing.preferredQuizSubjects,
+      preferredQuizSubjects:
+          preferredQuizSubjects ?? existing.preferredQuizSubjects,
       preferredQuizTypes: preferredQuizTypes ?? existing.preferredQuizTypes,
       updatedAt: DateTime.now().toUtc(),
     );

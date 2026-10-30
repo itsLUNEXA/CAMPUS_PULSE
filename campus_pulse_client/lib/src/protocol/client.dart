@@ -11,18 +11,26 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _ida;
+import 'dart:typed_data' as _idt;
 import 'package:campus_pulse_client/src/protocol/academic_resource.dart'
     as _id97hjpr;
 import 'package:campus_pulse_client/src/protocol/admin_audit_log.dart'
     as _i6e8adep;
 import 'package:campus_pulse_client/src/protocol/attendance_record.dart'
     as _id4j1rwr;
+import 'package:campus_pulse_client/src/protocol/campus_club.dart' as _i7de4lp2;
+import 'package:campus_pulse_client/src/protocol/campus_company.dart'
+    as _idckwp02;
 import 'package:campus_pulse_client/src/protocol/campus_event.dart'
     as _ip4v6fvs;
+import 'package:campus_pulse_client/src/protocol/campus_notification.dart'
+    as _ips3fl58;
 import 'package:campus_pulse_client/src/protocol/chat_message.dart'
     as _ik3iv9q2;
 import 'package:campus_pulse_client/src/protocol/chat_report.dart' as _izhvp4kh;
 import 'package:campus_pulse_client/src/protocol/chat_room.dart' as _i69co3yd;
+import 'package:campus_pulse_client/src/protocol/club_query_request.dart'
+    as _ikkmzz2m;
 import 'package:campus_pulse_client/src/protocol/event_certificate.dart'
     as _ihpqvest;
 import 'package:campus_pulse_client/src/protocol/event_rsvp.dart' as _in2xsmyl;
@@ -34,6 +42,16 @@ import 'package:campus_pulse_client/src/protocol/leaderboard_update.dart'
     as _ivors92c;
 import 'package:campus_pulse_client/src/protocol/minutes_of_meeting.dart'
     as _idz08l1h;
+import 'package:campus_pulse_client/src/protocol/mock_interview_slot.dart'
+    as _isnswiy4;
+import 'package:campus_pulse_client/src/protocol/points_ledger.dart'
+    as _ifx1d0ne;
+import 'package:campus_pulse_client/src/protocol/print_point_transaction.dart'
+    as _idfiw4w6;
+import 'package:campus_pulse_client/src/protocol/print_point_wallet.dart'
+    as _isp01kbi;
+import 'package:campus_pulse_client/src/protocol/print_request.dart'
+    as _in0khvxd;
 import 'package:campus_pulse_client/src/protocol/quiz_attempt.dart'
     as _i395nlzx;
 import 'package:campus_pulse_client/src/protocol/quiz_question_view.dart'
@@ -48,6 +66,8 @@ import 'package:campus_pulse_client/src/protocol/search_response.dart'
     as _irna5qn8;
 import 'package:campus_pulse_client/src/protocol/section_timetable.dart'
     as _ij8cgkiw;
+import 'package:campus_pulse_client/src/protocol/senior_experience.dart'
+    as _isi3g25f;
 import 'package:campus_pulse_client/src/protocol/student_free_slot.dart'
     as _iuvh50w9;
 import 'package:campus_pulse_client/src/protocol/student_profile.dart'
@@ -358,16 +378,26 @@ class EndpointAcademicResource extends _isc.EndpointRef {
     },
   );
 
-  /// Approve or reject resource (Admin / Contributor Review)
+  /// List pending academic resources awaiting verification
+  _ida.Future<List<_id97hjpr.AcademicResource>> listPendingResources() =>
+      caller.callServerEndpoint<List<_id97hjpr.AcademicResource>>(
+        'academicResource',
+        'listPendingResources',
+        {},
+      );
+
+  /// Approve or reject resource with optional reason and submitter alert
   _ida.Future<bool> setApprovalStatus(
     int resourceId,
-    bool approved,
-  ) => caller.callServerEndpoint<bool>(
+    bool approved, {
+    String? reason,
+  }) => caller.callServerEndpoint<bool>(
     'academicResource',
     'setApprovalStatus',
     {
       'resourceId': resourceId,
       'approved': approved,
+      'reason': reason,
     },
   );
 
@@ -393,6 +423,60 @@ class EndpointAcademicResource extends _isc.EndpointRef {
       'subjectCode': subjectCode,
     },
   );
+
+  /// Upload an actual PDF file to persistent backend storage,
+  /// validate size and magic bytes, record in PostgreSQL, and return the record.
+  _ida.Future<_id97hjpr.AcademicResource> uploadPdf({
+    required String title,
+    String? description,
+    required String university,
+    required String course,
+    required String branch,
+    required int academicYear,
+    required int semester,
+    required String subjectCode,
+    required String subjectName,
+    int? unitNumber,
+    required String resourceType,
+    required String filename,
+    required _idt.ByteData fileBytes,
+  }) => caller.callServerEndpoint<_id97hjpr.AcademicResource>(
+    'academicResource',
+    'uploadPdf',
+    {
+      'title': title,
+      'description': description,
+      'university': university,
+      'course': course,
+      'branch': branch,
+      'academicYear': academicYear,
+      'semester': semester,
+      'subjectCode': subjectCode,
+      'subjectName': subjectName,
+      'unitNumber': unitNumber,
+      'resourceType': resourceType,
+      'filename': filename,
+      'fileBytes': fileBytes,
+    },
+  );
+
+  /// Downloads the actual stored PDF file.
+  /// Returns ByteData containing physical PDF bytes, or null if the file is unavailable.
+  /// Increments the download counter only upon successful physical retrieval.
+  _ida.Future<_idt.ByteData?> downloadPdf(int resourceId) =>
+      caller.callServerEndpoint<_idt.ByteData?>(
+        'academicResource',
+        'downloadPdf',
+        {'resourceId': resourceId},
+      );
+
+  /// Checks whether an actual physical PDF file exists on storage for this resource.
+  _ida.Future<bool> isPdfAvailable(int resourceId) =>
+      caller.callServerEndpoint<bool>(
+        'academicResource',
+        'isPdfAvailable',
+        {'resourceId': resourceId},
+      );
 }
 
 /// {@category Endpoint}
@@ -455,6 +539,50 @@ class EndpointAdmin extends _isc.EndpointRef {
     },
   );
 
+  /// Revoke a role from a user (Admin only, prevents removing last superadmin)
+  _ida.Future<bool> revokeRole(
+    _isc.UuidValue targetUserId,
+    String role,
+  ) => caller.callServerEndpoint<bool>(
+    'admin',
+    'revokeRole',
+    {
+      'targetUserId': targetUserId,
+      'role': role,
+    },
+  );
+
+  /// Fetch all assigned roles for a target student
+  _ida.Future<List<String>> getUserRoles(_isc.UuidValue targetUserId) =>
+      caller.callServerEndpoint<List<String>>(
+        'admin',
+        'getUserRoles',
+        {'targetUserId': targetUserId},
+      );
+
+  /// Searchable, paginated student roster for admin management
+  _ida.Future<List<_i66wptcz.StudentProfile>> listStudents({
+    String? search,
+    required int limit,
+    required int offset,
+  }) => caller.callServerEndpoint<List<_i66wptcz.StudentProfile>>(
+    'admin',
+    'listStudents',
+    {
+      'search': search,
+      'limit': limit,
+      'offset': offset,
+    },
+  );
+
+  /// Total count of students matching query
+  _ida.Future<int> getStudentCount({String? search}) =>
+      caller.callServerEndpoint<int>(
+        'admin',
+        'getStudentCount',
+        {'search': search},
+      );
+
   /// Get roles for current caller
   _ida.Future<List<String>> getMyRoles() =>
       caller.callServerEndpoint<List<String>>(
@@ -463,13 +591,21 @@ class EndpointAdmin extends _isc.EndpointRef {
         {},
       );
 
-  /// List admin audit logs (Admin only)
+  /// List admin audit logs with search, action filtering, and pagination
   _ida.Future<List<_i6e8adep.AdminAuditLog>> listAuditLogs({
+    String? search,
+    String? actionType,
     required int limit,
+    required int offset,
   }) => caller.callServerEndpoint<List<_i6e8adep.AdminAuditLog>>(
     'admin',
     'listAuditLogs',
-    {'limit': limit},
+    {
+      'search': search,
+      'actionType': actionType,
+      'limit': limit,
+      'offset': offset,
+    },
   );
 }
 
@@ -700,6 +836,124 @@ class EndpointChat extends _isc.EndpointRef {
         'listMyRooms',
         {},
       );
+
+  /// Creates a custom room with name, optional description, topic, and academic restrictions.
+  /// Derives creator identity from the authenticated session, adds creator as member,
+  /// and prevents duplicate creation.
+  _ida.Future<_i69co3yd.ChatRoom> createCustomRoom({
+    required String name,
+    String? description,
+    String? topic,
+    String? allowedBranch,
+    int? allowedAcademicYear,
+  }) => caller.callServerEndpoint<_i69co3yd.ChatRoom>(
+    'chat',
+    'createCustomRoom',
+    {
+      'name': name,
+      'description': description,
+      'topic': topic,
+      'allowedBranch': allowedBranch,
+      'allowedAcademicYear': allowedAcademicYear,
+    },
+  );
+
+  /// Joins an eligible room for non-members, enforcing academic restrictions.
+  _ida.Future<_i69co3yd.ChatRoom> joinRoom(int roomId) =>
+      caller.callServerEndpoint<_i69co3yd.ChatRoom>(
+        'chat',
+        'joinRoom',
+        {'roomId': roomId},
+      );
+
+  /// List all accessible rooms partitioned for My Rooms vs Discover Rooms.
+  _ida.Future<List<_i69co3yd.ChatRoom>> listAllAccessibleRooms() =>
+      caller.callServerEndpoint<List<_i69co3yd.ChatRoom>>(
+        'chat',
+        'listAllAccessibleRooms',
+        {},
+      );
+}
+
+/// {@category Endpoint}
+class EndpointClub extends _isc.EndpointRef {
+  EndpointClub(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'club';
+
+  /// Lists campus clubs with optional category filtering
+  _ida.Future<List<_i7de4lp2.CampusClub>> listClubs({String? category}) =>
+      caller.callServerEndpoint<List<_i7de4lp2.CampusClub>>(
+        'club',
+        'listClubs',
+        {'category': category},
+      );
+
+  /// Get details of a single club
+  _ida.Future<_i7de4lp2.CampusClub?> getClub(int clubId) =>
+      caller.callServerEndpoint<_i7de4lp2.CampusClub?>(
+        'club',
+        'getClub',
+        {'clubId': clubId},
+      );
+
+  /// Submit a query request to either the Tech Team or Management Team of a club
+  _ida.Future<_ikkmzz2m.ClubQueryRequest> submitClubQuery({
+    required int clubId,
+    required String targetTeam,
+    required String category,
+    required String subject,
+    required String message,
+  }) => caller.callServerEndpoint<_ikkmzz2m.ClubQueryRequest>(
+    'club',
+    'submitClubQuery',
+    {
+      'clubId': clubId,
+      'targetTeam': targetTeam,
+      'category': category,
+      'subject': subject,
+      'message': message,
+    },
+  );
+
+  /// Get all queries sent by the current student
+  _ida.Future<List<_ikkmzz2m.ClubQueryRequest>> getMyClubQueries() =>
+      caller.callServerEndpoint<List<_ikkmzz2m.ClubQueryRequest>>(
+        'club',
+        'getMyClubQueries',
+        {},
+      );
+
+  /// Get queries submitted to a specific club (accessible to club leads and admins)
+  _ida.Future<List<_ikkmzz2m.ClubQueryRequest>> getClubQueries({
+    int? clubId,
+    String? targetTeam,
+    String? status,
+  }) => caller.callServerEndpoint<List<_ikkmzz2m.ClubQueryRequest>>(
+    'club',
+    'getClubQueries',
+    {
+      'clubId': clubId,
+      'targetTeam': targetTeam,
+      'status': status,
+    },
+  );
+
+  /// Respond to a student query
+  _ida.Future<_ikkmzz2m.ClubQueryRequest> respondToClubQuery({
+    required int queryId,
+    required String responseMessage,
+    String? responderName,
+  }) => caller.callServerEndpoint<_ikkmzz2m.ClubQueryRequest>(
+    'club',
+    'respondToClubQuery',
+    {
+      'queryId': queryId,
+      'responseMessage': responseMessage,
+      'responderName': responderName,
+    },
+  );
 }
 
 /// {@category Endpoint}
@@ -922,6 +1176,107 @@ class EndpointEvent extends _isc.EndpointRef {
         {},
         {},
       );
+
+  /// List pending events for administrative review queue (Admin only)
+  _ida.Future<List<_ip4v6fvs.CampusEvent>> getPendingEvents({
+    required int limit,
+    required int offset,
+  }) => caller.callServerEndpoint<List<_ip4v6fvs.CampusEvent>>(
+    'event',
+    'getPendingEvents',
+    {
+      'limit': limit,
+      'offset': offset,
+    },
+  );
+
+  /// Get total count of pending events awaiting admin approval (Admin only)
+  _ida.Future<int> getPendingEventsCount() => caller.callServerEndpoint<int>(
+    'event',
+    'getPendingEventsCount',
+    {},
+  );
+
+  /// Returns events submitted by the current authenticated user with their approval statuses
+  _ida.Future<List<_ip4v6fvs.CampusEvent>> getMyEvents({String? status}) =>
+      caller.callServerEndpoint<List<_ip4v6fvs.CampusEvent>>(
+        'event',
+        'getMyEvents',
+        {'status': status},
+      );
+}
+
+/// {@category Endpoint}
+class EndpointInterviewPrep extends _isc.EndpointRef {
+  EndpointInterviewPrep(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'interviewPrep';
+
+  /// Lists all campus companies visiting for placements and internships
+  _ida.Future<List<_idckwp02.CampusCompany>> listCompanies() =>
+      caller.callServerEndpoint<List<_idckwp02.CampusCompany>>(
+        'interviewPrep',
+        'listCompanies',
+        {},
+      );
+
+  /// Lists senior interview experiences with questions and round breakdowns
+  _ida.Future<List<_isi3g25f.SeniorExperience>> listSeniorExperiences({
+    String? companyName,
+  }) => caller.callServerEndpoint<List<_isi3g25f.SeniorExperience>>(
+    'interviewPrep',
+    'listSeniorExperiences',
+    {'companyName': companyName},
+  );
+
+  /// Request a personalized 1-on-1 mock interview with an experienced campus senior
+  _ida.Future<_isnswiy4.MockInterviewSlot> requestMockInterview({
+    required String targetCompany,
+    required String targetRole,
+    required String mockRound,
+    required DateTime preferredDate,
+    String? resumeUrl,
+    String? notes,
+  }) => caller.callServerEndpoint<_isnswiy4.MockInterviewSlot>(
+    'interviewPrep',
+    'requestMockInterview',
+    {
+      'targetCompany': targetCompany,
+      'targetRole': targetRole,
+      'mockRound': mockRound,
+      'preferredDate': preferredDate,
+      'resumeUrl': resumeUrl,
+      'notes': notes,
+    },
+  );
+
+  /// Get mock interview slots booked by current student
+  _ida.Future<List<_isnswiy4.MockInterviewSlot>> getMyMockInterviewSlots() =>
+      caller.callServerEndpoint<List<_isnswiy4.MockInterviewSlot>>(
+        'interviewPrep',
+        'getMyMockInterviewSlots',
+        {},
+      );
+
+  /// Update mock interview status (assign mentor, meeting link, or feedback)
+  _ida.Future<_isnswiy4.MockInterviewSlot> updateMockInterviewStatus({
+    required int slotId,
+    required String status,
+    String? seniorMentorName,
+    String? meetingLink,
+    String? feedbackNotes,
+  }) => caller.callServerEndpoint<_isnswiy4.MockInterviewSlot>(
+    'interviewPrep',
+    'updateMockInterviewStatus',
+    {
+      'slotId': slotId,
+      'status': status,
+      'seniorMentorName': seniorMentorName,
+      'meetingLink': meetingLink,
+      'feedbackNotes': feedbackNotes,
+    },
+  );
 }
 
 /// {@category Endpoint}
@@ -991,6 +1346,147 @@ class EndpointLeaderboard extends _isc.EndpointRef {
 }
 
 /// {@category Endpoint}
+class EndpointLibrary extends _isc.EndpointRef {
+  EndpointLibrary(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'library';
+
+  /// Returns staff metadata (role, assigned counter)
+  _ida.Future<Map<String, dynamic>> getStaffProfile() =>
+      caller.callServerEndpoint<Map<String, dynamic>>(
+        'library',
+        'getStaffProfile',
+        {},
+      );
+
+  /// List available print counters
+  _ida.Future<List<String>> getAvailableCounters() =>
+      caller.callServerEndpoint<List<String>>(
+        'library',
+        'getAvailableCounters',
+        {},
+      );
+
+  /// Fetch paid library print requests for the library staff dashboard
+  _ida.Future<List<_in0khvxd.PrintRequest>> getLibraryRequests({
+    String? counterName,
+    String? statusFilter,
+    String? searchQuery,
+    required int limit,
+    required int offset,
+  }) => caller.callServerEndpoint<List<_in0khvxd.PrintRequest>>(
+    'library',
+    'getLibraryRequests',
+    {
+      'counterName': counterName,
+      'statusFilter': statusFilter,
+      'searchQuery': searchQuery,
+      'limit': limit,
+      'offset': offset,
+    },
+  );
+
+  /// Update print request status: QUEUED -> PRINTING -> READY -> COLLECTED
+  _ida.Future<_in0khvxd.PrintRequest> updateRequestStatus({
+    required int requestId,
+    required String targetStatus,
+    String? reason,
+  }) => caller.callServerEndpoint<_in0khvxd.PrintRequest>(
+    'library',
+    'updateRequestStatus',
+    {
+      'requestId': requestId,
+      'targetStatus': targetStatus,
+      'reason': reason,
+    },
+  );
+
+  /// Verify collection code or QR token and mark request as COLLECTED, awarding points
+  _ida.Future<_in0khvxd.PrintRequest> verifyCollection({
+    required String collectionCodeOrToken,
+  }) => caller.callServerEndpoint<_in0khvxd.PrintRequest>(
+    'library',
+    'verifyCollection',
+    {'collectionCodeOrToken': collectionCodeOrToken},
+  );
+
+  /// Fetch caller student's print requests
+  _ida.Future<List<_in0khvxd.PrintRequest>> getStudentPrintRequests({
+    String? paymentStatusFilter,
+  }) => caller.callServerEndpoint<List<_in0khvxd.PrintRequest>>(
+    'library',
+    'getStudentPrintRequests',
+    {'paymentStatusFilter': paymentStatusFilter},
+  );
+
+  /// Create a new print request with payment gating and optional point redemption
+  _ida.Future<_in0khvxd.PrintRequest> createPrintRequest({
+    required String fileName,
+    required String fileUrl,
+    int? fileSizeBytes,
+    required int pageCount,
+    required int copies,
+    required String printType,
+    required String paperSize,
+    required String printSide,
+    required String binding,
+    required String deliveryMode,
+    required String counterName,
+    required int pointsToRedeem,
+    required bool simulatePaymentFailure,
+  }) => caller.callServerEndpoint<_in0khvxd.PrintRequest>(
+    'library',
+    'createPrintRequest',
+    {
+      'fileName': fileName,
+      'fileUrl': fileUrl,
+      'fileSizeBytes': fileSizeBytes,
+      'pageCount': pageCount,
+      'copies': copies,
+      'printType': printType,
+      'paperSize': paperSize,
+      'printSide': printSide,
+      'binding': binding,
+      'deliveryMode': deliveryMode,
+      'counterName': counterName,
+      'pointsToRedeem': pointsToRedeem,
+      'simulatePaymentFailure': simulatePaymentFailure,
+    },
+  );
+
+  /// Retry failed payment for a print request
+  _ida.Future<_in0khvxd.PrintRequest> retryPrintPayment({
+    required int requestId,
+    required bool simulatePaymentFailure,
+  }) => caller.callServerEndpoint<_in0khvxd.PrintRequest>(
+    'library',
+    'retryPrintPayment',
+    {
+      'requestId': requestId,
+      'simulatePaymentFailure': simulatePaymentFailure,
+    },
+  );
+
+  /// Get student's print points wallet
+  _ida.Future<_isp01kbi.PrintPointWallet> getStudentPointWallet() =>
+      caller.callServerEndpoint<_isp01kbi.PrintPointWallet>(
+        'library',
+        'getStudentPointWallet',
+        {},
+      );
+
+  /// Get point transaction history for caller
+  _ida.Future<List<_idfiw4w6.PrintPointTransaction>> getPointTransactions({
+    required int limit,
+  }) => caller.callServerEndpoint<List<_idfiw4w6.PrintPointTransaction>>(
+    'library',
+    'getPointTransactions',
+    {'limit': limit},
+  );
+}
+
+/// {@category Endpoint}
 class EndpointMom extends _isc.EndpointRef {
   EndpointMom(_isc.EndpointCaller caller) : super(caller);
 
@@ -1036,6 +1532,64 @@ class EndpointMom extends _isc.EndpointRef {
         'mom',
         'getMomDetail',
         {'momId': momId},
+      );
+}
+
+/// {@category Endpoint}
+class EndpointNotification extends _isc.EndpointRef {
+  EndpointNotification(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'notification';
+
+  /// Fetch user's persistent notifications
+  _ida.Future<List<_ips3fl58.CampusNotification>> getMyNotifications({
+    bool? unreadOnly,
+    String? type,
+    required int limit,
+    required int offset,
+  }) => caller.callServerEndpoint<List<_ips3fl58.CampusNotification>>(
+    'notification',
+    'getMyNotifications',
+    {
+      'unreadOnly': unreadOnly,
+      'type': type,
+      'limit': limit,
+      'offset': offset,
+    },
+  );
+
+  /// Get unread notifications count
+  _ida.Future<int> getUnreadCount() => caller.callServerEndpoint<int>(
+    'notification',
+    'getUnreadCount',
+    {},
+  );
+
+  /// Mark single notification as read
+  _ida.Future<bool> markAsRead(int id) => caller.callServerEndpoint<bool>(
+    'notification',
+    'markAsRead',
+    {'id': id},
+  );
+
+  /// Mark all notifications as read
+  _ida.Future<bool> markAllAsRead() => caller.callServerEndpoint<bool>(
+    'notification',
+    'markAllAsRead',
+    {},
+  );
+
+  /// Stream real-time notifications for the authenticated user
+  _ida.Stream<_ips3fl58.CampusNotification> streamMyNotifications() =>
+      caller.callStreamingServerEndpoint<
+        _ida.Stream<_ips3fl58.CampusNotification>,
+        _ips3fl58.CampusNotification
+      >(
+        'notification',
+        'streamMyNotifications',
+        {},
+        {},
       );
 }
 
@@ -1092,6 +1646,40 @@ class EndpointPoints extends _isc.EndpointRef {
       'costPoints': costPoints,
       'stockRemaining': stockRemaining,
     },
+  );
+
+  /// List all reward perks including inactive (Admin only)
+  _ida.Future<List<_i04nrlxs.RewardPerk>> listAllRewards() =>
+      caller.callServerEndpoint<List<_i04nrlxs.RewardPerk>>(
+        'points',
+        'listAllRewards',
+        {},
+      );
+
+  /// Admin: Update an existing reward perk
+  _ida.Future<_i04nrlxs.RewardPerk> updateRewardPerk(
+    _i04nrlxs.RewardPerk perk,
+  ) => caller.callServerEndpoint<_i04nrlxs.RewardPerk>(
+    'points',
+    'updateRewardPerk',
+    {'perk': perk},
+  );
+
+  /// Admin: Delete a reward perk
+  _ida.Future<bool> deleteRewardPerk(int perkId) =>
+      caller.callServerEndpoint<bool>(
+        'points',
+        'deleteRewardPerk',
+        {'perkId': perkId},
+      );
+
+  /// Admin: View platform redemption history
+  _ida.Future<List<_ifx1d0ne.PointsLedger>> listRedemptions({
+    required int limit,
+  }) => caller.callServerEndpoint<List<_ifx1d0ne.PointsLedger>>(
+    'points',
+    'listRedemptions',
+    {'limit': limit},
   );
 
   /// Redeem reward perk
@@ -1218,6 +1806,14 @@ class EndpointStudent extends _isc.EndpointRef {
       caller.callServerEndpoint<_iacc.AuthSuccess>(
         'student',
         'loginDemo',
+        {},
+      );
+
+  /// 1-click instant demo login for Priya Patel (CSE Year 3) - Student Demo 2
+  _ida.Future<_iacc.AuthSuccess> loginDemoStudent2() =>
+      caller.callServerEndpoint<_iacc.AuthSuccess>(
+        'student',
+        'loginDemoStudent2',
         {},
       );
 
@@ -1390,7 +1986,7 @@ class EndpointTimetable extends _isc.EndpointRef {
   @override
   String get name => 'timetable';
 
-  /// Admin only: Create or update class timetable for a section
+  /// Admin only: Create class timetable entry with overlap validation and student alerts
   _ida.Future<_ij8cgkiw.SectionTimetable> addSectionTimetable({
     required String branch,
     required int academicYear,
@@ -1401,6 +1997,7 @@ class EndpointTimetable extends _isc.EndpointRef {
     required String endTime,
     required String subject,
     required String room,
+    String? faculty,
   }) => caller.callServerEndpoint<_ij8cgkiw.SectionTimetable>(
     'timetable',
     'addSectionTimetable',
@@ -1414,6 +2011,39 @@ class EndpointTimetable extends _isc.EndpointRef {
       'endTime': endTime,
       'subject': subject,
       'room': room,
+      'faculty': faculty,
+    },
+  );
+
+  /// Admin: Update an existing class timetable entry
+  _ida.Future<_ij8cgkiw.SectionTimetable> updateSectionTimetable(
+    _ij8cgkiw.SectionTimetable entry,
+  ) => caller.callServerEndpoint<_ij8cgkiw.SectionTimetable>(
+    'timetable',
+    'updateSectionTimetable',
+    {'entry': entry},
+  );
+
+  /// Admin: Delete a class timetable entry
+  _ida.Future<bool> deleteSectionTimetable(int id) =>
+      caller.callServerEndpoint<bool>(
+        'timetable',
+        'deleteSectionTimetable',
+        {'id': id},
+      );
+
+  /// List all class timetables (with optional branch, semester, section filters)
+  _ida.Future<List<_ij8cgkiw.SectionTimetable>> listAllTimetables({
+    String? branch,
+    int? semester,
+    String? section,
+  }) => caller.callServerEndpoint<List<_ij8cgkiw.SectionTimetable>>(
+    'timetable',
+    'listAllTimetables',
+    {
+      'branch': branch,
+      'semester': semester,
+      'section': section,
     },
   );
 
@@ -1456,6 +2086,19 @@ class EndpointTimetable extends _isc.EndpointRef {
       'startTime': startTime,
       'endTime': endTime,
       'isFree': isFree,
+    },
+  );
+
+  /// Student: Clear/unset availability slot
+  _ida.Future<bool> clearFreeSlot({
+    required String dayOfWeek,
+    required String slotLabel,
+  }) => caller.callServerEndpoint<bool>(
+    'timetable',
+    'clearFreeSlot',
+    {
+      'dayOfWeek': dayOfWeek,
+      'slotLabel': slotLabel,
     },
   );
 
@@ -1532,9 +2175,13 @@ class Client extends _isc.ServerpodClientShared {
     attendance = EndpointAttendance(this);
     certificate = EndpointCertificate(this);
     chat = EndpointChat(this);
+    club = EndpointClub(this);
     event = EndpointEvent(this);
+    interviewPrep = EndpointInterviewPrep(this);
     leaderboard = EndpointLeaderboard(this);
+    library = EndpointLibrary(this);
     mom = EndpointMom(this);
+    notification = EndpointNotification(this);
     points = EndpointPoints(this);
     quiz = EndpointQuiz(this);
     search = EndpointSearch(this);
@@ -1560,11 +2207,19 @@ class Client extends _isc.ServerpodClientShared {
 
   late final EndpointChat chat;
 
+  late final EndpointClub club;
+
   late final EndpointEvent event;
+
+  late final EndpointInterviewPrep interviewPrep;
 
   late final EndpointLeaderboard leaderboard;
 
+  late final EndpointLibrary library;
+
   late final EndpointMom mom;
+
+  late final EndpointNotification notification;
 
   late final EndpointPoints points;
 
@@ -1593,9 +2248,13 @@ class Client extends _isc.ServerpodClientShared {
     'attendance': attendance,
     'certificate': certificate,
     'chat': chat,
+    'club': club,
     'event': event,
+    'interviewPrep': interviewPrep,
     'leaderboard': leaderboard,
+    'library': library,
     'mom': mom,
+    'notification': notification,
     'points': points,
     'quiz': quiz,
     'search': search,

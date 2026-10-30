@@ -243,7 +243,9 @@ class _QuizSelectionScreenState extends State<QuizSelectionScreen> {
                                           ),
                                         ),
                                       ),
-                                      if (_recommendedSubjects.contains(title)) ...[
+                                      if (_recommendedSubjects.contains(
+                                        title,
+                                      )) ...[
                                         const SizedBox(width: 8),
                                         Container(
                                           padding: const EdgeInsets.symmetric(
@@ -251,7 +253,8 @@ class _QuizSelectionScreenState extends State<QuizSelectionScreen> {
                                             vertical: 2,
                                           ),
                                           decoration: BoxDecoration(
-                                            color: AppleTokens.primaryBlue.withValues(alpha: 0.15),
+                                            color: AppleTokens.primaryBlue
+                                                .withValues(alpha: 0.15),
                                             borderRadius: BorderRadius.circular(
                                               AppleTokens.radius999,
                                             ),
@@ -270,7 +273,8 @@ class _QuizSelectionScreenState extends State<QuizSelectionScreen> {
                                                 style: TextStyle(
                                                   fontSize: 11,
                                                   fontWeight: FontWeight.w600,
-                                                  color: AppleTokens.primaryBlue,
+                                                  color:
+                                                      AppleTokens.primaryBlue,
                                                 ),
                                               ),
                                             ],

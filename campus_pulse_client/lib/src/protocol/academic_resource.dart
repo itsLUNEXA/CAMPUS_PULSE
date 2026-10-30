@@ -33,6 +33,7 @@ abstract class AcademicResource
     required this.uploaderName,
     bool? isApproved,
     this.approvedByUserId,
+    this.rejectionReason,
     DateTime? createdAt,
     int? downloadCount,
   }) : isApproved = isApproved ?? false,
@@ -58,6 +59,7 @@ abstract class AcademicResource
     required String uploaderName,
     bool? isApproved,
     _isc.UuidValue? approvedByUserId,
+    String? rejectionReason,
     DateTime? createdAt,
     int? downloadCount,
   }) = _AcademicResourceImpl;
@@ -90,6 +92,7 @@ abstract class AcademicResource
           : _isc.UuidValueJsonExtension.fromJson(
               jsonSerialization['approvedByUserId'],
             ),
+      rejectionReason: jsonSerialization['rejectionReason'] as String?,
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
@@ -136,6 +139,8 @@ abstract class AcademicResource
 
   _isc.UuidValue? approvedByUserId;
 
+  String? rejectionReason;
+
   DateTime createdAt;
 
   int downloadCount;
@@ -162,6 +167,7 @@ abstract class AcademicResource
     String? uploaderName,
     bool? isApproved,
     _isc.UuidValue? approvedByUserId,
+    String? rejectionReason,
     DateTime? createdAt,
     int? downloadCount,
   });
@@ -188,6 +194,7 @@ abstract class AcademicResource
       'isApproved': isApproved,
       if (approvedByUserId != null)
         'approvedByUserId': approvedByUserId?.toJson(),
+      if (rejectionReason != null) 'rejectionReason': rejectionReason,
       'createdAt': createdAt.toJson(),
       'downloadCount': downloadCount,
     };
@@ -216,6 +223,7 @@ abstract class AcademicResource
       'isApproved': isApproved,
       if (approvedByUserId != null)
         'approvedByUserId': approvedByUserId?.toJson(),
+      if (rejectionReason != null) 'rejectionReason': rejectionReason,
       'createdAt': createdAt.toJson(),
       'downloadCount': downloadCount,
     };
@@ -249,6 +257,7 @@ class _AcademicResourceImpl extends AcademicResource {
     required String uploaderName,
     bool? isApproved,
     _isc.UuidValue? approvedByUserId,
+    String? rejectionReason,
     DateTime? createdAt,
     int? downloadCount,
   }) : super._(
@@ -270,6 +279,7 @@ class _AcademicResourceImpl extends AcademicResource {
          uploaderName: uploaderName,
          isApproved: isApproved,
          approvedByUserId: approvedByUserId,
+         rejectionReason: rejectionReason,
          createdAt: createdAt,
          downloadCount: downloadCount,
        );
@@ -297,6 +307,7 @@ class _AcademicResourceImpl extends AcademicResource {
     String? uploaderName,
     bool? isApproved,
     Object? approvedByUserId = _Undefined,
+    Object? rejectionReason = _Undefined,
     DateTime? createdAt,
     int? downloadCount,
   }) {
@@ -321,6 +332,9 @@ class _AcademicResourceImpl extends AcademicResource {
       approvedByUserId: approvedByUserId is _isc.UuidValue?
           ? approvedByUserId
           : this.approvedByUserId,
+      rejectionReason: rejectionReason is String?
+          ? rejectionReason
+          : this.rejectionReason,
       createdAt: createdAt ?? this.createdAt,
       downloadCount: downloadCount ?? this.downloadCount,
     );

@@ -157,18 +157,16 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                   Container(
                     padding: const EdgeInsets.all(AppleTokens.space16),
                     decoration: BoxDecoration(
-                      color:
-                          isDark
-                              ? AppleTokens.darkSurfaceElevated
-                              : AppleTokens.warmCream,
+                      color: isDark
+                          ? AppleTokens.darkSurfaceElevated
+                          : AppleTokens.warmCream,
                       borderRadius: BorderRadius.circular(AppleTokens.radius12),
                       border: Border.all(
-                        color:
-                            isDark
-                                ? AppleTokens.darkBorder
-                                : AppleTokens.yellowAccent.withValues(
-                                  alpha: 0.5,
-                                ),
+                        color: isDark
+                            ? AppleTokens.darkBorder
+                            : AppleTokens.yellowAccent.withValues(
+                                alpha: 0.5,
+                              ),
                         width: 1.2,
                       ),
                     ),
@@ -176,15 +174,15 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                       children: [
                         CircleAvatar(
                           radius: 20,
-                          backgroundColor:
-                              isDark
-                                  ? AppleTokens.palePurple
-                                  : AppleTokens.deepNavy,
+                          backgroundColor: isDark
+                              ? AppleTokens.palePurple
+                              : AppleTokens.deepNavy,
                           child: Text(
                             '#${_myRank!.rank}',
                             style: TextStyle(
-                              color:
-                                  isDark ? AppleTokens.deepNavy : Colors.white,
+                              color: isDark
+                                  ? AppleTokens.deepNavy
+                                  : Colors.white,
                               fontWeight: FontWeight.w800,
                               fontSize: 14,
                             ),
@@ -200,20 +198,18 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                                 style: TextStyle(
                                   fontWeight: FontWeight.w700,
                                   fontSize: 16,
-                                  color:
-                                      isDark
-                                          ? AppleTokens.darkTextPrimary
-                                          : AppleTokens.deepNavy,
+                                  color: isDark
+                                      ? AppleTokens.darkTextPrimary
+                                      : AppleTokens.deepNavy,
                                 ),
                               ),
                               Text(
                                 '${_myRank!.score} total points across ${_myRank!.quizzesTaken} quiz challenges (${_myRank!.accuracy}% accuracy)',
                                 style: Theme.of(context).textTheme.bodySmall
                                     ?.copyWith(
-                                      color:
-                                          isDark
-                                              ? AppleTokens.darkTextSecondary
-                                              : AppleTokens.bodyText,
+                                      color: isDark
+                                          ? AppleTokens.darkTextSecondary
+                                          : AppleTokens.bodyText,
                                     ),
                               ),
                             ],
@@ -379,20 +375,18 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                         icon: Icons.chevron_left,
                         variant: AppleButtonVariant.subtle,
                         height: 38,
-                        onPressed:
-                            _currentPage > 0
-                                ? () => _loadLeaderboard(page: _currentPage - 1)
-                                : null,
+                        onPressed: _currentPage > 0
+                            ? () => _loadLeaderboard(page: _currentPage - 1)
+                            : null,
                       ),
                       const SizedBox(width: AppleTokens.space16),
                       Text(
                         'Page ${_currentPage + 1}',
                         style: TextStyle(
                           fontWeight: FontWeight.w600,
-                          color:
-                              isDark
-                                  ? AppleTokens.darkTextPrimary
-                                  : AppleTokens.deepNavy,
+                          color: isDark
+                              ? AppleTokens.darkTextPrimary
+                              : AppleTokens.deepNavy,
                         ),
                       ),
                       const SizedBox(width: AppleTokens.space16),
@@ -401,10 +395,9 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                         icon: Icons.chevron_right,
                         variant: AppleButtonVariant.subtle,
                         height: 38,
-                        onPressed:
-                            _hasNextPage
-                                ? () => _loadLeaderboard(page: _currentPage + 1)
-                                : null,
+                        onPressed: _hasNextPage
+                            ? () => _loadLeaderboard(page: _currentPage + 1)
+                            : null,
                       ),
                     ],
                   ),
@@ -424,28 +417,67 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
   ) {
     Widget rankWidget;
     if (entry.rank == 1) {
-      rankWidget = const Icon(
-        Icons.military_tech,
-        color: Color(0xFFFFD700),
-        size: 28,
-      ); // Gold
+      rankWidget = Container(
+        width: 32,
+        height: 32,
+        decoration: BoxDecoration(
+          color: AppleTokens.primaryTeal,
+          borderRadius: BorderRadius.circular(AppleTokens.radius8),
+        ),
+        child: const Center(
+          child: Text(
+            '1',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w800,
+              fontSize: 14,
+            ),
+          ),
+        ),
+      );
     } else if (entry.rank == 2) {
-      rankWidget = const Icon(
-        Icons.military_tech,
-        color: Color(0xFFC0C0C0),
-        size: 28,
-      ); // Silver
+      rankWidget = Container(
+        width: 32,
+        height: 32,
+        decoration: BoxDecoration(
+          color: AppleTokens.purple,
+          borderRadius: BorderRadius.circular(AppleTokens.radius8),
+        ),
+        child: const Center(
+          child: Text(
+            '2',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w800,
+              fontSize: 14,
+            ),
+          ),
+        ),
+      );
     } else if (entry.rank == 3) {
-      rankWidget = const Icon(
-        Icons.military_tech,
-        color: Color(0xFFCD7F32),
-        size: 28,
-      ); // Bronze
+      rankWidget = Container(
+        width: 32,
+        height: 32,
+        decoration: BoxDecoration(
+          color: AppleTokens.lightMint,
+          borderRadius: BorderRadius.circular(AppleTokens.radius8),
+        ),
+        child: const Center(
+          child: Text(
+            '3',
+            style: TextStyle(
+              color: AppleTokens.primaryTeal,
+              fontWeight: FontWeight.w800,
+              fontSize: 14,
+            ),
+          ),
+        ),
+      );
     } else {
       rankWidget = Text(
         '#${entry.rank}',
         style: TextStyle(
-          fontSize: 16,
+          fontSize: 15,
           fontWeight: FontWeight.w700,
           color: isDark
               ? AppleTokens.darkTextSecondary

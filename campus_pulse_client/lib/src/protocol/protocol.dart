@@ -17,12 +17,19 @@ import 'package:campus_pulse_client/src/protocol/admin_audit_log.dart'
     as _i6e8adep;
 import 'package:campus_pulse_client/src/protocol/attendance_record.dart'
     as _id4j1rwr;
+import 'package:campus_pulse_client/src/protocol/campus_club.dart' as _i7de4lp2;
+import 'package:campus_pulse_client/src/protocol/campus_company.dart'
+    as _idckwp02;
 import 'package:campus_pulse_client/src/protocol/campus_event.dart'
     as _ip4v6fvs;
+import 'package:campus_pulse_client/src/protocol/campus_notification.dart'
+    as _ips3fl58;
 import 'package:campus_pulse_client/src/protocol/chat_message.dart'
     as _ik3iv9q2;
 import 'package:campus_pulse_client/src/protocol/chat_report.dart' as _izhvp4kh;
 import 'package:campus_pulse_client/src/protocol/chat_room.dart' as _i69co3yd;
+import 'package:campus_pulse_client/src/protocol/club_query_request.dart'
+    as _ikkmzz2m;
 import 'package:campus_pulse_client/src/protocol/event_certificate.dart'
     as _ihpqvest;
 import 'package:campus_pulse_client/src/protocol/event_rsvp.dart' as _in2xsmyl;
@@ -30,6 +37,14 @@ import 'package:campus_pulse_client/src/protocol/leaderboard_entry.dart'
     as _ipx1rsvs;
 import 'package:campus_pulse_client/src/protocol/minutes_of_meeting.dart'
     as _idz08l1h;
+import 'package:campus_pulse_client/src/protocol/mock_interview_slot.dart'
+    as _isnswiy4;
+import 'package:campus_pulse_client/src/protocol/points_ledger.dart'
+    as _ifx1d0ne;
+import 'package:campus_pulse_client/src/protocol/print_point_transaction.dart'
+    as _idfiw4w6;
+import 'package:campus_pulse_client/src/protocol/print_request.dart'
+    as _in0khvxd;
 import 'package:campus_pulse_client/src/protocol/quiz_attempt.dart'
     as _i395nlzx;
 import 'package:campus_pulse_client/src/protocol/quiz_question_view.dart'
@@ -37,6 +52,8 @@ import 'package:campus_pulse_client/src/protocol/quiz_question_view.dart'
 import 'package:campus_pulse_client/src/protocol/reward_perk.dart' as _i04nrlxs;
 import 'package:campus_pulse_client/src/protocol/section_timetable.dart'
     as _ij8cgkiw;
+import 'package:campus_pulse_client/src/protocol/senior_experience.dart'
+    as _isi3g25f;
 import 'package:campus_pulse_client/src/protocol/student_free_slot.dart'
     as _iuvh50w9;
 import 'package:campus_pulse_client/src/protocol/student_profile.dart'
@@ -53,11 +70,14 @@ import 'package:serverpod_client/serverpod_client.dart' as _isc;
 import 'academic_resource.dart' as _if13xk5x;
 import 'admin_audit_log.dart' as _ihc3ja42;
 import 'attendance_record.dart' as _ixvdsmvt;
+import 'campus_club.dart' as _iwba3fjr;
+import 'campus_company.dart' as _igqutz9d;
 import 'campus_event.dart' as _ieh998j0;
 import 'campus_notification.dart' as _ik9ino7k;
 import 'chat_message.dart' as _ivuncx2e;
 import 'chat_report.dart' as _i9uqw2ol;
 import 'chat_room.dart' as _i860mpd8;
+import 'club_query_request.dart' as _im9yt7uy;
 import 'contact_message.dart' as _itkhxrdg;
 import 'event_certificate.dart' as _i18h4dy9;
 import 'event_rsvp.dart' as _it1gnu2n;
@@ -65,7 +85,11 @@ import 'greetings/greeting.dart' as _izw8z7ou;
 import 'leaderboard_entry.dart' as _ikawkn1p;
 import 'leaderboard_update.dart' as _ivs2wzhx;
 import 'minutes_of_meeting.dart' as _i25xzg8r;
+import 'mock_interview_slot.dart' as _iu2sg8u8;
 import 'points_ledger.dart' as _ihcqna09;
+import 'print_point_transaction.dart' as _iue337dt;
+import 'print_point_wallet.dart' as _ie4rsrbk;
+import 'print_request.dart' as _isllut2n;
 import 'quiz_answer_submission.dart' as _icbmbpey;
 import 'quiz_attempt.dart' as _ibhufrza;
 import 'quiz_question.dart' as _i6b38qpb;
@@ -78,6 +102,7 @@ import 'rsvp_update.dart' as _i9l2hi6q;
 import 'search_item.dart' as _imxb4b9a;
 import 'search_response.dart' as _iz2tuvmq;
 import 'section_timetable.dart' as _iyrk4e0o;
+import 'senior_experience.dart' as _ieehbuqz;
 import 'student_free_slot.dart' as _i76e3tnf;
 import 'student_profile.dart' as _iovtxv26;
 import 'study_request.dart' as _i2p0wucy;
@@ -86,11 +111,14 @@ import 'user_role.dart' as _ir0y0iu6;
 export 'academic_resource.dart';
 export 'admin_audit_log.dart';
 export 'attendance_record.dart';
+export 'campus_club.dart';
+export 'campus_company.dart';
 export 'campus_event.dart';
 export 'campus_notification.dart';
 export 'chat_message.dart';
 export 'chat_report.dart';
 export 'chat_room.dart';
+export 'club_query_request.dart';
 export 'contact_message.dart';
 export 'event_certificate.dart';
 export 'event_rsvp.dart';
@@ -98,7 +126,11 @@ export 'greetings/greeting.dart';
 export 'leaderboard_entry.dart';
 export 'leaderboard_update.dart';
 export 'minutes_of_meeting.dart';
+export 'mock_interview_slot.dart';
 export 'points_ledger.dart';
+export 'print_point_transaction.dart';
+export 'print_point_wallet.dart';
+export 'print_request.dart';
 export 'quiz_answer_submission.dart';
 export 'quiz_attempt.dart';
 export 'quiz_question.dart';
@@ -111,6 +143,7 @@ export 'rsvp_update.dart';
 export 'search_item.dart';
 export 'search_response.dart';
 export 'section_timetable.dart';
+export 'senior_experience.dart';
 export 'student_free_slot.dart';
 export 'student_profile.dart';
 export 'study_request.dart';
@@ -161,6 +194,12 @@ class Protocol extends _isc.SerializationManager {
     if (t == _ixvdsmvt.AttendanceRecord) {
       return _ixvdsmvt.AttendanceRecord.fromJson(data) as T;
     }
+    if (t == _iwba3fjr.CampusClub) {
+      return _iwba3fjr.CampusClub.fromJson(data) as T;
+    }
+    if (t == _igqutz9d.CampusCompany) {
+      return _igqutz9d.CampusCompany.fromJson(data) as T;
+    }
     if (t == _ieh998j0.CampusEvent) {
       return _ieh998j0.CampusEvent.fromJson(data) as T;
     }
@@ -175,6 +214,9 @@ class Protocol extends _isc.SerializationManager {
     }
     if (t == _i860mpd8.ChatRoom) {
       return _i860mpd8.ChatRoom.fromJson(data) as T;
+    }
+    if (t == _im9yt7uy.ClubQueryRequest) {
+      return _im9yt7uy.ClubQueryRequest.fromJson(data) as T;
     }
     if (t == _itkhxrdg.ContactMessage) {
       return _itkhxrdg.ContactMessage.fromJson(data) as T;
@@ -197,8 +239,20 @@ class Protocol extends _isc.SerializationManager {
     if (t == _i25xzg8r.MinutesOfMeeting) {
       return _i25xzg8r.MinutesOfMeeting.fromJson(data) as T;
     }
+    if (t == _iu2sg8u8.MockInterviewSlot) {
+      return _iu2sg8u8.MockInterviewSlot.fromJson(data) as T;
+    }
     if (t == _ihcqna09.PointsLedger) {
       return _ihcqna09.PointsLedger.fromJson(data) as T;
+    }
+    if (t == _iue337dt.PrintPointTransaction) {
+      return _iue337dt.PrintPointTransaction.fromJson(data) as T;
+    }
+    if (t == _ie4rsrbk.PrintPointWallet) {
+      return _ie4rsrbk.PrintPointWallet.fromJson(data) as T;
+    }
+    if (t == _isllut2n.PrintRequest) {
+      return _isllut2n.PrintRequest.fromJson(data) as T;
     }
     if (t == _icbmbpey.QuizAnswerSubmission) {
       return _icbmbpey.QuizAnswerSubmission.fromJson(data) as T;
@@ -236,6 +290,9 @@ class Protocol extends _isc.SerializationManager {
     if (t == _iyrk4e0o.SectionTimetable) {
       return _iyrk4e0o.SectionTimetable.fromJson(data) as T;
     }
+    if (t == _ieehbuqz.SeniorExperience) {
+      return _ieehbuqz.SeniorExperience.fromJson(data) as T;
+    }
     if (t == _i76e3tnf.StudentFreeSlot) {
       return _i76e3tnf.StudentFreeSlot.fromJson(data) as T;
     }
@@ -263,6 +320,13 @@ class Protocol extends _isc.SerializationManager {
       return (data != null ? _ixvdsmvt.AttendanceRecord.fromJson(data) : null)
           as T;
     }
+    if (t == _isc.getType<_iwba3fjr.CampusClub?>()) {
+      return (data != null ? _iwba3fjr.CampusClub.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_igqutz9d.CampusCompany?>()) {
+      return (data != null ? _igqutz9d.CampusCompany.fromJson(data) : null)
+          as T;
+    }
     if (t == _isc.getType<_ieh998j0.CampusEvent?>()) {
       return (data != null ? _ieh998j0.CampusEvent.fromJson(data) : null) as T;
     }
@@ -278,6 +342,10 @@ class Protocol extends _isc.SerializationManager {
     }
     if (t == _isc.getType<_i860mpd8.ChatRoom?>()) {
       return (data != null ? _i860mpd8.ChatRoom.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_im9yt7uy.ClubQueryRequest?>()) {
+      return (data != null ? _im9yt7uy.ClubQueryRequest.fromJson(data) : null)
+          as T;
     }
     if (t == _isc.getType<_itkhxrdg.ContactMessage?>()) {
       return (data != null ? _itkhxrdg.ContactMessage.fromJson(data) : null)
@@ -305,8 +373,25 @@ class Protocol extends _isc.SerializationManager {
       return (data != null ? _i25xzg8r.MinutesOfMeeting.fromJson(data) : null)
           as T;
     }
+    if (t == _isc.getType<_iu2sg8u8.MockInterviewSlot?>()) {
+      return (data != null ? _iu2sg8u8.MockInterviewSlot.fromJson(data) : null)
+          as T;
+    }
     if (t == _isc.getType<_ihcqna09.PointsLedger?>()) {
       return (data != null ? _ihcqna09.PointsLedger.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_iue337dt.PrintPointTransaction?>()) {
+      return (data != null
+              ? _iue337dt.PrintPointTransaction.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _isc.getType<_ie4rsrbk.PrintPointWallet?>()) {
+      return (data != null ? _ie4rsrbk.PrintPointWallet.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_isllut2n.PrintRequest?>()) {
+      return (data != null ? _isllut2n.PrintRequest.fromJson(data) : null) as T;
     }
     if (t == _isc.getType<_icbmbpey.QuizAnswerSubmission?>()) {
       return (data != null
@@ -353,6 +438,10 @@ class Protocol extends _isc.SerializationManager {
       return (data != null ? _iyrk4e0o.SectionTimetable.fromJson(data) : null)
           as T;
     }
+    if (t == _isc.getType<_ieehbuqz.SeniorExperience?>()) {
+      return (data != null ? _ieehbuqz.SeniorExperience.fromJson(data) : null)
+          as T;
+    }
     if (t == _isc.getType<_i76e3tnf.StudentFreeSlot?>()) {
       return (data != null ? _i76e3tnf.StudentFreeSlot.fromJson(data) : null)
           as T;
@@ -370,12 +459,12 @@ class Protocol extends _isc.SerializationManager {
     if (t == _isc.getType<_ir0y0iu6.UserRole?>()) {
       return (data != null ? _ir0y0iu6.UserRole.fromJson(data) : null) as T;
     }
+    if (t == List<String>) {
+      return (data as List).map((e) => deserialize<String>(e)).toList() as T;
+    }
     if (t == List<_isc.UuidValue>) {
       return (data as List).map((e) => deserialize<_isc.UuidValue>(e)).toList()
           as T;
-    }
-    if (t == List<String>) {
-      return (data as List).map((e) => deserialize<String>(e)).toList() as T;
     }
     if (t == _isc.getType<List<String>?>()) {
       return (data != null
@@ -422,6 +511,12 @@ class Protocol extends _isc.SerializationManager {
     if (t == List<String>) {
       return (data as List).map((e) => deserialize<String>(e)).toList() as T;
     }
+    if (t == List<_i66wptcz.StudentProfile>) {
+      return (data as List)
+              .map((e) => deserialize<_i66wptcz.StudentProfile>(e))
+              .toList()
+          as T;
+    }
     if (t == List<_i6e8adep.AdminAuditLog>) {
       return (data as List)
               .map((e) => deserialize<_i6e8adep.AdminAuditLog>(e))
@@ -462,6 +557,18 @@ class Protocol extends _isc.SerializationManager {
               .toList()
           as T;
     }
+    if (t == List<_i7de4lp2.CampusClub>) {
+      return (data as List)
+              .map((e) => deserialize<_i7de4lp2.CampusClub>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_ikkmzz2m.ClubQueryRequest>) {
+      return (data as List)
+              .map((e) => deserialize<_ikkmzz2m.ClubQueryRequest>(e))
+              .toList()
+          as T;
+    }
     if (t == List<_ip4v6fvs.CampusEvent>) {
       return (data as List)
               .map((e) => deserialize<_ip4v6fvs.CampusEvent>(e))
@@ -483,15 +590,27 @@ class Protocol extends _isc.SerializationManager {
               .toList()
           as T;
     }
-    if (t == List<_ipx1rsvs.LeaderboardEntry>) {
+    if (t == List<_idckwp02.CampusCompany>) {
       return (data as List)
-              .map((e) => deserialize<_ipx1rsvs.LeaderboardEntry>(e))
+              .map((e) => deserialize<_idckwp02.CampusCompany>(e))
               .toList()
           as T;
     }
-    if (t == List<_idz08l1h.MinutesOfMeeting>) {
+    if (t == List<_isi3g25f.SeniorExperience>) {
       return (data as List)
-              .map((e) => deserialize<_idz08l1h.MinutesOfMeeting>(e))
+              .map((e) => deserialize<_isi3g25f.SeniorExperience>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_isnswiy4.MockInterviewSlot>) {
+      return (data as List)
+              .map((e) => deserialize<_isnswiy4.MockInterviewSlot>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_ipx1rsvs.LeaderboardEntry>) {
+      return (data as List)
+              .map((e) => deserialize<_ipx1rsvs.LeaderboardEntry>(e))
               .toList()
           as T;
     }
@@ -504,9 +623,39 @@ class Protocol extends _isc.SerializationManager {
     if (t == dynamic) {
       return deserializeDynamicFieldValue(data) as T;
     }
+    if (t == List<_in0khvxd.PrintRequest>) {
+      return (data as List)
+              .map((e) => deserialize<_in0khvxd.PrintRequest>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_idfiw4w6.PrintPointTransaction>) {
+      return (data as List)
+              .map((e) => deserialize<_idfiw4w6.PrintPointTransaction>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_idz08l1h.MinutesOfMeeting>) {
+      return (data as List)
+              .map((e) => deserialize<_idz08l1h.MinutesOfMeeting>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_ips3fl58.CampusNotification>) {
+      return (data as List)
+              .map((e) => deserialize<_ips3fl58.CampusNotification>(e))
+              .toList()
+          as T;
+    }
     if (t == List<_i04nrlxs.RewardPerk>) {
       return (data as List)
               .map((e) => deserialize<_i04nrlxs.RewardPerk>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_ifx1d0ne.PointsLedger>) {
+      return (data as List)
+              .map((e) => deserialize<_ifx1d0ne.PointsLedger>(e))
               .toList()
           as T;
     }
@@ -519,12 +668,6 @@ class Protocol extends _isc.SerializationManager {
     if (t == List<_i395nlzx.QuizAttempt>) {
       return (data as List)
               .map((e) => deserialize<_i395nlzx.QuizAttempt>(e))
-              .toList()
-          as T;
-    }
-    if (t == List<_i66wptcz.StudentProfile>) {
-      return (data as List)
-              .map((e) => deserialize<_i66wptcz.StudentProfile>(e))
               .toList()
           as T;
     }
@@ -566,11 +709,14 @@ class Protocol extends _isc.SerializationManager {
       _if13xk5x.AcademicResource => 'AcademicResource',
       _ihc3ja42.AdminAuditLog => 'AdminAuditLog',
       _ixvdsmvt.AttendanceRecord => 'AttendanceRecord',
+      _iwba3fjr.CampusClub => 'CampusClub',
+      _igqutz9d.CampusCompany => 'CampusCompany',
       _ieh998j0.CampusEvent => 'CampusEvent',
       _ik9ino7k.CampusNotification => 'CampusNotification',
       _ivuncx2e.ChatMessage => 'ChatMessage',
       _i9uqw2ol.ChatReport => 'ChatReport',
       _i860mpd8.ChatRoom => 'ChatRoom',
+      _im9yt7uy.ClubQueryRequest => 'ClubQueryRequest',
       _itkhxrdg.ContactMessage => 'ContactMessage',
       _i18h4dy9.EventCertificate => 'EventCertificate',
       _it1gnu2n.EventRsvp => 'EventRsvp',
@@ -578,7 +724,11 @@ class Protocol extends _isc.SerializationManager {
       _ikawkn1p.LeaderboardEntry => 'LeaderboardEntry',
       _ivs2wzhx.LeaderboardUpdate => 'LeaderboardUpdate',
       _i25xzg8r.MinutesOfMeeting => 'MinutesOfMeeting',
+      _iu2sg8u8.MockInterviewSlot => 'MockInterviewSlot',
       _ihcqna09.PointsLedger => 'PointsLedger',
+      _iue337dt.PrintPointTransaction => 'PrintPointTransaction',
+      _ie4rsrbk.PrintPointWallet => 'PrintPointWallet',
+      _isllut2n.PrintRequest => 'PrintRequest',
       _icbmbpey.QuizAnswerSubmission => 'QuizAnswerSubmission',
       _ibhufrza.QuizAttempt => 'QuizAttempt',
       _i6b38qpb.QuizQuestion => 'QuizQuestion',
@@ -591,6 +741,7 @@ class Protocol extends _isc.SerializationManager {
       _imxb4b9a.SearchItem => 'SearchItem',
       _iz2tuvmq.SearchResponse => 'SearchResponse',
       _iyrk4e0o.SectionTimetable => 'SectionTimetable',
+      _ieehbuqz.SeniorExperience => 'SeniorExperience',
       _i76e3tnf.StudentFreeSlot => 'StudentFreeSlot',
       _iovtxv26.StudentProfile => 'StudentProfile',
       _i2p0wucy.StudyRequest => 'StudyRequest',
@@ -619,6 +770,10 @@ class Protocol extends _isc.SerializationManager {
         return 'AdminAuditLog';
       case _ixvdsmvt.AttendanceRecord():
         return 'AttendanceRecord';
+      case _iwba3fjr.CampusClub():
+        return 'CampusClub';
+      case _igqutz9d.CampusCompany():
+        return 'CampusCompany';
       case _ieh998j0.CampusEvent():
         return 'CampusEvent';
       case _ik9ino7k.CampusNotification():
@@ -629,6 +784,8 @@ class Protocol extends _isc.SerializationManager {
         return 'ChatReport';
       case _i860mpd8.ChatRoom():
         return 'ChatRoom';
+      case _im9yt7uy.ClubQueryRequest():
+        return 'ClubQueryRequest';
       case _itkhxrdg.ContactMessage():
         return 'ContactMessage';
       case _i18h4dy9.EventCertificate():
@@ -643,8 +800,16 @@ class Protocol extends _isc.SerializationManager {
         return 'LeaderboardUpdate';
       case _i25xzg8r.MinutesOfMeeting():
         return 'MinutesOfMeeting';
+      case _iu2sg8u8.MockInterviewSlot():
+        return 'MockInterviewSlot';
       case _ihcqna09.PointsLedger():
         return 'PointsLedger';
+      case _iue337dt.PrintPointTransaction():
+        return 'PrintPointTransaction';
+      case _ie4rsrbk.PrintPointWallet():
+        return 'PrintPointWallet';
+      case _isllut2n.PrintRequest():
+        return 'PrintRequest';
       case _icbmbpey.QuizAnswerSubmission():
         return 'QuizAnswerSubmission';
       case _ibhufrza.QuizAttempt():
@@ -669,6 +834,8 @@ class Protocol extends _isc.SerializationManager {
         return 'SearchResponse';
       case _iyrk4e0o.SectionTimetable():
         return 'SectionTimetable';
+      case _ieehbuqz.SeniorExperience():
+        return 'SeniorExperience';
       case _i76e3tnf.StudentFreeSlot():
         return 'StudentFreeSlot';
       case _iovtxv26.StudentProfile():
@@ -710,6 +877,12 @@ class Protocol extends _isc.SerializationManager {
     if (dataClassName == 'AttendanceRecord') {
       return deserialize<_ixvdsmvt.AttendanceRecord>(data['data']);
     }
+    if (dataClassName == 'CampusClub') {
+      return deserialize<_iwba3fjr.CampusClub>(data['data']);
+    }
+    if (dataClassName == 'CampusCompany') {
+      return deserialize<_igqutz9d.CampusCompany>(data['data']);
+    }
     if (dataClassName == 'CampusEvent') {
       return deserialize<_ieh998j0.CampusEvent>(data['data']);
     }
@@ -724,6 +897,9 @@ class Protocol extends _isc.SerializationManager {
     }
     if (dataClassName == 'ChatRoom') {
       return deserialize<_i860mpd8.ChatRoom>(data['data']);
+    }
+    if (dataClassName == 'ClubQueryRequest') {
+      return deserialize<_im9yt7uy.ClubQueryRequest>(data['data']);
     }
     if (dataClassName == 'ContactMessage') {
       return deserialize<_itkhxrdg.ContactMessage>(data['data']);
@@ -746,8 +922,20 @@ class Protocol extends _isc.SerializationManager {
     if (dataClassName == 'MinutesOfMeeting') {
       return deserialize<_i25xzg8r.MinutesOfMeeting>(data['data']);
     }
+    if (dataClassName == 'MockInterviewSlot') {
+      return deserialize<_iu2sg8u8.MockInterviewSlot>(data['data']);
+    }
     if (dataClassName == 'PointsLedger') {
       return deserialize<_ihcqna09.PointsLedger>(data['data']);
+    }
+    if (dataClassName == 'PrintPointTransaction') {
+      return deserialize<_iue337dt.PrintPointTransaction>(data['data']);
+    }
+    if (dataClassName == 'PrintPointWallet') {
+      return deserialize<_ie4rsrbk.PrintPointWallet>(data['data']);
+    }
+    if (dataClassName == 'PrintRequest') {
+      return deserialize<_isllut2n.PrintRequest>(data['data']);
     }
     if (dataClassName == 'QuizAnswerSubmission') {
       return deserialize<_icbmbpey.QuizAnswerSubmission>(data['data']);
@@ -784,6 +972,9 @@ class Protocol extends _isc.SerializationManager {
     }
     if (dataClassName == 'SectionTimetable') {
       return deserialize<_iyrk4e0o.SectionTimetable>(data['data']);
+    }
+    if (dataClassName == 'SeniorExperience') {
+      return deserialize<_ieehbuqz.SeniorExperience>(data['data']);
     }
     if (dataClassName == 'StudentFreeSlot') {
       return deserialize<_i76e3tnf.StudentFreeSlot>(data['data']);

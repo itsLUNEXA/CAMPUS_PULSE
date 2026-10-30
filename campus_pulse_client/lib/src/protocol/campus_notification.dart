@@ -15,34 +15,59 @@ import 'package:serverpod_client/serverpod_client.dart' as _isc;
 abstract class CampusNotification
     implements _isc.SerializableModel, _isc.ProtocolSerialization {
   CampusNotification._({
-    required this.id,
+    this.id,
+    required this.authUserId,
     required this.title,
     required this.message,
     required this.type,
-    required this.timestamp,
-  });
+    this.targetRoute,
+    this.targetId,
+    bool? isRead,
+    DateTime? createdAt,
+    this.eventIdTag,
+  }) : isRead = isRead ?? false,
+       createdAt = createdAt ?? DateTime.now();
 
   factory CampusNotification({
-    required String id,
+    int? id,
+    required _isc.UuidValue authUserId,
     required String title,
     required String message,
     required String type,
-    required DateTime timestamp,
+    String? targetRoute,
+    String? targetId,
+    bool? isRead,
+    DateTime? createdAt,
+    String? eventIdTag,
   }) = _CampusNotificationImpl;
 
   factory CampusNotification.fromJson(Map<String, dynamic> jsonSerialization) {
     return CampusNotification(
-      id: jsonSerialization['id'] as String,
+      id: jsonSerialization['id'] as int?,
+      authUserId: _isc.UuidValueJsonExtension.fromJson(
+        jsonSerialization['authUserId'],
+      ),
       title: jsonSerialization['title'] as String,
       message: jsonSerialization['message'] as String,
       type: jsonSerialization['type'] as String,
-      timestamp: _isc.DateTimeJsonExtension.fromJson(
-        jsonSerialization['timestamp'],
-      ),
+      targetRoute: jsonSerialization['targetRoute'] as String?,
+      targetId: jsonSerialization['targetId'] as String?,
+      isRead: jsonSerialization['isRead'] == null
+          ? null
+          : _isc.BoolJsonExtension.fromJson(jsonSerialization['isRead']),
+      createdAt: jsonSerialization['createdAt'] == null
+          ? null
+          : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
+      eventIdTag: jsonSerialization['eventIdTag'] as String?,
     );
   }
 
-  String id;
+  /// The database id, set if the object has been inserted into the
+  /// database or if it has been fetched from the database. Otherwise,
+  /// the id will be null.
+  int? id;
+
+  _isc.UuidValue authUserId;
 
   String title;
 
@@ -50,27 +75,45 @@ abstract class CampusNotification
 
   String type;
 
-  DateTime timestamp;
+  String? targetRoute;
+
+  String? targetId;
+
+  bool isRead;
+
+  DateTime createdAt;
+
+  String? eventIdTag;
 
   /// Returns a shallow copy of this [CampusNotification]
   /// with some or all fields replaced by the given arguments.
   @_isc.useResult
   CampusNotification copyWith({
-    String? id,
+    int? id,
+    _isc.UuidValue? authUserId,
     String? title,
     String? message,
     String? type,
-    DateTime? timestamp,
+    String? targetRoute,
+    String? targetId,
+    bool? isRead,
+    DateTime? createdAt,
+    String? eventIdTag,
   });
   @override
   Map<String, dynamic> toJson() {
     return {
       '__className__': 'CampusNotification',
-      'id': id,
+      if (id != null) 'id': id,
+      'authUserId': authUserId.toJson(),
       'title': title,
       'message': message,
       'type': type,
-      'timestamp': timestamp.toJson(),
+      if (targetRoute != null) 'targetRoute': targetRoute,
+      if (targetId != null) 'targetId': targetId,
+      'isRead': isRead,
+      'createdAt': createdAt.toJson(),
+      if (eventIdTag != null) 'eventIdTag': eventIdTag,
     };
   }
 
@@ -78,11 +121,16 @@ abstract class CampusNotification
   Map<String, dynamic> toJsonForProtocol() {
     return {
       '__className__': 'CampusNotification',
-      'id': id,
+      if (id != null) 'id': id,
+      'authUserId': authUserId.toJson(),
       'title': title,
       'message': message,
       'type': type,
-      'timestamp': timestamp.toJson(),
+      if (targetRoute != null) 'targetRoute': targetRoute,
+      if (targetId != null) 'targetId': targetId,
+      'isRead': isRead,
+      'createdAt': createdAt.toJson(),
+      if (eventIdTag != null) 'eventIdTag': eventIdTag,
     };
   }
 
@@ -92,19 +140,31 @@ abstract class CampusNotification
   }
 }
 
+class _Undefined {}
+
 class _CampusNotificationImpl extends CampusNotification {
   _CampusNotificationImpl({
-    required String id,
+    int? id,
+    required _isc.UuidValue authUserId,
     required String title,
     required String message,
     required String type,
-    required DateTime timestamp,
+    String? targetRoute,
+    String? targetId,
+    bool? isRead,
+    DateTime? createdAt,
+    String? eventIdTag,
   }) : super._(
          id: id,
+         authUserId: authUserId,
          title: title,
          message: message,
          type: type,
-         timestamp: timestamp,
+         targetRoute: targetRoute,
+         targetId: targetId,
+         isRead: isRead,
+         createdAt: createdAt,
+         eventIdTag: eventIdTag,
        );
 
   /// Returns a shallow copy of this [CampusNotification]
@@ -112,18 +172,28 @@ class _CampusNotificationImpl extends CampusNotification {
   @_isc.useResult
   @override
   CampusNotification copyWith({
-    String? id,
+    Object? id = _Undefined,
+    _isc.UuidValue? authUserId,
     String? title,
     String? message,
     String? type,
-    DateTime? timestamp,
+    Object? targetRoute = _Undefined,
+    Object? targetId = _Undefined,
+    bool? isRead,
+    DateTime? createdAt,
+    Object? eventIdTag = _Undefined,
   }) {
     return CampusNotification(
-      id: id ?? this.id,
+      id: id is int? ? id : this.id,
+      authUserId: authUserId ?? this.authUserId,
       title: title ?? this.title,
       message: message ?? this.message,
       type: type ?? this.type,
-      timestamp: timestamp ?? this.timestamp,
+      targetRoute: targetRoute is String? ? targetRoute : this.targetRoute,
+      targetId: targetId is String? ? targetId : this.targetId,
+      isRead: isRead ?? this.isRead,
+      createdAt: createdAt ?? this.createdAt,
+      eventIdTag: eventIdTag is String? ? eventIdTag : this.eventIdTag,
     );
   }
 }

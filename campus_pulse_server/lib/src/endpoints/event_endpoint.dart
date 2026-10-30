@@ -1,6 +1,8 @@
 import 'package:serverpod/serverpod.dart';
 import 'package:serverpod_auth_idp_server/core.dart';
 import '../generated/protocol.dart';
+import '../services/notification_service.dart';
+import 'admin_endpoint.dart';
 
 class EventEndpoint extends Endpoint {
   static const String rsvpChannel = 'events-rsvp-channel';
@@ -18,7 +20,9 @@ class EventEndpoint extends Endpoint {
       session,
       where: (t) {
         Expression expr = Constant.bool(true);
-        if (approvalStatus != null && approvalStatus.isNotEmpty && approvalStatus != 'All') {
+        if (approvalStatus != null &&
+            approvalStatus.isNotEmpty &&
+            approvalStatus != 'All') {
           expr = expr & t.approvalStatus.equals(approvalStatus);
         }
         if (category != null && category.isNotEmpty && category != 'All') {
@@ -53,7 +57,8 @@ class EventEndpoint extends Endpoint {
         where: (t) => t.authUserId.equals(authUserId),
       );
       if (profile != null) {
-        if (profile.eventInterests != null && profile.eventInterests!.isNotEmpty) {
+        if (profile.eventInterests != null &&
+            profile.eventInterests!.isNotEmpty) {
           interests = profile.eventInterests!;
         } else {
           interests = profile.subjectInterests;
@@ -64,7 +69,9 @@ class EventEndpoint extends Endpoint {
     final now = DateTime.now().toUtc();
     final candidates = await CampusEvent.db.find(
       session,
-      where: (t) => t.approvalStatus.equals('approved') & (t.startTime >= now.subtract(const Duration(hours: 6))),
+      where: (t) =>
+          t.approvalStatus.equals('approved') &
+          (t.startTime >= now.subtract(const Duration(hours: 6))),
       orderBy: (t) => t.startTime,
       limit: 100,
     );
@@ -73,7 +80,10 @@ class EventEndpoint extends Endpoint {
       return candidates.take(limit.clamp(1, 50)).toList();
     }
 
-    final normalizedInterests = interests.map((i) => i.trim().toLowerCase()).where((i) => i.isNotEmpty).toSet();
+    final normalizedInterests = interests
+        .map((i) => i.trim().toLowerCase())
+        .where((i) => i.isNotEmpty)
+        .toSet();
 
     final scored = candidates.map((ev) {
       int score = 0;
@@ -137,6 +147,12 @@ class EventEndpoint extends Endpoint {
     );
     final organizerName = student?.fullName ?? 'Campus Student';
 
+    // Verify if creator is master admin. Regular students' events are strictly 'pending'.
+    final isAdminUser = await AdminEndpoint.isAdmin(session);
+    final finalStatus = isAdminUser
+        ? (approvalStatus ?? 'approved')
+        : 'pending';
+
     final now = DateTime.now().toUtc();
     final event = CampusEvent(
       title: trimmedTitle,
@@ -149,7 +165,7 @@ class EventEndpoint extends Endpoint {
       organizerAuthUserId: authUserId,
       organizerName: organizerName,
       rsvpCount: 0,
-      approvalStatus: approvalStatus ?? 'pending',
+      approvalStatus: finalStatus,
       registrationDeadline: registrationDeadline?.toUtc(),
       isTeamEvent: isTeamEvent,
       minTeamSize: minTeamSize.clamp(1, 20),
@@ -159,7 +175,24 @@ class EventEndpoint extends Endpoint {
       updatedAt: now,
     );
 
-    return await CampusEvent.db.insertRow(session, event);
+    final created = await CampusEvent.db.insertRow(session, event);
+
+    if (finalStatus == 'pending') {
+      try {
+        await NotificationService.notifyAdmins(
+          session,
+          title: 'New Campus Event Submission',
+          message:
+              '$organizerName submitted event "$trimmedTitle" for administrative review.',
+          type: 'event_review',
+          targetRoute: 'master_admin',
+          targetId: created.id.toString(),
+          eventIdTag: 'event_submit_${created.id}',
+        );
+      } catch (_) {}
+    }
+
+    return created;
   }
 
   /// Edits an existing event.
@@ -197,7 +230,9 @@ class EventEndpoint extends Endpoint {
     final isOwner = event.organizerAuthUserId == authUserId;
 
     if (!isOwner && adminRole == null) {
-      throw StateError('Unauthorized: Only the event organizer or an admin can edit this event.');
+      throw StateError(
+        'Unauthorized: Only the event organizer or an admin can edit this event.',
+      );
     }
 
     final trimmedTitle = title.trim();
@@ -207,14 +242,18 @@ class EventEndpoint extends Endpoint {
     final now = DateTime.now().toUtc();
 
     // Check if material fields changed
-    final bool isMaterialChange = event.title != trimmedTitle ||
+    final bool isMaterialChange =
+        event.title != trimmedTitle ||
         event.category != category ||
         event.venue != venue.trim() ||
         event.startTime.isAtSameMomentAs(startTime.toUtc()) == false ||
         event.isTeamEvent != isTeamEvent ||
         event.minTeamSize != minTeamSize ||
         event.maxTeamSize != maxTeamSize ||
-        event.registrationDeadline?.isAtSameMomentAs(registrationDeadline?.toUtc() ?? DateTime(0)) == false;
+        event.registrationDeadline?.isAtSameMomentAs(
+              registrationDeadline?.toUtc() ?? DateTime(0),
+            ) ==
+            false;
 
     final String nextStatus = (isMaterialChange && adminRole == null)
         ? 'pending'
@@ -256,38 +295,104 @@ class EventEndpoint extends Endpoint {
       throw StateError('Admin authentication required.');
     }
 
-    final adminRole = await UserRole.db.findFirstRow(
-      session,
-      where: (t) => t.authUserId.equals(authUserId) & t.role.equals('admin'),
-    );
-    if (adminRole == null) {
+    final isAuthorized = await AdminEndpoint.isAdmin(session);
+    if (!isAuthorized) {
       throw StateError('Access denied: Admin role required.');
     }
 
-    final event = await CampusEvent.db.findById(session, eventId);
-    if (event == null) throw ArgumentError('Event not found.');
+    if (decision != 'approved' && decision != 'rejected') {
+      throw ArgumentError('Invalid decision: must be approved or rejected.');
+    }
+
+    final cleanReason = rejectionReason?.trim();
+    if (decision == 'rejected') {
+      if (cleanReason == null || cleanReason.isEmpty) {
+        throw ArgumentError(
+          'A rejection reason is required when rejecting an event.',
+        );
+      }
+    }
+
+    final adminProfile = await StudentProfile.db.findFirstRow(
+      session,
+      where: (t) => t.authUserId.equals(authUserId),
+    );
+    final adminName = adminProfile?.fullName ?? 'Master Admin';
 
     final now = DateTime.now().toUtc();
-    final updated = event.copyWith(
-      approvalStatus: decision == 'approved' ? 'approved' : 'rejected',
-      rejectionReason: decision == 'rejected' ? rejectionReason?.trim() : null,
-      updatedAt: now,
-    );
+    late CampusEvent updated;
 
-    await CampusEvent.db.updateRow(session, updated);
+    await session.db.transaction((transaction) async {
+      final event = await CampusEvent.db.findById(
+        session,
+        eventId,
+        transaction: transaction,
+      );
+      if (event == null) throw ArgumentError('Event not found.');
 
-    await AdminAuditLog.db.insertRow(
-      session,
-      AdminAuditLog(
-        actorUserId: authUserId,
-        actorName: 'Admin',
-        actionType: 'EVENT_REVIEW',
-        targetEntity: 'campus_event',
-        targetId: '$eventId',
-        details: 'Event "${event.title}" marked as $decision',
-        timestamp: now,
-      ),
-    );
+      if (event.approvalStatus != 'pending') {
+        throw StateError(
+          'Conflict: Event has already been reviewed (current status: ${event.approvalStatus}).',
+        );
+      }
+
+      updated = event.copyWith(
+        approvalStatus: decision,
+        rejectionReason: decision == 'rejected' ? cleanReason : null,
+        updatedAt: now,
+      );
+
+      await CampusEvent.db.updateRow(
+        session,
+        updated,
+        transaction: transaction,
+      );
+
+      await AdminAuditLog.db.insertRow(
+        session,
+        AdminAuditLog(
+          actorUserId: authUserId,
+          actorName: adminName,
+          actionType: decision == 'approved' ? 'EVENT_APPROVE' : 'EVENT_REJECT',
+          targetEntity: 'campus_event',
+          targetId: '$eventId',
+          details: decision == 'approved'
+              ? 'Approved campus event "${event.title}"'
+              : 'Rejected campus event "${event.title}". Reason: $cleanReason',
+          timestamp: now,
+        ),
+        transaction: transaction,
+      );
+    });
+
+    try {
+      if (decision == 'approved') {
+        await NotificationService.sendNotification(
+          session,
+          authUserId: updated.organizerAuthUserId,
+          title: 'Event Approved! 🎉',
+          message: 'Your event "${updated.title}" has been approved.',
+          type: 'event_approved',
+          targetRoute: 'event_detail',
+          targetId: updated.id.toString(),
+          eventIdTag:
+              'event_approved_${updated.id}_${updated.submissionVersion}',
+        );
+      } else {
+        await NotificationService.sendNotification(
+          session,
+          authUserId: updated.organizerAuthUserId,
+          title: 'Event Rejected',
+          message:
+              'Your event "${updated.title}" was rejected. Reason: $cleanReason',
+          type: 'event_rejected',
+          targetRoute: 'event_detail',
+          targetId: updated.id.toString(),
+          eventIdTag:
+              'event_rejected_${updated.id}_${updated.submissionVersion}',
+        );
+      }
+    } catch (_) {}
 
     return updated;
   }
@@ -315,6 +420,9 @@ class EventEndpoint extends Endpoint {
 
     var updatedCount = 0;
 
+    String? eventTitle;
+    String? eventVenue;
+
     await session.db.transaction((transaction) async {
       // 1. Fetch event
       final event = await CampusEvent.db.findById(
@@ -326,6 +434,9 @@ class EventEndpoint extends Endpoint {
         throw ArgumentError('Event not found.');
       }
 
+      eventTitle = event.title;
+      eventVenue = event.venue;
+
       // 2. Enforce approval status
       if (event.approvalStatus != 'approved') {
         throw StateError('Registrations are not open for unapproved events.');
@@ -333,14 +444,16 @@ class EventEndpoint extends Endpoint {
 
       // 3. Enforce registration deadline
       final now = DateTime.now().toUtc();
-      if (event.registrationDeadline != null && now.isAfter(event.registrationDeadline!)) {
+      if (event.registrationDeadline != null &&
+          now.isAfter(event.registrationDeadline!)) {
         throw StateError('Registration deadline for this event has passed.');
       }
 
       // 4. Enforce team validation
       if (event.isTeamEvent) {
         final totalMembers = 1 + (teamMemberNames?.length ?? 0);
-        if (totalMembers < event.minTeamSize || totalMembers > event.maxTeamSize) {
+        if (totalMembers < event.minTeamSize ||
+            totalMembers > event.maxTeamSize) {
           throw ArgumentError(
             'Invalid team size: $totalMembers members provided. Allowed range: ${event.minTeamSize} to ${event.maxTeamSize}.',
           );
@@ -400,6 +513,20 @@ class EventEndpoint extends Endpoint {
           action: 'register',
         ),
       );
+
+      try {
+        await NotificationService.sendNotification(
+          session,
+          authUserId: authUserId,
+          title: 'Event RSVP Confirmed! 🎟️',
+          message:
+              'You have successfully registered for "${eventTitle ?? 'Campus Event'}". See you at ${eventVenue ?? 'the venue'}!',
+          type: 'event_rsvp',
+          targetRoute: 'events',
+          targetId: eventId.toString(),
+          eventIdTag: 'rsvp_${eventId}_$authUserId',
+        );
+      } catch (_) {}
     }
 
     return true;
@@ -418,6 +545,7 @@ class EventEndpoint extends Endpoint {
     }
 
     var updatedCount = 0;
+    String? eventTitle;
 
     await session.db.transaction((transaction) async {
       final existing = await EventRsvp.db.findFirstRow(
@@ -437,6 +565,8 @@ class EventEndpoint extends Endpoint {
       );
       if (event == null) return;
 
+      eventTitle = event.title;
+
       await EventRsvp.db.deleteRow(
         session,
         existing,
@@ -455,7 +585,7 @@ class EventEndpoint extends Endpoint {
       );
     });
 
-    if (updatedCount >= 0) {
+    if (updatedCount >= 0 && eventTitle != null) {
       await session.messages.postMessage(
         rsvpChannel,
         RsvpUpdate(
@@ -464,6 +594,20 @@ class EventEndpoint extends Endpoint {
           action: 'cancel',
         ),
       );
+
+      try {
+        await NotificationService.sendNotification(
+          session,
+          authUserId: authUserId,
+          title: 'Event RSVP Cancelled',
+          message:
+              'You have cancelled your registration for "${eventTitle ?? 'Campus Event'}".',
+          type: 'event_rsvp',
+          targetRoute: 'events',
+          targetId: eventId.toString(),
+          eventIdTag: 'cancel_rsvp_${eventId}_$authUserId',
+        );
+      } catch (_) {}
     }
 
     return true;
@@ -527,7 +671,9 @@ class EventEndpoint extends Endpoint {
     );
 
     if (event.organizerAuthUserId != authUserId && adminRole == null) {
-      throw StateError('Unauthorized: Only the event organizer or an admin can access registration rosters.');
+      throw StateError(
+        'Unauthorized: Only the event organizer or an admin can access registration rosters.',
+      );
     }
 
     return await EventRsvp.db.find(
@@ -544,5 +690,64 @@ class EventEndpoint extends Endpoint {
     await for (final update in stream) {
       yield update;
     }
+  }
+
+  /// List pending events for administrative review queue (Admin only)
+  Future<List<CampusEvent>> getPendingEvents(
+    Session session, {
+    int limit = 50,
+    int offset = 0,
+  }) async {
+    final isAuthorized = await AdminEndpoint.isAdmin(session);
+    if (!isAuthorized) {
+      throw StateError('Access denied: Admin role required.');
+    }
+
+    return await CampusEvent.db.find(
+      session,
+      where: (t) => t.approvalStatus.equals('pending'),
+      orderBy: (t) => t.createdAt.desc(),
+      limit: limit.clamp(1, 100),
+      offset: offset,
+    );
+  }
+
+  /// Get total count of pending events awaiting admin approval (Admin only)
+  Future<int> getPendingEventsCount(Session session) async {
+    final isAuthorized = await AdminEndpoint.isAdmin(session);
+    if (!isAuthorized) {
+      throw StateError('Access denied: Admin role required.');
+    }
+
+    return await CampusEvent.db.count(
+      session,
+      where: (t) => t.approvalStatus.equals('pending'),
+    );
+  }
+
+  /// Returns events submitted by the current authenticated user with their approval statuses
+  Future<List<CampusEvent>> getMyEvents(
+    Session session, {
+    String? status,
+  }) async {
+    final authUserId = session.authenticated?.authUserId;
+    if (authUserId == null) {
+      throw StateError('User must be authenticated to view their events.');
+    }
+
+    return await CampusEvent.db.find(
+      session,
+      where: (t) {
+        Expression expr = t.organizerAuthUserId.equals(authUserId);
+        if (status != null &&
+            status.isNotEmpty &&
+            status.toLowerCase() != 'all') {
+          expr = expr & t.approvalStatus.equals(status.toLowerCase());
+        }
+        return expr;
+      },
+      orderBy: (t) => t.createdAt.desc(),
+      limit: 100,
+    );
   }
 }

@@ -24,10 +24,8 @@ class CertificateEndpoint extends Endpoint {
     // Verify attendance is confirmed ('attended')
     final attendance = await AttendanceRecord.db.findFirstRow(
       session,
-      where:
-          (t) =>
-              t.eventId.equals(eventId) &
-              t.authUserId.equals(studentAuthUserId),
+      where: (t) =>
+          t.eventId.equals(eventId) & t.authUserId.equals(studentAuthUserId),
     );
 
     if (attendance == null || attendance.status != 'attended') {
@@ -39,19 +37,23 @@ class CertificateEndpoint extends Endpoint {
     // Check if certificate already exists (prevent duplicate issuance)
     final existing = await EventCertificate.db.findFirstRow(
       session,
-      where:
-          (t) =>
-              t.eventId.equals(eventId) &
-              t.authUserId.equals(studentAuthUserId),
+      where: (t) =>
+          t.eventId.equals(eventId) & t.authUserId.equals(studentAuthUserId),
     );
     if (existing != null) {
       return existing;
     }
 
     // Create unique deterministic certificate ID
-    final rawHash = md5.convert(
-      utf8.encode('CP-CERT-$eventId-$studentAuthUserId-${DateTime.now().millisecondsSinceEpoch}'),
-    ).toString().substring(0, 10).toUpperCase();
+    final rawHash = md5
+        .convert(
+          utf8.encode(
+            'CP-CERT-$eventId-$studentAuthUserId-${DateTime.now().millisecondsSinceEpoch}',
+          ),
+        )
+        .toString()
+        .substring(0, 10)
+        .toUpperCase();
     final certificateId = 'CP-$eventId-$rawHash';
     final verificationUrl = 'https://campuspulse.edu/verify/$certificateId';
     final now = DateTime.now().toUtc();
@@ -83,7 +85,8 @@ class CertificateEndpoint extends Endpoint {
           actionType: 'CERT_ISSUE',
           targetEntity: 'event_certificate',
           targetId: certificateId,
-          details: 'Issued certificate $certificateId to $studentName for event ${event.title}',
+          details:
+              'Issued certificate $certificateId to $studentName for event ${event.title}',
           timestamp: now,
         ),
       );

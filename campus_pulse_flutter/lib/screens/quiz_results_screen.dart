@@ -124,7 +124,7 @@ class QuizResultsScreen extends StatelessWidget {
                         ),
                         CopyButton(
                           textToCopy:
-                              'I scored ${result.score}/${result.totalQuestions} (${result.percentage.toStringAsFixed(1)}%) in the Campus Pulse ${result.subject} Quiz!',
+                              'I scored ${result.score}/${result.totalQuestions} (${result.percentage.toStringAsFixed(1)}%) in the CAMPULSE ${result.subject} Quiz!',
                           label: 'Share Score',
                         ),
                       ],

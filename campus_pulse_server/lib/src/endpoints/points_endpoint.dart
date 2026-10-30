@@ -1,6 +1,7 @@
 import 'package:serverpod/serverpod.dart';
 import 'package:serverpod_auth_idp_server/core.dart';
 import '../generated/protocol.dart';
+import '../services/notification_service.dart';
 import 'admin_endpoint.dart';
 
 class PointsEndpoint extends Endpoint {
@@ -12,7 +13,10 @@ class PointsEndpoint extends Endpoint {
   }) async {
     final authUserId = session.authenticated?.authUserId;
     if (authUserId == null) {
-      return {'status': 'unauthorized', 'message': 'Please log in to check in.'};
+      return {
+        'status': 'unauthorized',
+        'message': 'Please log in to check in.',
+      };
     }
 
     final event = await CampusEvent.db.findById(session, eventId);
@@ -28,7 +32,8 @@ class PointsEndpoint extends Endpoint {
     if (rsvp == null) {
       return {
         'status': 'no_rsvp',
-        'message': 'No RSVP found! You must register for this event before check-in.',
+        'message':
+            'No RSVP found! You must register for this event before check-in.',
       };
     }
 
@@ -47,7 +52,8 @@ class PointsEndpoint extends Endpoint {
     // Check time window: within 2 hours before start and 4 hours after start
     final now = DateTime.now().toUtc();
     final windowStart = event.startTime.subtract(const Duration(hours: 2));
-    final windowEnd = event.endTime ?? event.startTime.add(const Duration(hours: 4));
+    final windowEnd =
+        event.endTime ?? event.startTime.add(const Duration(hours: 4));
     if (now.isBefore(windowStart) || now.isAfter(windowEnd)) {
       return {
         'status': 'expired_qr',
@@ -97,16 +103,17 @@ class PointsEndpoint extends Endpoint {
       ),
     );
 
-    // 3. Notify via WebSocket channel using CampusNotification model
-    await session.messages.postMessage(
-      'notifications_$authUserId',
-      CampusNotification(
-        id: 'notif_${DateTime.now().millisecondsSinceEpoch}',
-        title: 'Event Check-In Confirmed',
-        message: '🎉 Checked in to ${event.title}! +$pointsAwarded Campus Points earned.',
-        type: 'event_checkin',
-        timestamp: now,
-      ),
+    // 3. Notify via persistent NotificationService
+    await NotificationService.sendNotification(
+      session,
+      authUserId: authUserId,
+      title: 'Event Check-In Confirmed',
+      message:
+          'Checked in to ${event.title}! +$pointsAwarded Campus Points earned.',
+      type: 'event_rsvp',
+      targetRoute: 'events',
+      targetId: '$eventId',
+      eventIdTag: 'checkin_${eventId}_$authUserId',
     );
 
     return {
@@ -197,6 +204,94 @@ class PointsEndpoint extends Endpoint {
     );
   }
 
+  /// List all reward perks including inactive (Admin only)
+  Future<List<RewardPerk>> listAllRewards(Session session) async {
+    final isAuthorized = await AdminEndpoint.isAdmin(session);
+    if (!isAuthorized) {
+      throw StateError('Unauthorized: Admin access required.');
+    }
+    return await RewardPerk.db.find(
+      session,
+      orderBy: (t) => t.costPoints,
+    );
+  }
+
+  /// Admin: Update an existing reward perk
+  Future<RewardPerk> updateRewardPerk(
+    Session session,
+    RewardPerk perk,
+  ) async {
+    final isAuthorized = await AdminEndpoint.isAdmin(session);
+    if (!isAuthorized) {
+      throw StateError('Unauthorized: Admin access required.');
+    }
+
+    final updated = await RewardPerk.db.updateRow(session, perk);
+
+    final callerId = session.authenticated!.authUserId;
+    await AdminAuditLog.db.insertRow(
+      session,
+      AdminAuditLog(
+        actorUserId: callerId,
+        actorName: 'Master Admin',
+        actionType: 'REWARD_UPDATE',
+        targetEntity: 'reward_perk',
+        targetId: perk.id.toString(),
+        details: 'Updated reward perk "${perk.title}"',
+        timestamp: DateTime.now().toUtc(),
+      ),
+    );
+
+    return updated;
+  }
+
+  /// Admin: Delete a reward perk
+  Future<bool> deleteRewardPerk(Session session, int perkId) async {
+    final isAuthorized = await AdminEndpoint.isAdmin(session);
+    if (!isAuthorized) {
+      throw StateError('Unauthorized: Admin access required.');
+    }
+
+    final perk = await RewardPerk.db.findById(session, perkId);
+    if (perk == null) return false;
+
+    await RewardPerk.db.deleteRow(session, perk);
+
+    final callerId = session.authenticated!.authUserId;
+    await AdminAuditLog.db.insertRow(
+      session,
+      AdminAuditLog(
+        actorUserId: callerId,
+        actorName: 'Master Admin',
+        actionType: 'REWARD_DELETE',
+        targetEntity: 'reward_perk',
+        targetId: perkId.toString(),
+        details: 'Deleted reward perk "${perk.title}"',
+        timestamp: DateTime.now().toUtc(),
+      ),
+    );
+
+    return true;
+  }
+
+  /// Admin: View platform redemption history
+  Future<List<PointsLedger>> listRedemptions(
+    Session session, {
+    int limit = 50,
+  }) async {
+    final isAuthorized = await AdminEndpoint.isAdmin(session);
+    if (!isAuthorized) {
+      throw StateError('Unauthorized: Admin access required.');
+    }
+
+    return await PointsLedger.db.find(
+      session,
+      where: (t) => t.source.equals('reward_redemption'),
+      orderBy: (t) => t.timestamp.desc(),
+      limit: limit,
+    );
+  }
+
   /// Redeem reward perk
   Future<bool> redeemReward(Session session, int perkId) async {
     final authUserId = session.authenticated?.authUserId;
@@ -205,7 +300,7 @@ class PointsEndpoint extends Endpoint {
     }
 
     final perk = await RewardPerk.db.findById(session, perkId);
-    if (perk == null || perk.stockRemaining <= 0) {
+    if (perk == null || perk.stockRemaining <= 0 || !perk.isActive) {
       throw StateError('Reward out of stock or unavailable.');
     }
 
@@ -235,6 +330,21 @@ class PointsEndpoint extends Endpoint {
 
     perk.stockRemaining -= 1;
     await RewardPerk.db.updateRow(session, perk);
+
+    // Notify student of redemption
+    try {
+      await NotificationService.sendNotification(
+        session,
+        authUserId: authUserId,
+        title: 'Perk Redeemed Successfully',
+        message:
+            'You redeemed "${perk.title}" for ${perk.costPoints} points. Present your verification pass at the counter.',
+        type: 'reward_perk',
+        targetRoute: 'rewards',
+        targetId: '$perkId',
+        eventIdTag: 'redeem_${perkId}_${DateTime.now().millisecondsSinceEpoch}',
+      );
+    } catch (_) {}
 
     return true;
   }

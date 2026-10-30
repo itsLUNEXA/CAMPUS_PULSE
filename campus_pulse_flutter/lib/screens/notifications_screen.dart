@@ -5,15 +5,61 @@ import '../theme/apple_tokens.dart';
 import '../widgets/apple_button.dart';
 import '../widgets/apple_card.dart';
 
-class NotificationsScreen extends StatelessWidget {
+class NotificationsScreen extends StatefulWidget {
   final RealtimeService realtimeService;
   final VoidCallback onBack;
+  final void Function(String route)? onNavigate;
+  final void Function(String route, String? targetId)? onNavigateWithTarget;
 
   const NotificationsScreen({
     super.key,
     required this.realtimeService,
     required this.onBack,
+    this.onNavigate,
+    this.onNavigateWithTarget,
   });
+
+  @override
+  State<NotificationsScreen> createState() => _NotificationsScreenState();
+}
+
+class _NotificationsScreenState extends State<NotificationsScreen> {
+  String _selectedCategory = 'All';
+
+  final List<String> _categories = [
+    'All',
+    'Events',
+    'Study Buddies',
+    'Academics',
+    'Rewards',
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    widget.realtimeService.refreshNotifications();
+  }
+
+  bool _matchesCategory(CampusNotification notif, String category) {
+    if (category == 'All') return true;
+    final type = notif.type.toLowerCase();
+    switch (category) {
+      case 'Events':
+        return type.contains('event') || type.contains('rsvp');
+      case 'Study Buddies':
+        return type.contains('study');
+      case 'Academics':
+        return type.contains('academic') ||
+            type.contains('resource') ||
+            type.contains('timetable');
+      case 'Rewards':
+        return type.contains('reward') ||
+            type.contains('point') ||
+            type.contains('streak');
+      default:
+        return true;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,101 +72,206 @@ class NotificationsScreen extends StatelessWidget {
       ),
       child: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 720),
+          constraints: const BoxConstraints(maxWidth: 800),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Back Button
               AppleButton(
                 label: 'Back',
                 variant: AppleButtonVariant.subtle,
                 icon: Icons.arrow_back,
                 height: 38,
-                onPressed: onBack,
+                onPressed: widget.onBack,
               ),
               const SizedBox(height: AppleTokens.space16),
 
+              // Header Title & Actions
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Live Activity & Notifications',
-                        style: Theme.of(context).textTheme.headlineMedium
-                            ?.copyWith(fontWeight: FontWeight.w700),
-                      ),
-                      const SizedBox(height: AppleTokens.space4),
-                      Text(
-                        'Real-time streaming updates across campus events and quiz leaderboards.',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: isDark
-                              ? AppleTokens.darkTextSecondary
-                              : AppleTokens.secondaryText,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppleTokens.success.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(
-                        AppleTokens.radius999,
-                      ),
-                    ),
-                    child: const Row(
-                      mainAxisSize: MainAxisSize.min,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(
-                          Icons.wifi_tethering,
-                          size: 14,
-                          color: AppleTokens.success,
-                        ),
-                        SizedBox(width: 6),
                         Text(
-                          'WebSocket Live',
-                          style: TextStyle(
-                            color: AppleTokens.success,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 11,
-                          ),
+                          'Notifications & Activity',
+                          style: Theme.of(context).textTheme.headlineMedium
+                              ?.copyWith(
+                                fontWeight: FontWeight.w700,
+                                color: isDark
+                                    ? AppleTokens.darkTextPrimary
+                                    : AppleTokens.primaryText,
+                              ),
+                        ),
+                        const SizedBox(height: AppleTokens.space4),
+                        Text(
+                          'Real-time campus updates, RSVP alerts, academic review decisions, and rewards.',
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                color: isDark
+                                    ? AppleTokens.darkTextSecondary
+                                    : AppleTokens.secondaryText,
+                              ),
                         ),
                       ],
                     ),
                   ),
+                  const SizedBox(width: AppleTokens.space12),
+                  ListenableBuilder(
+                    listenable: widget.realtimeService,
+                    builder: (context, _) {
+                      final unread = widget.realtimeService.unreadCount;
+                      return Row(
+                        children: [
+                          if (unread > 0)
+                            AppleButton(
+                              label: 'Mark all as read',
+                              variant: AppleButtonVariant.subtle,
+                              icon: Icons.done_all_rounded,
+                              height: 36,
+                              onPressed: () {
+                                widget.realtimeService.markAllAsRead();
+                              },
+                            ),
+                          const SizedBox(width: AppleTokens.space8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppleTokens.primaryTeal.withValues(
+                                alpha: 0.12,
+                              ),
+                              borderRadius: BorderRadius.circular(
+                                AppleTokens.radius999,
+                              ),
+                            ),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.wifi_tethering,
+                                  size: 13,
+                                  color: AppleTokens.primaryTeal,
+                                ),
+                                SizedBox(width: 5),
+                                Text(
+                                  'Live Connected',
+                                  style: TextStyle(
+                                    color: AppleTokens.primaryTeal,
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 11,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
                 ],
+              ),
+              const SizedBox(height: AppleTokens.space20),
+
+              // Filter Category Chips
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: _categories.map((cat) {
+                    final isSelected = _selectedCategory == cat;
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: FilterChip(
+                        selected: isSelected,
+                        label: Text(cat),
+                        labelStyle: TextStyle(
+                          fontSize: 13,
+                          fontWeight: isSelected
+                              ? FontWeight.w700
+                              : FontWeight.w500,
+                          color: isSelected
+                              ? AppleTokens.primaryButtonText
+                              : (isDark
+                                    ? AppleTokens.darkTextPrimary
+                                    : AppleTokens.primaryText),
+                        ),
+                        selectedColor: AppleTokens.primaryTeal,
+                        backgroundColor: isDark
+                            ? AppleTokens.darkSurface
+                            : AppleTokens.cardSurface,
+                        side: BorderSide(
+                          color: isSelected
+                              ? AppleTokens.primaryTeal
+                              : (isDark
+                                    ? AppleTokens.darkBorder
+                                    : AppleTokens.border),
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                            AppleTokens.radius999,
+                          ),
+                        ),
+                        onSelected: (val) {
+                          setState(() {
+                            _selectedCategory = cat;
+                          });
+                        },
+                      ),
+                    );
+                  }).toList(),
+                ),
               ),
               const SizedBox(height: AppleTokens.space24),
 
+              // List of Notifications
               ListenableBuilder(
-                listenable: realtimeService,
+                listenable: widget.realtimeService,
                 builder: (context, _) {
-                  final notifications = realtimeService.notifications;
-                  if (notifications.isEmpty) {
+                  final allNotifications = widget.realtimeService.notifications;
+                  final filtered = allNotifications
+                      .where((n) => _matchesCategory(n, _selectedCategory))
+                      .toList();
+
+                  if (filtered.isEmpty) {
                     return AppleCard(
                       padding: const EdgeInsets.all(AppleTokens.space40),
                       child: Center(
                         child: Column(
                           children: [
-                            const Icon(
-                              Icons.notifications_off_outlined,
-                              size: 48,
-                              color: AppleTokens.secondaryText,
+                            Container(
+                              width: 56,
+                              height: 56,
+                              decoration: BoxDecoration(
+                                color: AppleTokens.lightMint,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.notifications_none_rounded,
+                                size: 28,
+                                color: AppleTokens.primaryTeal,
+                              ),
                             ),
                             const SizedBox(height: AppleTokens.space16),
                             Text(
-                              'No Recent Activity Yet',
+                              _selectedCategory == 'All'
+                                  ? 'No Notifications Yet'
+                                  : 'No $_selectedCategory Notifications',
                               style: Theme.of(context).textTheme.titleLarge
                                   ?.copyWith(fontWeight: FontWeight.w700),
                             ),
                             const SizedBox(height: AppleTokens.space8),
-                            const Text(
-                              'When classmates RSVP to events or complete quiz challenges, live updates will stream right here.',
+                            Text(
+                              'When updates arrive regarding your events, academic materials, or study buddies, they will appear here.',
                               textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: isDark
+                                    ? AppleTokens.darkTextSecondary
+                                    : AppleTokens.secondaryText,
+                              ),
                             ),
                           ],
                         ),
@@ -128,13 +279,15 @@ class NotificationsScreen extends StatelessWidget {
                     );
                   }
 
-                  return ListView.builder(
+                  return ListView.separated(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    itemCount: notifications.length,
+                    itemCount: filtered.length,
+                    separatorBuilder: (_, _) =>
+                        const SizedBox(height: AppleTokens.space12),
                     itemBuilder: (context, index) {
-                      final notif = notifications[index];
-                      return _notificationTile(context, notif, isDark);
+                      final notif = filtered[index];
+                      return _buildNotificationCard(context, notif, isDark);
                     },
                   );
                 },
@@ -146,39 +299,71 @@ class NotificationsScreen extends StatelessWidget {
     );
   }
 
-  Widget _notificationTile(
+  Widget _buildNotificationCard(
     BuildContext context,
     CampusNotification notif,
     bool isDark,
   ) {
-    IconData icon = Icons.notifications_none_rounded;
-    Color color = AppleTokens.primaryBlue;
+    IconData icon = Icons.notifications_rounded;
+    Color iconBg = AppleTokens.lightMint;
+    Color iconColor = AppleTokens.primaryTeal;
 
-    if (notif.type == 'event') {
+    final type = notif.type.toLowerCase();
+    if (type.contains('study')) {
+      icon = Icons.group_rounded;
+      iconBg = AppleTokens.lightCyan;
+      iconColor = AppleTokens.primaryTeal;
+    } else if (type.contains('event')) {
       icon = Icons.event_available_rounded;
-      color = AppleTokens.primaryBlue;
-    } else if (notif.type == 'quiz') {
-      icon = Icons.emoji_events_rounded;
-      color = AppleTokens.warning;
+      iconBg = AppleTokens.lightBlue;
+      iconColor = AppleTokens.highlightBlue;
+    } else if (type.contains('reward') || type.contains('point')) {
+      icon = Icons.redeem_rounded;
+      iconBg = AppleTokens.lightLavender;
+      iconColor = const Color(0xFF705EFF);
+    } else if (type.contains('academic') || type.contains('timetable')) {
+      icon = Icons.school_rounded;
+      iconBg = AppleTokens.lightMint;
+      iconColor = AppleTokens.primaryTeal;
     }
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: AppleTokens.space12),
+    return InkWell(
+      onTap: () {
+        if (!notif.isRead && notif.id != null) {
+          widget.realtimeService.markAsRead(notif.id!);
+        }
+        if (notif.targetRoute != null && notif.targetRoute!.isNotEmpty) {
+          if (widget.onNavigateWithTarget != null) {
+            widget.onNavigateWithTarget!(notif.targetRoute!, notif.targetId);
+          } else if (widget.onNavigate != null) {
+            widget.onNavigate!(notif.targetRoute!);
+          }
+        }
+      },
+      borderRadius: BorderRadius.circular(AppleTokens.radius12),
       child: AppleCard(
         padding: const EdgeInsets.all(AppleTokens.space16),
+        backgroundColor: notif.isRead
+            ? (isDark ? AppleTokens.darkSurface : AppleTokens.cardSurface)
+            : (isDark
+                  ? AppleTokens.darkSurfaceElevated
+                  : AppleTokens.lightMint.withValues(alpha: 0.25)),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Icon
             Container(
-              width: 38,
-              height: 38,
+              width: 42,
+              height: 42,
               decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.12),
+                color: iconBg,
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, color: color, size: 20),
+              child: Icon(icon, color: iconColor, size: 22),
             ),
             const SizedBox(width: AppleTokens.space16),
+
+            // Content
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -186,31 +371,75 @@ class NotificationsScreen extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        notif.title,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 15,
+                      Expanded(
+                        child: Text(
+                          notif.title,
+                          style: TextStyle(
+                            fontWeight: notif.isRead
+                                ? FontWeight.w600
+                                : FontWeight.w700,
+                            fontSize: 15,
+                            color: isDark
+                                ? AppleTokens.darkTextPrimary
+                                : AppleTokens.primaryText,
+                          ),
                         ),
                       ),
                       Text(
-                        _formatTime(notif.timestamp),
-                        style: Theme.of(context).textTheme.bodySmall,
+                        _formatTime(notif.createdAt),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isDark
+                              ? AppleTokens.darkTextSecondary
+                              : AppleTokens.mutedText,
+                        ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 4),
                   Text(
                     notif.message,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    style: TextStyle(
+                      fontSize: 13,
+                      height: 1.4,
                       color: isDark
                           ? AppleTokens.darkTextSecondary
                           : AppleTokens.secondaryText,
                     ),
                   ),
+                  if (notif.targetRoute != null &&
+                      notif.targetRoute!.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Text(
+                          'Tap to view ${notif.targetRoute!.replaceAll('_', ' ')} →',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: AppleTokens.primaryTeal,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ],
               ),
             ),
+
+            // Unread dot indicator
+            if (!notif.isRead) ...[
+              const SizedBox(width: 8),
+              Container(
+                width: 9,
+                height: 9,
+                margin: const EdgeInsets.only(top: 6),
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppleTokens.primaryTeal,
+                ),
+              ),
+            ],
           ],
         ),
       ),
@@ -219,11 +448,19 @@ class NotificationsScreen extends StatelessWidget {
 
   String _formatTime(DateTime dt) {
     final local = dt.toLocal();
+    final now = DateTime.now();
+    final diff = now.difference(local);
+
+    if (diff.inMinutes < 1) return 'Just now';
+    if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
+    if (diff.inHours < 24) return '${diff.inHours}h ago';
+    if (diff.inDays < 7) return '${diff.inDays}d ago';
+
     final hour = local.hour > 12
         ? local.hour - 12
         : (local.hour == 0 ? 12 : local.hour);
     final ampm = local.hour >= 12 ? 'PM' : 'AM';
     final minute = local.minute.toString().padLeft(2, '0');
-    return '$hour:$minute $ampm';
+    return '${local.day}/${local.month} $hour:$minute $ampm';
   }
 }

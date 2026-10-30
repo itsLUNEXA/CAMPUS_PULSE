@@ -25,7 +25,9 @@ class EventsFeedScreen extends StatefulWidget {
 }
 
 class _EventsFeedScreenState extends State<EventsFeedScreen> {
+  int _feedMode = 0; // 0 = Explore Feed, 1 = My Submissions
   String _selectedCategory = 'All';
+  String _myEventsStatusFilter = 'All';
   final List<String> _categories = [
     'All',
     'Recommended',
@@ -34,6 +36,12 @@ class _EventsFeedScreenState extends State<EventsFeedScreen> {
     'Cultural',
     'Workshop',
     'Hackathon',
+  ];
+  final List<String> _statusFilters = [
+    'All',
+    'Pending',
+    'Approved',
+    'Rejected',
   ];
   final TextEditingController _searchCtrl = TextEditingController();
 
@@ -128,8 +136,31 @@ class _EventsFeedScreenState extends State<EventsFeedScreen> {
     });
 
     try {
-      final List<CampusEvent> events;
-      if (_selectedCategory == 'Recommended') {
+      List<CampusEvent> events;
+      if (_feedMode == 1) {
+        final filter = _myEventsStatusFilter.toLowerCase();
+        try {
+          events = await client.event
+              .getMyEvents(status: filter == 'all' ? null : filter)
+              .timeout(const Duration(seconds: 10));
+        } catch (_) {
+          final allEvents = await client.event
+              .listEvents(
+                approvalStatus: filter == 'all' ? null : filter,
+                limit: 100,
+                offset: 0,
+              )
+              .timeout(const Duration(seconds: 10));
+          final myAuthUserId = widget.authState.currentProfile?.authUserId;
+          if (myAuthUserId != null) {
+            events = allEvents
+                .where((e) => e.organizerAuthUserId == myAuthUserId)
+                .toList();
+          } else {
+            events = allEvents;
+          }
+        }
+      } else if (_selectedCategory == 'Recommended') {
         events = await client.event
             .getRecommendedEvents(limit: 50)
             .timeout(const Duration(seconds: 10));
@@ -198,6 +229,16 @@ class _EventsFeedScreenState extends State<EventsFeedScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please sign in to register for events.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    if (event.approvalStatus != 'approved') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('RSVPs are only enabled for approved events.'),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -309,10 +350,9 @@ class _EventsFeedScreenState extends State<EventsFeedScreen> {
                             'Campus Events Feed',
                             style: _serifHeadline(
                               fontSize: 32,
-                              color:
-                                  isDark
-                                      ? AppleTokens.darkTextPrimary
-                                      : AppleTokens.deepNavy,
+                              color: isDark
+                                  ? AppleTokens.darkTextPrimary
+                                  : AppleTokens.deepNavy,
                             ),
                           ),
                           const SizedBox(height: 6),
@@ -320,10 +360,9 @@ class _EventsFeedScreenState extends State<EventsFeedScreen> {
                             'Discover upcoming hackathons, tech talks, cultural galas, and tournaments across campus.',
                             style: _sansText(
                               fontSize: 15,
-                              color:
-                                  isDark
-                                      ? AppleTokens.darkTextSecondary
-                                      : AppleTokens.bodyText,
+                              color: isDark
+                                  ? AppleTokens.darkTextSecondary
+                                  : AppleTokens.bodyText,
                               height: 1.5,
                             ),
                           ),
@@ -337,12 +376,12 @@ class _EventsFeedScreenState extends State<EventsFeedScreen> {
                         label: const Text('Create Event'),
                         onPressed: widget.onCreateEvent,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              isDark
-                                  ? AppleTokens.palePurple
-                                  : AppleTokens.deepNavy,
-                          foregroundColor:
-                              isDark ? AppleTokens.deepNavy : Colors.white,
+                          backgroundColor: isDark
+                              ? AppleTokens.palePurple
+                              : AppleTokens.deepNavy,
+                          foregroundColor: isDark
+                              ? AppleTokens.deepNavy
+                              : Colors.white,
                           padding: const EdgeInsets.symmetric(
                             horizontal: 20,
                             vertical: 12,
@@ -357,16 +396,77 @@ class _EventsFeedScreenState extends State<EventsFeedScreen> {
                 ),
                 const SizedBox(height: AppleTokens.space24),
 
+                if (widget.authState.isAuthenticated) ...[
+                  Row(
+                    children: [
+                      ChoiceChip(
+                        label: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.explore_rounded, size: 16),
+                            SizedBox(width: 6),
+                            Text('Explore Feed'),
+                          ],
+                        ),
+                        selected: _feedMode == 0,
+                        selectedColor: AppleTokens.primaryTeal,
+                        labelStyle: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          color: _feedMode == 0
+                              ? Colors.white
+                              : (isDark
+                                    ? AppleTokens.darkTextPrimary
+                                    : AppleTokens.primaryText),
+                        ),
+                        onSelected: (val) {
+                          if (!val) return;
+                          setState(() => _feedMode = 0);
+                          _loadEvents();
+                        },
+                      ),
+                      const SizedBox(width: 10),
+                      ChoiceChip(
+                        label: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.inventory_2_rounded, size: 16),
+                            SizedBox(width: 6),
+                            Text('My Events & Submissions'),
+                          ],
+                        ),
+                        selected: _feedMode == 1,
+                        selectedColor: AppleTokens.primaryTeal,
+                        labelStyle: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          color: _feedMode == 1
+                              ? Colors.white
+                              : (isDark
+                                    ? AppleTokens.darkTextPrimary
+                                    : AppleTokens.primaryText),
+                        ),
+                        onSelected: (val) {
+                          if (!val) return;
+                          setState(() => _feedMode = 1);
+                          _loadEvents();
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppleTokens.space16),
+                ],
+
                 // Search & Filter Controls
                 Container(
                   padding: const EdgeInsets.all(AppleTokens.space16),
                   decoration: BoxDecoration(
-                    color:
-                        isDark ? AppleTokens.darkSurface : AppleTokens.cardBg,
+                    color: isDark
+                        ? AppleTokens.darkSurface
+                        : AppleTokens.cardBg,
                     borderRadius: BorderRadius.circular(AppleTokens.radius16),
                     border: Border.all(
-                      color:
-                          isDark ? AppleTokens.darkBorder : AppleTokens.border,
+                      color: isDark
+                          ? AppleTokens.darkBorder
+                          : AppleTokens.border,
                     ),
                   ),
                   child: Column(
@@ -378,56 +478,52 @@ class _EventsFeedScreenState extends State<EventsFeedScreen> {
                         onChanged: (_) => setState(() {}),
                         style: _sansText(
                           fontSize: 14,
-                          color:
-                              isDark
-                                  ? AppleTokens.darkTextPrimary
-                                  : AppleTokens.deepNavy,
+                          color: isDark
+                              ? AppleTokens.darkTextPrimary
+                              : AppleTokens.deepNavy,
                         ),
                         decoration: InputDecoration(
-                          hintText:
-                              'Search events by title, keyword, or venue...',
+                          hintText: _feedMode == 0
+                              ? 'Search events by title, keyword, or venue...'
+                              : 'Search your submitted events...',
                           prefixIcon: const Icon(
                             Icons.search_rounded,
                             size: 20,
                           ),
-                          suffixIcon:
-                              _searchCtrl.text.isNotEmpty
-                                  ? IconButton(
-                                    icon: const Icon(
-                                      Icons.clear_rounded,
-                                      size: 18,
-                                    ),
-                                    onPressed: () {
-                                      _searchCtrl.clear();
-                                      setState(() {});
-                                    },
-                                  )
-                                  : null,
+                          suffixIcon: _searchCtrl.text.isNotEmpty
+                              ? IconButton(
+                                  icon: const Icon(
+                                    Icons.clear_rounded,
+                                    size: 18,
+                                  ),
+                                  onPressed: () {
+                                    _searchCtrl.clear();
+                                    setState(() {});
+                                  },
+                                )
+                              : null,
                           contentPadding: const EdgeInsets.symmetric(
                             horizontal: 16,
                             vertical: 12,
                           ),
                           filled: true,
-                          fillColor:
-                              isDark
-                                  ? AppleTokens.darkSurfaceElevated
-                                  : AppleTokens.background,
+                          fillColor: isDark
+                              ? AppleTokens.darkSurfaceElevated
+                              : AppleTokens.background,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(999),
                             borderSide: BorderSide(
-                              color:
-                                  isDark
-                                      ? AppleTokens.darkBorder
-                                      : AppleTokens.border,
+                              color: isDark
+                                  ? AppleTokens.darkBorder
+                                  : AppleTokens.border,
                             ),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(999),
                             borderSide: BorderSide(
-                              color:
-                                  isDark
-                                      ? AppleTokens.darkBorder
-                                      : AppleTokens.border,
+                              color: isDark
+                                  ? AppleTokens.darkBorder
+                                  : AppleTokens.border,
                             ),
                           ),
                           focusedBorder: OutlineInputBorder(
@@ -441,58 +537,104 @@ class _EventsFeedScreenState extends State<EventsFeedScreen> {
                       ),
                       const SizedBox(height: AppleTokens.space12),
 
-                      // Category Filter Pills
+                      // Filter Pills (Category in Explore mode, Status in My Events mode)
                       SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
                         child: Row(
-                          children:
-                              _categories.map((category) {
-                                final isSelected =
-                                    _selectedCategory == category;
-                                return Padding(
-                                  padding: const EdgeInsets.only(right: 8),
-                                  child: FilterChip(
-                                    selected: isSelected,
-                                    label: Text(category),
-                                    labelStyle: _sansText(
-                                      fontSize: 13,
-                                      fontWeight:
-                                          isSelected
-                                              ? FontWeight.w600
-                                              : FontWeight.w500,
-                                      color:
-                                          isSelected
-                                              ? AppleTokens.deepForest
-                                              : (isDark
-                                                  ? AppleTokens.darkTextSecondary
+                          children: _feedMode == 0
+                              ? _categories.map((category) {
+                                  final isSelected =
+                                      _selectedCategory == category;
+                                  return Padding(
+                                    padding: const EdgeInsets.only(right: 8),
+                                    child: FilterChip(
+                                      selected: isSelected,
+                                      label: Text(category),
+                                      labelStyle: _sansText(
+                                        fontSize: 13,
+                                        fontWeight: isSelected
+                                            ? FontWeight.w600
+                                            : FontWeight.w500,
+                                        color: isSelected
+                                            ? AppleTokens.deepForest
+                                            : (isDark
+                                                  ? AppleTokens
+                                                        .darkTextSecondary
                                                   : AppleTokens.mutedGrey),
-                                    ),
-                                    backgroundColor:
-                                        isDark
-                                            ? AppleTokens.darkSurfaceElevated
-                                            : AppleTokens.warmWhite,
-                                    selectedColor: AppleTokens.sageGreen,
-                                    checkmarkColor: AppleTokens.deepForest,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(999),
-                                      side: BorderSide(
-                                        color:
-                                            isSelected
-                                                ? AppleTokens.sageGreen
-                                                : (isDark
-                                                    ? AppleTokens.darkBorder
-                                                    : AppleTokens.lightConcrete),
                                       ),
+                                      backgroundColor: isDark
+                                          ? AppleTokens.darkSurfaceElevated
+                                          : Colors.white,
+                                      selectedColor: AppleTokens.lightMint,
+                                      checkmarkColor: AppleTokens.primaryTeal,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(
+                                          AppleTokens.radius8,
+                                        ),
+                                        side: BorderSide(
+                                          color: isSelected
+                                              ? AppleTokens.primaryTeal
+                                              : (isDark
+                                                    ? AppleTokens.darkBorder
+                                                    : AppleTokens.borderSubtle),
+                                        ),
+                                      ),
+                                      onSelected: (selected) {
+                                        setState(() {
+                                          _selectedCategory = category;
+                                        });
+                                        _loadEvents();
+                                      },
                                     ),
-                                    onSelected: (selected) {
-                                      setState(() {
-                                        _selectedCategory = category;
-                                      });
-                                      _loadEvents();
-                                    },
-                                  ),
-                                );
-                              }).toList(),
+                                  );
+                                }).toList()
+                              : _statusFilters.map((status) {
+                                  final isSelected =
+                                      _myEventsStatusFilter == status;
+                                  return Padding(
+                                    padding: const EdgeInsets.only(right: 8),
+                                    child: FilterChip(
+                                      selected: isSelected,
+                                      label: Text(status),
+                                      labelStyle: _sansText(
+                                        fontSize: 13,
+                                        fontWeight: isSelected
+                                            ? FontWeight.w700
+                                            : FontWeight.w500,
+                                        color: isSelected
+                                            ? AppleTokens.primaryTeal
+                                            : (isDark
+                                                  ? AppleTokens
+                                                        .darkTextSecondary
+                                                  : AppleTokens.mutedGrey),
+                                      ),
+                                      backgroundColor: isDark
+                                          ? AppleTokens.darkSurfaceElevated
+                                          : Colors.white,
+                                      selectedColor: AppleTokens.lightMint,
+                                      checkmarkColor: AppleTokens.primaryTeal,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(
+                                          AppleTokens.radius8,
+                                        ),
+                                        side: BorderSide(
+                                          color: isSelected
+                                              ? AppleTokens.primaryTeal
+                                              : (isDark
+                                                    ? AppleTokens
+                                                          .darkTextSecondary
+                                                    : AppleTokens.borderSubtle),
+                                        ),
+                                      ),
+                                      onSelected: (selected) {
+                                        setState(() {
+                                          _myEventsStatusFilter = status;
+                                        });
+                                        _loadEvents();
+                                      },
+                                    ),
+                                  );
+                                }).toList(),
                         ),
                       ),
                     ],
@@ -539,13 +681,12 @@ class _EventsFeedScreenState extends State<EventsFeedScreen> {
         return Wrap(
           spacing: spacing,
           runSpacing: spacing,
-          children:
-              events.map((event) {
-                return SizedBox(
-                  width: cardWidth,
-                  child: _buildImageFirstEventCard(event, isDark),
-                );
-              }).toList(),
+          children: events.map((event) {
+            return SizedBox(
+              width: cardWidth,
+              child: _buildImageFirstEventCard(event, isDark),
+            );
+          }).toList(),
         );
       },
     );
@@ -553,10 +694,9 @@ class _EventsFeedScreenState extends State<EventsFeedScreen> {
 
   Widget _buildImageFirstEventCard(CampusEvent event, bool isDark) {
     final isRsvpd = _myRsvpdEventIds.contains(event.id);
-    final imageUrl =
-        (event.bannerUrl != null && event.bannerUrl!.isNotEmpty)
-            ? event.bannerUrl!
-            : _getCategoryFallbackImage(event.category);
+    final imageUrl = (event.bannerUrl != null && event.bannerUrl!.isNotEmpty)
+        ? event.bannerUrl!
+        : _getCategoryFallbackImage(event.category);
 
     return Container(
       decoration: BoxDecoration(
@@ -593,21 +733,12 @@ class _EventsFeedScreenState extends State<EventsFeedScreen> {
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) {
                       return Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              AppleTokens.palePurple,
-                              AppleTokens.softBlue,
-                            ],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                        ),
-                        child: Center(
+                        color: AppleTokens.lightMint,
+                        child: const Center(
                           child: Icon(
                             Icons.event_available_rounded,
-                            size: 44,
-                            color: AppleTokens.accentPurple,
+                            size: 40,
+                            color: AppleTokens.primaryTeal,
                           ),
                         ),
                       );
@@ -615,10 +746,9 @@ class _EventsFeedScreenState extends State<EventsFeedScreen> {
                     loadingBuilder: (context, child, progress) {
                       if (progress == null) return child;
                       return Container(
-                        color:
-                            isDark
-                                ? AppleTokens.darkSurfaceElevated
-                                : AppleTokens.palePurple.withValues(alpha: 0.3),
+                        color: isDark
+                            ? AppleTokens.darkSurfaceElevated
+                            : AppleTokens.palePurple.withValues(alpha: 0.3),
                         child: const Center(
                           child: CircularProgressIndicator(strokeWidth: 2),
                         ),
@@ -656,40 +786,77 @@ class _EventsFeedScreenState extends State<EventsFeedScreen> {
                     ),
                   ),
 
-                  // Bookmark / RSVP Floating Action (Top-Right)
+                  // Bookmark / RSVP Floating Action or Review Status Badge (Top-Right)
                   Positioned(
                     top: 12,
                     right: 12,
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        onTap: () => _toggleRsvp(event),
-                        borderRadius: BorderRadius.circular(999),
-                        child: Container(
-                          padding: const EdgeInsets.all(7),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.94),
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.12),
-                                blurRadius: 6,
+                    child: event.approvalStatus == 'approved'
+                        ? Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: () => _toggleRsvp(event),
+                              borderRadius: BorderRadius.circular(999),
+                              child: Container(
+                                padding: const EdgeInsets.all(7),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.94),
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withValues(
+                                        alpha: 0.12,
+                                      ),
+                                      blurRadius: 6,
+                                    ),
+                                  ],
+                                ),
+                                child: Icon(
+                                  isRsvpd
+                                      ? Icons.bookmark_rounded
+                                      : Icons.bookmark_border_rounded,
+                                  size: 18,
+                                  color: isRsvpd
+                                      ? AppleTokens.accentPurple
+                                      : AppleTokens.deepNavy,
+                                ),
                               ),
-                            ],
+                            ),
+                          )
+                        : Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: event.approvalStatus == 'pending'
+                                  ? AppleTokens.lightMint
+                                  : const Color(0xFFFDE2E2),
+                              borderRadius: BorderRadius.circular(999),
+                              border: Border.all(
+                                color: event.approvalStatus == 'pending'
+                                    ? AppleTokens.primaryTeal
+                                    : const Color(0xFFFCA5A5),
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.1),
+                                  blurRadius: 4,
+                                ),
+                              ],
+                            ),
+                            child: Text(
+                              event.approvalStatus == 'pending'
+                                  ? 'PENDING'
+                                  : 'REJECTED',
+                              style: _sansText(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w800,
+                                color: event.approvalStatus == 'pending'
+                                    ? AppleTokens.primaryTeal
+                                    : const Color(0xFF9B1C1C),
+                              ),
+                            ),
                           ),
-                          child: Icon(
-                            isRsvpd
-                                ? Icons.bookmark_rounded
-                                : Icons.bookmark_border_rounded,
-                            size: 18,
-                            color:
-                                isRsvpd
-                                    ? AppleTokens.accentPurple
-                                    : AppleTokens.deepNavy,
-                          ),
-                        ),
-                      ),
-                    ),
                   ),
                 ],
               ),
@@ -709,10 +876,9 @@ class _EventsFeedScreenState extends State<EventsFeedScreen> {
                     style: _serifHeadline(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
-                      color:
-                          isDark
-                              ? AppleTokens.darkTextPrimary
-                              : AppleTokens.deepNavy,
+                      color: isDark
+                          ? AppleTokens.darkTextPrimary
+                          : AppleTokens.deepNavy,
                     ),
                   ),
                   const SizedBox(height: 6),
@@ -724,10 +890,9 @@ class _EventsFeedScreenState extends State<EventsFeedScreen> {
                     overflow: TextOverflow.ellipsis,
                     style: _sansText(
                       fontSize: 13,
-                      color:
-                          isDark
-                              ? AppleTokens.darkTextSecondary
-                              : AppleTokens.bodyText,
+                      color: isDark
+                          ? AppleTokens.darkTextSecondary
+                          : AppleTokens.bodyText,
                       height: 1.4,
                     ),
                   ),
@@ -739,10 +904,9 @@ class _EventsFeedScreenState extends State<EventsFeedScreen> {
                       Icon(
                         Icons.calendar_today_rounded,
                         size: 14,
-                        color:
-                            isDark
-                                ? AppleTokens.darkAccentPurple
-                                : AppleTokens.accentPurple,
+                        color: isDark
+                            ? AppleTokens.darkAccentPurple
+                            : AppleTokens.accentPurple,
                       ),
                       const SizedBox(width: 6),
                       Expanded(
@@ -751,10 +915,9 @@ class _EventsFeedScreenState extends State<EventsFeedScreen> {
                           style: _sansText(
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
-                            color:
-                                isDark
-                                    ? AppleTokens.darkTextSecondary
-                                    : AppleTokens.bodyText,
+                            color: isDark
+                                ? AppleTokens.darkTextSecondary
+                                : AppleTokens.bodyText,
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -768,10 +931,9 @@ class _EventsFeedScreenState extends State<EventsFeedScreen> {
                       Icon(
                         Icons.location_on_rounded,
                         size: 14,
-                        color:
-                            isDark
-                                ? AppleTokens.darkAccentPurple
-                                : AppleTokens.accentPurple,
+                        color: isDark
+                            ? AppleTokens.darkAccentPurple
+                            : AppleTokens.accentPurple,
                       ),
                       const SizedBox(width: 6),
                       Expanded(
@@ -780,16 +942,53 @@ class _EventsFeedScreenState extends State<EventsFeedScreen> {
                           style: _sansText(
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
-                            color:
-                                isDark
-                                    ? AppleTokens.darkTextSecondary
-                                    : AppleTokens.bodyText,
+                            color: isDark
+                                ? AppleTokens.darkTextSecondary
+                                : AppleTokens.bodyText,
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
                   ),
+                  if (event.approvalStatus == 'rejected' &&
+                      event.rejectionReason != null &&
+                      event.rejectionReason!.isNotEmpty) ...[
+                    const SizedBox(height: 10),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFDE2E2),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: const Color(0xFFFCA5A5)),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Icon(
+                            Icons.error_outline_rounded,
+                            size: 14,
+                            color: Color(0xFF9B1C1C),
+                          ),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              'Rejection Reason: ${event.rejectionReason}',
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF9B1C1C),
+                                height: 1.3,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 16),
 
                   // Footer Row: RSVP Count & RSVP Action Button
@@ -802,10 +1001,9 @@ class _EventsFeedScreenState extends State<EventsFeedScreen> {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color:
-                              isDark
-                                  ? AppleTokens.darkSurfaceElevated
-                                  : AppleTokens.palePurple,
+                          color: isDark
+                              ? AppleTokens.darkSurfaceElevated
+                              : AppleTokens.palePurple,
                           borderRadius: BorderRadius.circular(999),
                         ),
                         child: Row(
@@ -814,10 +1012,9 @@ class _EventsFeedScreenState extends State<EventsFeedScreen> {
                             Icon(
                               Icons.people_outline_rounded,
                               size: 13,
-                              color:
-                                  isDark
-                                      ? AppleTokens.darkAccentPurple
-                                      : AppleTokens.deepNavy,
+                              color: isDark
+                                  ? AppleTokens.darkAccentPurple
+                                  : AppleTokens.deepNavy,
                             ),
                             const SizedBox(width: 4),
                             Text(
@@ -825,57 +1022,82 @@ class _EventsFeedScreenState extends State<EventsFeedScreen> {
                               style: _sansText(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
-                                color:
-                                    isDark
-                                        ? AppleTokens.darkTextPrimary
-                                        : AppleTokens.deepNavy,
+                                color: isDark
+                                    ? AppleTokens.darkTextPrimary
+                                    : AppleTokens.deepNavy,
                               ),
                             ),
                           ],
                         ),
                       ),
 
-                      ElevatedButton(
-                        onPressed: () => _toggleRsvp(event),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              isRsvpd
-                                  ? AppleTokens.softSage
-                                  : AppleTokens.burntAmber,
-                          foregroundColor:
-                              isRsvpd
+                      if (event.approvalStatus == 'approved')
+                        ElevatedButton(
+                          onPressed: () => _toggleRsvp(event),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: isRsvpd
+                                ? AppleTokens.lightMint
+                                : AppleTokens.primaryTeal,
+                            foregroundColor: isRsvpd
+                                ? AppleTokens.primaryTeal
+                                : Colors.white,
+                            side: isRsvpd
+                                ? const BorderSide(
+                                    color: AppleTokens.primaryTeal,
+                                    width: 1.0,
+                                  )
+                                : BorderSide.none,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                AppleTokens.radius8,
+                              ),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            minimumSize: Size.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                          child: Text(
+                            isRsvpd ? 'Registered ✓' : 'Register',
+                            style: _sansText(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: isRsvpd
                                   ? AppleTokens.deepForest
                                   : Colors.white,
-                          side:
-                              isRsvpd
-                                  ? const BorderSide(
-                                    color: AppleTokens.sageGreen,
-                                    width: 1.2,
-                                  )
-                                  : BorderSide.none,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(999),
+                            ),
                           ),
+                        )
+                      else
+                        Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
+                            horizontal: 10,
+                            vertical: 6,
                           ),
-                          minimumSize: Size.zero,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        ),
-                        child: Text(
-                          isRsvpd ? 'Registered ✓' : 'Register',
-                          style: _sansText(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color:
-                                isRsvpd
-                                    ? AppleTokens.deepForest
-                                    : Colors.white,
+                          decoration: BoxDecoration(
+                            color: event.approvalStatus == 'pending'
+                                ? AppleTokens.lightMint
+                                : const Color(0xFFFDE2E2),
+                            borderRadius: BorderRadius.circular(
+                              AppleTokens.radius8,
+                            ),
+                          ),
+                          child: Text(
+                            event.approvalStatus == 'pending'
+                                ? 'Under Review'
+                                : 'Not Published',
+                            style: _sansText(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: event.approvalStatus == 'pending'
+                                  ? AppleTokens.primaryTeal
+                                  : const Color(0xFF9B1C1C),
+                            ),
                           ),
                         ),
-                      ),
                     ],
                   ),
                 ],
@@ -915,18 +1137,18 @@ class _EventsFeedScreenState extends State<EventsFeedScreen> {
             const SizedBox(height: AppleTokens.space16),
             ElevatedButton.icon(
               label: Text(_isRetrying ? 'Retrying...' : 'Retry'),
-              icon:
-                  _isRetrying
-                      ? const SizedBox(
-                        width: 14,
-                        height: 14,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                      : const Icon(Icons.refresh_rounded, size: 16),
+              icon: _isRetrying
+                  ? const SizedBox(
+                      width: 14,
+                      height: 14,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.refresh_rounded, size: 16),
               onPressed: _isRetrying ? null : _loadEvents,
               style: ElevatedButton.styleFrom(
-                backgroundColor:
-                    isDark ? AppleTokens.palePurple : AppleTokens.deepNavy,
+                backgroundColor: isDark
+                    ? AppleTokens.palePurple
+                    : AppleTokens.deepNavy,
                 foregroundColor: isDark ? AppleTokens.deepNavy : Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(999),
@@ -956,19 +1178,17 @@ class _EventsFeedScreenState extends State<EventsFeedScreen> {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color:
-                    isDark
-                        ? AppleTokens.darkSurfaceElevated
-                        : AppleTokens.palePurple,
+                color: isDark
+                    ? AppleTokens.darkSurfaceElevated
+                    : AppleTokens.palePurple,
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.event_busy_rounded,
                 size: 40,
-                color:
-                    isDark
-                        ? AppleTokens.darkAccentPurple
-                        : AppleTokens.accentPurple,
+                color: isDark
+                    ? AppleTokens.darkAccentPurple
+                    : AppleTokens.accentPurple,
               ),
             ),
             const SizedBox(height: AppleTokens.space20),
@@ -976,10 +1196,9 @@ class _EventsFeedScreenState extends State<EventsFeedScreen> {
               'No Events Found',
               style: _serifHeadline(
                 fontSize: 22,
-                color:
-                    isDark
-                        ? AppleTokens.darkTextPrimary
-                        : AppleTokens.deepNavy,
+                color: isDark
+                    ? AppleTokens.darkTextPrimary
+                    : AppleTokens.deepNavy,
               ),
             ),
             const SizedBox(height: AppleTokens.space8),
@@ -987,10 +1206,9 @@ class _EventsFeedScreenState extends State<EventsFeedScreen> {
               'Try selecting another category or clear your search query.',
               style: _sansText(
                 fontSize: 14,
-                color:
-                    isDark
-                        ? AppleTokens.darkTextSecondary
-                        : AppleTokens.bodyText,
+                color: isDark
+                    ? AppleTokens.darkTextSecondary
+                    : AppleTokens.bodyText,
               ),
             ),
             const SizedBox(height: AppleTokens.space16),
@@ -1014,12 +1232,11 @@ class _EventsFeedScreenState extends State<EventsFeedScreen> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth;
-        final int crossAxisCount =
-            width >= 980
-                ? 3
-                : width >= 640
-                ? 2
-                : 1;
+        final int crossAxisCount = width >= 980
+            ? 3
+            : width >= 640
+            ? 2
+            : 1;
         const spacing = 20.0;
         final cardWidth =
             (width - (spacing * (crossAxisCount - 1))) / crossAxisCount;
@@ -1044,10 +1261,9 @@ class _EventsFeedScreenState extends State<EventsFeedScreen> {
                   AspectRatio(
                     aspectRatio: 16 / 9,
                     child: Container(
-                      color:
-                          isDark
-                              ? AppleTokens.darkSurfaceElevated
-                              : AppleTokens.palePurple.withValues(alpha: 0.3),
+                      color: isDark
+                          ? AppleTokens.darkSurfaceElevated
+                          : AppleTokens.palePurple.withValues(alpha: 0.3),
                     ),
                   ),
                   Padding(
@@ -1086,10 +1302,9 @@ class _EventsFeedScreenState extends State<EventsFeedScreen> {
 
   String _formatDate(DateTime dt) {
     final local = dt.toLocal();
-    final hour =
-        local.hour > 12
-            ? local.hour - 12
-            : (local.hour == 0 ? 12 : local.hour);
+    final hour = local.hour > 12
+        ? local.hour - 12
+        : (local.hour == 0 ? 12 : local.hour);
     final ampm = local.hour >= 12 ? 'PM' : 'AM';
     final minute = local.minute.toString().padLeft(2, '0');
     final months = [

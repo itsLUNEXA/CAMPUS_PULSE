@@ -59,7 +59,8 @@ class _RewardsScreenState extends State<RewardsScreen> {
                 id: 1,
                 title: 'Campus Cafeteria 20% Discount Pass',
                 category: 'Dining',
-                description: 'Valid for full week across food court and beverage stations.',
+                description:
+                    'Valid for full week across food court and beverage stations.',
                 costPoints: 100,
                 stockRemaining: 45,
                 isActive: true,
@@ -68,7 +69,8 @@ class _RewardsScreenState extends State<RewardsScreen> {
                 id: 2,
                 title: 'Annual TechFest VIP Fast-Track Pass',
                 category: 'Fest Pass',
-                description: 'Skip queues for keynote technical talks and coding arenas.',
+                description:
+                    'Skip queues for keynote technical talks and coding arenas.',
                 costPoints: 200,
                 stockRemaining: 15,
                 isActive: true,
@@ -77,7 +79,8 @@ class _RewardsScreenState extends State<RewardsScreen> {
                 id: 3,
                 title: 'Library 24/7 Night Access Card',
                 category: 'Academic',
-                description: 'Overnight study cubicle booking pass during examination week.',
+                description:
+                    'Overnight study cubicle booking pass during examination week.',
                 costPoints: 150,
                 stockRemaining: 20,
                 isActive: true,
@@ -92,7 +95,11 @@ class _RewardsScreenState extends State<RewardsScreen> {
   Future<void> _redeemPerk(RewardPerk perk) async {
     if (_totalPoints < perk.costPoints) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Insufficient points balance! Attend more events or quizzes.')),
+        const SnackBar(
+          content: Text(
+            'Insufficient points balance! Attend more events or quizzes.',
+          ),
+        ),
       );
       return;
     }
@@ -103,7 +110,11 @@ class _RewardsScreenState extends State<RewardsScreen> {
       }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('🎉 Redeemed "${perk.title}" successfully! Check email for voucher.')),
+          SnackBar(
+            content: Text(
+              '🎉 Redeemed "${perk.title}" successfully! Check email for voucher.',
+            ),
+          ),
         );
         _loadPointsAndPerks();
       }
@@ -121,7 +132,9 @@ class _RewardsScreenState extends State<RewardsScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark ? AppleTokens.darkBackground : AppleTokens.warmWhite,
+      backgroundColor: isDark
+          ? AppleTokens.darkBackground
+          : AppleTokens.warmWhite,
       appBar: AppBar(
         title: Text(
           'Campus Points & Rewards Economy',
@@ -148,23 +161,37 @@ class _RewardsScreenState extends State<RewardsScreen> {
                     children: [
                       Text(
                         'MY CAMPUS POINTS',
-                        style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w800, color: AppleTokens.darkNavy),
+                        style: GoogleFonts.inter(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                          color: AppleTokens.darkNavy,
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         '$_totalPoints PTS',
-                        style: GoogleFonts.inter(fontSize: 32, fontWeight: FontWeight.w900, color: AppleTokens.darkNavy),
+                        style: GoogleFonts.inter(
+                          fontSize: 32,
+                          fontWeight: FontWeight.w900,
+                          color: AppleTokens.darkNavy,
+                        ),
                       ),
                       const SizedBox(height: 6),
                       Text(
                         'Earned via verified QR check-ins, study sessions, and quizzes.',
-                        style: GoogleFonts.inter(fontSize: 12, color: AppleTokens.darkNavy.withValues(alpha: 0.8)),
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          color: AppleTokens.darkNavy.withValues(alpha: 0.8),
+                        ),
                       ),
                     ],
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(20),
@@ -177,15 +204,26 @@ class _RewardsScreenState extends State<RewardsScreen> {
                   ),
                   child: Column(
                     children: [
-                      const Icon(Icons.local_fire_department_rounded, color: Colors.deepOrange, size: 30),
+                      const Icon(
+                        Icons.local_fire_department_rounded,
+                        color: Colors.deepOrange,
+                        size: 30,
+                      ),
                       const SizedBox(height: 4),
                       Text(
                         '$_currentStreak DAY',
-                        style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13, color: AppleTokens.darkNavy),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 13,
+                          color: AppleTokens.darkNavy,
+                        ),
                       ),
                       const Text(
                         'Active Streak',
-                        style: TextStyle(fontSize: 10, color: AppleTokens.textMutedGrey),
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: AppleTokens.textMutedGrey,
+                        ),
                       ),
                     ],
                   ),
@@ -198,7 +236,11 @@ class _RewardsScreenState extends State<RewardsScreen> {
           // Perks Catalog
           Text(
             'Redeemable Rewards & Perks Catalog',
-            style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w800, color: isDark ? Colors.white : AppleTokens.darkNavy),
+            style: GoogleFonts.inter(
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+              color: isDark ? Colors.white : AppleTokens.darkNavy,
+            ),
           ),
           const SizedBox(height: 14),
 
@@ -223,7 +265,11 @@ class _RewardsScreenState extends State<RewardsScreen> {
             CircleAvatar(
               radius: 24,
               backgroundColor: AppleTokens.pastelBlue.withValues(alpha: 0.35),
-              child: const Icon(Icons.card_giftcard_rounded, color: AppleTokens.darkNavy, size: 24),
+              child: const Icon(
+                Icons.card_giftcard_rounded,
+                color: AppleTokens.darkNavy,
+                size: 24,
+              ),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -233,29 +279,50 @@ class _RewardsScreenState extends State<RewardsScreen> {
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                        decoration: BoxDecoration(color: AppleTokens.paleLavender, borderRadius: BorderRadius.circular(6)),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppleTokens.paleLavender,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
                         child: Text(
                           perk.category.toUpperCase(),
-                          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 9, color: AppleTokens.darkNavy),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w800,
+                            fontSize: 9,
+                            color: AppleTokens.darkNavy,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 8),
                       Text(
                         '${perk.costPoints} Points',
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.deepOrange),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                          color: Colors.deepOrange,
+                        ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 6),
                   Text(
                     perk.title,
-                    style: GoogleFonts.inter(fontWeight: FontWeight.w800, fontSize: 15, color: AppleTokens.darkNavy),
+                    style: GoogleFonts.inter(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 15,
+                      color: AppleTokens.darkNavy,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     perk.description,
-                    style: GoogleFonts.inter(fontSize: 12, color: AppleTokens.textMutedGrey),
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      color: AppleTokens.textMutedGrey,
+                    ),
                   ),
                 ],
               ),
@@ -263,7 +330,9 @@ class _RewardsScreenState extends State<RewardsScreen> {
             const SizedBox(width: 12),
             AppleButton(
               label: 'Redeem',
-              variant: canAfford ? AppleButtonVariant.primary : AppleButtonVariant.outline,
+              variant: canAfford
+                  ? AppleButtonVariant.primary
+                  : AppleButtonVariant.outline,
               onPressed: canAfford ? () => _redeemPerk(perk) : null,
             ),
           ],

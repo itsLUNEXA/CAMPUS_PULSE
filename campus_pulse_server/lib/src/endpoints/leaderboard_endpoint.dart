@@ -145,10 +145,9 @@ class LeaderboardEndpoint extends Endpoint {
         () => <String, QuizAttempt>{},
       );
 
-      final quizKey =
-          (att.quizId != null && att.quizId!.trim().isNotEmpty)
-              ? att.quizId!.trim()
-              : att.subject.trim();
+      final quizKey = (att.quizId != null && att.quizId!.trim().isNotEmpty)
+          ? att.quizId!.trim()
+          : att.subject.trim();
 
       final existingBest = quizzes[quizKey];
       if (existingBest == null) {
@@ -189,8 +188,9 @@ class LeaderboardEndpoint extends Endpoint {
         }
       }
 
-      final double accuracy =
-          totalQuestions > 0 ? (totalScore / totalQuestions) * 100.0 : 0.0;
+      final double accuracy = totalQuestions > 0
+          ? (totalScore / totalQuestions) * 100.0
+          : 0.0;
 
       statsList.add(
         _AggregatedStudentStats(

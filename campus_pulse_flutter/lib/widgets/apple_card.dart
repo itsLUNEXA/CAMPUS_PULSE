@@ -5,6 +5,7 @@ class AppleCard extends StatefulWidget {
   final Widget child;
   final VoidCallback? onTap;
   final EdgeInsetsGeometry padding;
+  final EdgeInsetsGeometry? margin;
   final double? width;
   final double? height;
   final Color? backgroundColor;
@@ -14,7 +15,8 @@ class AppleCard extends StatefulWidget {
     super.key,
     required this.child,
     this.onTap,
-    this.padding = const EdgeInsets.all(AppleTokens.space24),
+    this.padding = const EdgeInsets.all(16.0),
+    this.margin,
     this.width,
     this.height,
     this.backgroundColor,
@@ -30,41 +32,38 @@ class _AppleCardState extends State<AppleCard> {
 
   @override
   Widget build(BuildContext context) {
-    final surfaceColor = widget.backgroundColor ?? AppleTokens.cardBg;
-    final borderColor =
-        _isHovered ? AppleTokens.softLavender : AppleTokens.borderPastel;
+    final surfaceColor = widget.backgroundColor ?? Colors.white;
+    final borderColor = _isHovered
+        ? AppleTokens.purple
+        : AppleTokens.borderSubtle;
 
     return FocusableActionDetector(
-      onShowHoverHighlight:
-          widget.onTap != null ? (v) => setState(() => _isHovered = v) : null,
+      onShowHoverHighlight: widget.onTap != null
+          ? (v) => setState(() => _isHovered = v)
+          : null,
       child: GestureDetector(
         onTap: widget.onTap,
         child: AnimatedContainer(
-          duration: AppleTokens.duration160,
+          duration: AppleTokens.durationFast,
           curve: AppleTokens.defaultCurve,
           width: widget.width,
           height: widget.height,
+          margin: widget.margin,
           padding: widget.padding,
           decoration: BoxDecoration(
             color: widget.gradient == null ? surfaceColor : null,
             gradient: widget.gradient,
-            borderRadius: BorderRadius.circular(AppleTokens.radius24),
+            borderRadius: BorderRadius.circular(AppleTokens.radius12),
             border: Border.all(
               color: borderColor,
               width: AppleTokens.space1,
             ),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF10111C).withValues(alpha: _isHovered ? 0.08 : 0.03),
-                blurRadius: _isHovered ? 18 : 10,
-                offset: Offset(0, _isHovered ? 6 : 2),
+                color: const Color(0x0A000000),
+                blurRadius: _isHovered ? 6 : 2,
+                offset: Offset(0, _isHovered ? 2 : 1),
               ),
-              if (_isHovered)
-                BoxShadow(
-                  color: AppleTokens.softLavender.withValues(alpha: 0.15),
-                  blurRadius: 12,
-                  offset: const Offset(0, 0),
-                ),
             ],
           ),
           child: widget.child,

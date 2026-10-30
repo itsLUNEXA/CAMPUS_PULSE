@@ -17,13 +17,21 @@ import 'package:campus_pulse_server/src/generated/admin_audit_log.dart'
     as _i60whm80;
 import 'package:campus_pulse_server/src/generated/attendance_record.dart'
     as _i4oe753t;
+import 'package:campus_pulse_server/src/generated/campus_club.dart'
+    as _ih6v9w0h;
+import 'package:campus_pulse_server/src/generated/campus_company.dart'
+    as _iq2r5nkx;
 import 'package:campus_pulse_server/src/generated/campus_event.dart'
     as _iw7ccsb7;
+import 'package:campus_pulse_server/src/generated/campus_notification.dart'
+    as _if8eiets;
 import 'package:campus_pulse_server/src/generated/chat_message.dart'
     as _iit1n394;
 import 'package:campus_pulse_server/src/generated/chat_report.dart'
     as _i8osaxbj;
 import 'package:campus_pulse_server/src/generated/chat_room.dart' as _i787pbkv;
+import 'package:campus_pulse_server/src/generated/club_query_request.dart'
+    as _ieve3lh1;
 import 'package:campus_pulse_server/src/generated/event_certificate.dart'
     as _iii6sj61;
 import 'package:campus_pulse_server/src/generated/event_rsvp.dart' as _iemrykml;
@@ -31,6 +39,14 @@ import 'package:campus_pulse_server/src/generated/leaderboard_entry.dart'
     as _izc9hvlj;
 import 'package:campus_pulse_server/src/generated/minutes_of_meeting.dart'
     as _iecchb3j;
+import 'package:campus_pulse_server/src/generated/mock_interview_slot.dart'
+    as _i3jujyo2;
+import 'package:campus_pulse_server/src/generated/points_ledger.dart'
+    as _i966awo3;
+import 'package:campus_pulse_server/src/generated/print_point_transaction.dart'
+    as _i3a0j8k2;
+import 'package:campus_pulse_server/src/generated/print_request.dart'
+    as _inb42hn4;
 import 'package:campus_pulse_server/src/generated/quiz_attempt.dart'
     as _ii6cu1i5;
 import 'package:campus_pulse_server/src/generated/quiz_question_view.dart'
@@ -39,6 +55,8 @@ import 'package:campus_pulse_server/src/generated/reward_perk.dart'
     as _i5apij9o;
 import 'package:campus_pulse_server/src/generated/section_timetable.dart'
     as _i6o9odyo;
+import 'package:campus_pulse_server/src/generated/senior_experience.dart'
+    as _iy2qccrj;
 import 'package:campus_pulse_server/src/generated/student_free_slot.dart'
     as _iegmdz27;
 import 'package:campus_pulse_server/src/generated/student_profile.dart'
@@ -56,11 +74,14 @@ import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
 import 'academic_resource.dart' as _if13xk5x;
 import 'admin_audit_log.dart' as _ihc3ja42;
 import 'attendance_record.dart' as _ixvdsmvt;
+import 'campus_club.dart' as _iwba3fjr;
+import 'campus_company.dart' as _igqutz9d;
 import 'campus_event.dart' as _ieh998j0;
 import 'campus_notification.dart' as _ik9ino7k;
 import 'chat_message.dart' as _ivuncx2e;
 import 'chat_report.dart' as _i9uqw2ol;
 import 'chat_room.dart' as _i860mpd8;
+import 'club_query_request.dart' as _im9yt7uy;
 import 'contact_message.dart' as _itkhxrdg;
 import 'event_certificate.dart' as _i18h4dy9;
 import 'event_rsvp.dart' as _it1gnu2n;
@@ -68,7 +89,11 @@ import 'greetings/greeting.dart' as _izw8z7ou;
 import 'leaderboard_entry.dart' as _ikawkn1p;
 import 'leaderboard_update.dart' as _ivs2wzhx;
 import 'minutes_of_meeting.dart' as _i25xzg8r;
+import 'mock_interview_slot.dart' as _iu2sg8u8;
 import 'points_ledger.dart' as _ihcqna09;
+import 'print_point_transaction.dart' as _iue337dt;
+import 'print_point_wallet.dart' as _ie4rsrbk;
+import 'print_request.dart' as _isllut2n;
 import 'quiz_answer_submission.dart' as _icbmbpey;
 import 'quiz_attempt.dart' as _ibhufrza;
 import 'quiz_question.dart' as _i6b38qpb;
@@ -81,6 +106,7 @@ import 'rsvp_update.dart' as _i9l2hi6q;
 import 'search_item.dart' as _imxb4b9a;
 import 'search_response.dart' as _iz2tuvmq;
 import 'section_timetable.dart' as _iyrk4e0o;
+import 'senior_experience.dart' as _ieehbuqz;
 import 'student_free_slot.dart' as _i76e3tnf;
 import 'student_profile.dart' as _iovtxv26;
 import 'study_request.dart' as _i2p0wucy;
@@ -89,11 +115,14 @@ import 'user_role.dart' as _ir0y0iu6;
 export 'academic_resource.dart';
 export 'admin_audit_log.dart';
 export 'attendance_record.dart';
+export 'campus_club.dart';
+export 'campus_company.dart';
 export 'campus_event.dart';
 export 'campus_notification.dart';
 export 'chat_message.dart';
 export 'chat_report.dart';
 export 'chat_room.dart';
+export 'club_query_request.dart';
 export 'contact_message.dart';
 export 'event_certificate.dart';
 export 'event_rsvp.dart';
@@ -101,7 +130,11 @@ export 'greetings/greeting.dart';
 export 'leaderboard_entry.dart';
 export 'leaderboard_update.dart';
 export 'minutes_of_meeting.dart';
+export 'mock_interview_slot.dart';
 export 'points_ledger.dart';
+export 'print_point_transaction.dart';
+export 'print_point_wallet.dart';
+export 'print_request.dart';
 export 'quiz_answer_submission.dart';
 export 'quiz_attempt.dart';
 export 'quiz_question.dart';
@@ -114,6 +147,7 @@ export 'rsvp_update.dart';
 export 'search_item.dart';
 export 'search_response.dart';
 export 'section_timetable.dart';
+export 'senior_experience.dart';
 export 'student_free_slot.dart';
 export 'student_profile.dart';
 export 'study_request.dart';
@@ -243,6 +277,12 @@ class Protocol extends _is.DatabaseSerializationManager {
           columnType: _isp.ColumnType.uuid,
           isNullable: true,
           dartType: 'UuidValue?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'rejectionReason',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
         ),
         _isp.ColumnDefinition(
           name: 'createdAt',
@@ -491,6 +531,224 @@ class Protocol extends _is.DatabaseSerializationManager {
       managed: true,
     ),
     _isp.TableDefinition(
+      name: 'campus_clubs',
+      dartName: 'CampusClub',
+      schema: 'public',
+      module: 'campus_pulse',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int?',
+          columnDefault: 'serial',
+        ),
+        _isp.ColumnDefinition(
+          name: 'name',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'tagline',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'category',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'description',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'logoUrl',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'leadName',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'leadEmail',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'techTeamLead',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'techTeamEmail',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'managementLead',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'managementEmail',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'membersCount',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+          columnDefault: '0',
+        ),
+        _isp.ColumnDefinition(
+          name: 'recruitmentOpen',
+          columnType: _isp.ColumnType.boolean,
+          isNullable: false,
+          dartType: 'bool',
+          columnDefault: 'false',
+        ),
+        _isp.ColumnDefinition(
+          name: 'meetingSchedule',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'now',
+        ),
+      ],
+      foreignKeys: [],
+      indexes: [
+        _isp.IndexDefinition(
+          indexName: 'club_category_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'category',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _isp.TableDefinition(
+      name: 'campus_companies',
+      dartName: 'CampusCompany',
+      schema: 'public',
+      module: 'campus_pulse',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int?',
+          columnDefault: 'serial',
+        ),
+        _isp.ColumnDefinition(
+          name: 'name',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'tier',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'avgPackageLpa',
+          columnType: _isp.ColumnType.doublePrecision,
+          isNullable: false,
+          dartType: 'double',
+        ),
+        _isp.ColumnDefinition(
+          name: 'eligibleBranches',
+          columnType: _isp.ColumnType.json,
+          isNullable: false,
+          dartType: 'List<String>',
+        ),
+        _isp.ColumnDefinition(
+          name: 'cgpaCutoff',
+          columnType: _isp.ColumnType.doublePrecision,
+          isNullable: false,
+          dartType: 'double',
+        ),
+        _isp.ColumnDefinition(
+          name: 'hiringRounds',
+          columnType: _isp.ColumnType.json,
+          isNullable: false,
+          dartType: 'List<String>',
+        ),
+        _isp.ColumnDefinition(
+          name: 'keyFocusAreas',
+          columnType: _isp.ColumnType.json,
+          isNullable: false,
+          dartType: 'List<String>',
+        ),
+        _isp.ColumnDefinition(
+          name: 'description',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'logoUrl',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'now',
+        ),
+      ],
+      foreignKeys: [],
+      indexes: [
+        _isp.IndexDefinition(
+          indexName: 'company_name_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'name',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _isp.TableDefinition(
       name: 'campus_event',
       dartName: 'CampusEvent',
       schema: 'public',
@@ -661,6 +919,115 @@ class Protocol extends _is.DatabaseSerializationManager {
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
               definition: 'approvalStatus',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _isp.TableDefinition(
+      name: 'campus_notifications',
+      dartName: 'CampusNotification',
+      schema: 'public',
+      module: 'campus_pulse',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int?',
+          columnDefault: 'serial',
+        ),
+        _isp.ColumnDefinition(
+          name: 'authUserId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'title',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'message',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'type',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'targetRoute',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'targetId',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'isRead',
+          columnType: _isp.ColumnType.boolean,
+          isNullable: false,
+          dartType: 'bool',
+          columnDefault: 'false',
+        ),
+        _isp.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'now',
+        ),
+        _isp.ColumnDefinition(
+          name: 'eventIdTag',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+      ],
+      foreignKeys: [],
+      indexes: [
+        _isp.IndexDefinition(
+          indexName: 'notif_user_read_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'authUserId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'isRead',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+        _isp.IndexDefinition(
+          indexName: 'notif_dedup_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'authUserId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'eventIdTag',
             ),
           ],
           type: 'btree',
@@ -948,6 +1315,24 @@ class Protocol extends _is.DatabaseSerializationManager {
           dartType: 'String',
         ),
         _isp.ColumnDefinition(
+          name: 'description',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'topic',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'creatorAuthUserId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: true,
+          dartType: 'UuidValue?',
+        ),
+        _isp.ColumnDefinition(
           name: 'participantIds',
           columnType: _isp.ColumnType.json,
           isNullable: false,
@@ -998,6 +1383,149 @@ class Protocol extends _is.DatabaseSerializationManager {
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
               definition: 'referenceId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _isp.TableDefinition(
+      name: 'club_query_requests',
+      dartName: 'ClubQueryRequest',
+      schema: 'public',
+      module: 'campus_pulse',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int?',
+          columnDefault: 'serial',
+        ),
+        _isp.ColumnDefinition(
+          name: 'clubId',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _isp.ColumnDefinition(
+          name: 'clubName',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'targetTeam',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'senderAuthUserId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'senderName',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'senderEmail',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'senderBranch',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'senderYear',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _isp.ColumnDefinition(
+          name: 'category',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'subject',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'message',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'status',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+          columnDefault: '\'PENDING\'',
+        ),
+        _isp.ColumnDefinition(
+          name: 'responseMessage',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'responderName',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'now',
+        ),
+        _isp.ColumnDefinition(
+          name: 'respondedAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: true,
+          dartType: 'DateTime?',
+        ),
+      ],
+      foreignKeys: [],
+      indexes: [
+        _isp.IndexDefinition(
+          indexName: 'club_query_club_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'clubId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+        _isp.IndexDefinition(
+          indexName: 'club_query_sender_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'senderAuthUserId',
             ),
           ],
           type: 'btree',
@@ -1407,6 +1935,124 @@ class Protocol extends _is.DatabaseSerializationManager {
       managed: true,
     ),
     _isp.TableDefinition(
+      name: 'mock_interview_slots',
+      dartName: 'MockInterviewSlot',
+      schema: 'public',
+      module: 'campus_pulse',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int?',
+          columnDefault: 'serial',
+        ),
+        _isp.ColumnDefinition(
+          name: 'studentAuthUserId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'studentName',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'studentEmail',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'targetCompany',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'targetRole',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'mockRound',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'preferredDate',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+        _isp.ColumnDefinition(
+          name: 'resumeUrl',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'notes',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'status',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+          columnDefault: '\'REQUESTED\'',
+        ),
+        _isp.ColumnDefinition(
+          name: 'seniorMentorName',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'meetingLink',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'feedbackNotes',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'now',
+        ),
+      ],
+      foreignKeys: [],
+      indexes: [
+        _isp.IndexDefinition(
+          indexName: 'mock_slot_user_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'studentAuthUserId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _isp.TableDefinition(
       name: 'points_ledger',
       dartName: 'PointsLedger',
       schema: 'public',
@@ -1470,6 +2116,445 @@ class Protocol extends _is.DatabaseSerializationManager {
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
               definition: 'timestamp',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _isp.TableDefinition(
+      name: 'print_point_transactions',
+      dartName: 'PrintPointTransaction',
+      schema: 'public',
+      module: 'campus_pulse',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int?',
+          columnDefault: 'serial',
+        ),
+        _isp.ColumnDefinition(
+          name: 'authUserId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'printRequestId',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: true,
+          dartType: 'int?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'type',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'points',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _isp.ColumnDefinition(
+          name: 'balanceAfter',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _isp.ColumnDefinition(
+          name: 'description',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'now',
+        ),
+      ],
+      foreignKeys: [],
+      indexes: [
+        _isp.IndexDefinition(
+          indexName: 'print_tx_user_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'authUserId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'createdAt',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+        _isp.IndexDefinition(
+          indexName: 'print_tx_req_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'printRequestId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _isp.TableDefinition(
+      name: 'print_point_wallets',
+      dartName: 'PrintPointWallet',
+      schema: 'public',
+      module: 'campus_pulse',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int?',
+          columnDefault: 'serial',
+        ),
+        _isp.ColumnDefinition(
+          name: 'authUserId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'studentName',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'balance',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _isp.ColumnDefinition(
+          name: 'lifetimeEarned',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _isp.ColumnDefinition(
+          name: 'lifetimeRedeemed',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _isp.ColumnDefinition(
+          name: 'updatedAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'now',
+        ),
+      ],
+      foreignKeys: [],
+      indexes: [
+        _isp.IndexDefinition(
+          indexName: 'print_point_wallets__authUserId__unique_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'authUserId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
+        _isp.IndexDefinition(
+          indexName: 'print_wallet_user_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'authUserId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _isp.TableDefinition(
+      name: 'print_requests',
+      dartName: 'PrintRequest',
+      schema: 'public',
+      module: 'campus_pulse',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int?',
+          columnDefault: 'serial',
+        ),
+        _isp.ColumnDefinition(
+          name: 'studentAuthUserId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'studentName',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'studentBranch',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'studentYear',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _isp.ColumnDefinition(
+          name: 'hostelOrLocation',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'fileName',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'fileUrl',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'fileSizeBytes',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: true,
+          dartType: 'int?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'pageCount',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _isp.ColumnDefinition(
+          name: 'copies',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _isp.ColumnDefinition(
+          name: 'totalPages',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _isp.ColumnDefinition(
+          name: 'printType',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'paperSize',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'printSide',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'binding',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'deliveryMode',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'counterName',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'amountPaid',
+          columnType: _isp.ColumnType.doublePrecision,
+          isNullable: false,
+          dartType: 'double',
+        ),
+        _isp.ColumnDefinition(
+          name: 'pointsUsed',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _isp.ColumnDefinition(
+          name: 'pointsEarned',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _isp.ColumnDefinition(
+          name: 'pointsAwarded',
+          columnType: _isp.ColumnType.boolean,
+          isNullable: false,
+          dartType: 'bool',
+          columnDefault: 'false',
+        ),
+        _isp.ColumnDefinition(
+          name: 'paymentStatus',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'paymentTransactionId',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'paymentFailureReason',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'status',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'collectionCode',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'collectionQrToken',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'statusReason',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'processedByStaffName',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'now',
+        ),
+        _isp.ColumnDefinition(
+          name: 'updatedAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'now',
+        ),
+        _isp.ColumnDefinition(
+          name: 'collectedAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: true,
+          dartType: 'DateTime?',
+        ),
+      ],
+      foreignKeys: [],
+      indexes: [
+        _isp.IndexDefinition(
+          indexName: 'print_req_student_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'studentAuthUserId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'createdAt',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+        _isp.IndexDefinition(
+          indexName: 'print_req_counter_status_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'counterName',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'status',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'paymentStatus',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+        _isp.IndexDefinition(
+          indexName: 'print_req_code_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'collectionCode',
             ),
           ],
           type: 'btree',
@@ -1875,6 +2960,12 @@ class Protocol extends _is.DatabaseSerializationManager {
           dartType: 'String',
         ),
         _isp.ColumnDefinition(
+          name: 'faculty',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
           name: 'createdAt',
           columnType: _isp.ColumnType.timestampWithoutTimeZone,
           isNullable: false,
@@ -1903,6 +2994,119 @@ class Protocol extends _is.DatabaseSerializationManager {
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
               definition: 'dayOfWeek',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _isp.TableDefinition(
+      name: 'senior_experiences',
+      dartName: 'SeniorExperience',
+      schema: 'public',
+      module: 'campus_pulse',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int?',
+          columnDefault: 'serial',
+        ),
+        _isp.ColumnDefinition(
+          name: 'companyName',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'seniorName',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'seniorBranch',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'batchYear',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _isp.ColumnDefinition(
+          name: 'placedRole',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'packageOffered',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'difficultyRating',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+          columnDefault: '3',
+        ),
+        _isp.ColumnDefinition(
+          name: 'interviewQuestions',
+          columnType: _isp.ColumnType.json,
+          isNullable: false,
+          dartType: 'List<String>',
+        ),
+        _isp.ColumnDefinition(
+          name: 'experienceReview',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'tipsForJuniors',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'contactHandle',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'verified',
+          columnType: _isp.ColumnType.boolean,
+          isNullable: false,
+          dartType: 'bool',
+          columnDefault: 'true',
+        ),
+        _isp.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'now',
+        ),
+      ],
+      foreignKeys: [],
+      indexes: [
+        _isp.IndexDefinition(
+          indexName: 'senior_exp_company_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'companyName',
             ),
           ],
           type: 'btree',
@@ -2529,6 +3733,12 @@ class Protocol extends _is.DatabaseSerializationManager {
     if (t == _ixvdsmvt.AttendanceRecord) {
       return _ixvdsmvt.AttendanceRecord.fromJson(data) as T;
     }
+    if (t == _iwba3fjr.CampusClub) {
+      return _iwba3fjr.CampusClub.fromJson(data) as T;
+    }
+    if (t == _igqutz9d.CampusCompany) {
+      return _igqutz9d.CampusCompany.fromJson(data) as T;
+    }
     if (t == _ieh998j0.CampusEvent) {
       return _ieh998j0.CampusEvent.fromJson(data) as T;
     }
@@ -2543,6 +3753,9 @@ class Protocol extends _is.DatabaseSerializationManager {
     }
     if (t == _i860mpd8.ChatRoom) {
       return _i860mpd8.ChatRoom.fromJson(data) as T;
+    }
+    if (t == _im9yt7uy.ClubQueryRequest) {
+      return _im9yt7uy.ClubQueryRequest.fromJson(data) as T;
     }
     if (t == _itkhxrdg.ContactMessage) {
       return _itkhxrdg.ContactMessage.fromJson(data) as T;
@@ -2565,8 +3778,20 @@ class Protocol extends _is.DatabaseSerializationManager {
     if (t == _i25xzg8r.MinutesOfMeeting) {
       return _i25xzg8r.MinutesOfMeeting.fromJson(data) as T;
     }
+    if (t == _iu2sg8u8.MockInterviewSlot) {
+      return _iu2sg8u8.MockInterviewSlot.fromJson(data) as T;
+    }
     if (t == _ihcqna09.PointsLedger) {
       return _ihcqna09.PointsLedger.fromJson(data) as T;
+    }
+    if (t == _iue337dt.PrintPointTransaction) {
+      return _iue337dt.PrintPointTransaction.fromJson(data) as T;
+    }
+    if (t == _ie4rsrbk.PrintPointWallet) {
+      return _ie4rsrbk.PrintPointWallet.fromJson(data) as T;
+    }
+    if (t == _isllut2n.PrintRequest) {
+      return _isllut2n.PrintRequest.fromJson(data) as T;
     }
     if (t == _icbmbpey.QuizAnswerSubmission) {
       return _icbmbpey.QuizAnswerSubmission.fromJson(data) as T;
@@ -2604,6 +3829,9 @@ class Protocol extends _is.DatabaseSerializationManager {
     if (t == _iyrk4e0o.SectionTimetable) {
       return _iyrk4e0o.SectionTimetable.fromJson(data) as T;
     }
+    if (t == _ieehbuqz.SeniorExperience) {
+      return _ieehbuqz.SeniorExperience.fromJson(data) as T;
+    }
     if (t == _i76e3tnf.StudentFreeSlot) {
       return _i76e3tnf.StudentFreeSlot.fromJson(data) as T;
     }
@@ -2631,6 +3859,13 @@ class Protocol extends _is.DatabaseSerializationManager {
       return (data != null ? _ixvdsmvt.AttendanceRecord.fromJson(data) : null)
           as T;
     }
+    if (t == _is.getType<_iwba3fjr.CampusClub?>()) {
+      return (data != null ? _iwba3fjr.CampusClub.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_igqutz9d.CampusCompany?>()) {
+      return (data != null ? _igqutz9d.CampusCompany.fromJson(data) : null)
+          as T;
+    }
     if (t == _is.getType<_ieh998j0.CampusEvent?>()) {
       return (data != null ? _ieh998j0.CampusEvent.fromJson(data) : null) as T;
     }
@@ -2646,6 +3881,10 @@ class Protocol extends _is.DatabaseSerializationManager {
     }
     if (t == _is.getType<_i860mpd8.ChatRoom?>()) {
       return (data != null ? _i860mpd8.ChatRoom.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_im9yt7uy.ClubQueryRequest?>()) {
+      return (data != null ? _im9yt7uy.ClubQueryRequest.fromJson(data) : null)
+          as T;
     }
     if (t == _is.getType<_itkhxrdg.ContactMessage?>()) {
       return (data != null ? _itkhxrdg.ContactMessage.fromJson(data) : null)
@@ -2673,8 +3912,25 @@ class Protocol extends _is.DatabaseSerializationManager {
       return (data != null ? _i25xzg8r.MinutesOfMeeting.fromJson(data) : null)
           as T;
     }
+    if (t == _is.getType<_iu2sg8u8.MockInterviewSlot?>()) {
+      return (data != null ? _iu2sg8u8.MockInterviewSlot.fromJson(data) : null)
+          as T;
+    }
     if (t == _is.getType<_ihcqna09.PointsLedger?>()) {
       return (data != null ? _ihcqna09.PointsLedger.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_iue337dt.PrintPointTransaction?>()) {
+      return (data != null
+              ? _iue337dt.PrintPointTransaction.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _is.getType<_ie4rsrbk.PrintPointWallet?>()) {
+      return (data != null ? _ie4rsrbk.PrintPointWallet.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_isllut2n.PrintRequest?>()) {
+      return (data != null ? _isllut2n.PrintRequest.fromJson(data) : null) as T;
     }
     if (t == _is.getType<_icbmbpey.QuizAnswerSubmission?>()) {
       return (data != null
@@ -2721,6 +3977,10 @@ class Protocol extends _is.DatabaseSerializationManager {
       return (data != null ? _iyrk4e0o.SectionTimetable.fromJson(data) : null)
           as T;
     }
+    if (t == _is.getType<_ieehbuqz.SeniorExperience?>()) {
+      return (data != null ? _ieehbuqz.SeniorExperience.fromJson(data) : null)
+          as T;
+    }
     if (t == _is.getType<_i76e3tnf.StudentFreeSlot?>()) {
       return (data != null ? _i76e3tnf.StudentFreeSlot.fromJson(data) : null)
           as T;
@@ -2738,12 +3998,12 @@ class Protocol extends _is.DatabaseSerializationManager {
     if (t == _is.getType<_ir0y0iu6.UserRole?>()) {
       return (data != null ? _ir0y0iu6.UserRole.fromJson(data) : null) as T;
     }
+    if (t == List<String>) {
+      return (data as List).map((e) => deserialize<String>(e)).toList() as T;
+    }
     if (t == List<_is.UuidValue>) {
       return (data as List).map((e) => deserialize<_is.UuidValue>(e)).toList()
           as T;
-    }
-    if (t == List<String>) {
-      return (data as List).map((e) => deserialize<String>(e)).toList() as T;
     }
     if (t == _is.getType<List<String>?>()) {
       return (data != null
@@ -2790,6 +4050,12 @@ class Protocol extends _is.DatabaseSerializationManager {
     if (t == List<String>) {
       return (data as List).map((e) => deserialize<String>(e)).toList() as T;
     }
+    if (t == List<_iyr83ylc.StudentProfile>) {
+      return (data as List)
+              .map((e) => deserialize<_iyr83ylc.StudentProfile>(e))
+              .toList()
+          as T;
+    }
     if (t == List<_i60whm80.AdminAuditLog>) {
       return (data as List)
               .map((e) => deserialize<_i60whm80.AdminAuditLog>(e))
@@ -2830,6 +4096,18 @@ class Protocol extends _is.DatabaseSerializationManager {
               .toList()
           as T;
     }
+    if (t == List<_ih6v9w0h.CampusClub>) {
+      return (data as List)
+              .map((e) => deserialize<_ih6v9w0h.CampusClub>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_ieve3lh1.ClubQueryRequest>) {
+      return (data as List)
+              .map((e) => deserialize<_ieve3lh1.ClubQueryRequest>(e))
+              .toList()
+          as T;
+    }
     if (t == List<_iw7ccsb7.CampusEvent>) {
       return (data as List)
               .map((e) => deserialize<_iw7ccsb7.CampusEvent>(e))
@@ -2851,15 +4129,27 @@ class Protocol extends _is.DatabaseSerializationManager {
               .toList()
           as T;
     }
-    if (t == List<_izc9hvlj.LeaderboardEntry>) {
+    if (t == List<_iq2r5nkx.CampusCompany>) {
       return (data as List)
-              .map((e) => deserialize<_izc9hvlj.LeaderboardEntry>(e))
+              .map((e) => deserialize<_iq2r5nkx.CampusCompany>(e))
               .toList()
           as T;
     }
-    if (t == List<_iecchb3j.MinutesOfMeeting>) {
+    if (t == List<_iy2qccrj.SeniorExperience>) {
       return (data as List)
-              .map((e) => deserialize<_iecchb3j.MinutesOfMeeting>(e))
+              .map((e) => deserialize<_iy2qccrj.SeniorExperience>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_i3jujyo2.MockInterviewSlot>) {
+      return (data as List)
+              .map((e) => deserialize<_i3jujyo2.MockInterviewSlot>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_izc9hvlj.LeaderboardEntry>) {
+      return (data as List)
+              .map((e) => deserialize<_izc9hvlj.LeaderboardEntry>(e))
               .toList()
           as T;
     }
@@ -2872,9 +4162,39 @@ class Protocol extends _is.DatabaseSerializationManager {
     if (t == dynamic) {
       return deserializeDynamicFieldValue(data) as T;
     }
+    if (t == List<_inb42hn4.PrintRequest>) {
+      return (data as List)
+              .map((e) => deserialize<_inb42hn4.PrintRequest>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_i3a0j8k2.PrintPointTransaction>) {
+      return (data as List)
+              .map((e) => deserialize<_i3a0j8k2.PrintPointTransaction>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_iecchb3j.MinutesOfMeeting>) {
+      return (data as List)
+              .map((e) => deserialize<_iecchb3j.MinutesOfMeeting>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_if8eiets.CampusNotification>) {
+      return (data as List)
+              .map((e) => deserialize<_if8eiets.CampusNotification>(e))
+              .toList()
+          as T;
+    }
     if (t == List<_i5apij9o.RewardPerk>) {
       return (data as List)
               .map((e) => deserialize<_i5apij9o.RewardPerk>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_i966awo3.PointsLedger>) {
+      return (data as List)
+              .map((e) => deserialize<_i966awo3.PointsLedger>(e))
               .toList()
           as T;
     }
@@ -2887,12 +4207,6 @@ class Protocol extends _is.DatabaseSerializationManager {
     if (t == List<_ii6cu1i5.QuizAttempt>) {
       return (data as List)
               .map((e) => deserialize<_ii6cu1i5.QuizAttempt>(e))
-              .toList()
-          as T;
-    }
-    if (t == List<_iyr83ylc.StudentProfile>) {
-      return (data as List)
-              .map((e) => deserialize<_iyr83ylc.StudentProfile>(e))
               .toList()
           as T;
     }
@@ -2937,11 +4251,14 @@ class Protocol extends _is.DatabaseSerializationManager {
       _if13xk5x.AcademicResource => 'AcademicResource',
       _ihc3ja42.AdminAuditLog => 'AdminAuditLog',
       _ixvdsmvt.AttendanceRecord => 'AttendanceRecord',
+      _iwba3fjr.CampusClub => 'CampusClub',
+      _igqutz9d.CampusCompany => 'CampusCompany',
       _ieh998j0.CampusEvent => 'CampusEvent',
       _ik9ino7k.CampusNotification => 'CampusNotification',
       _ivuncx2e.ChatMessage => 'ChatMessage',
       _i9uqw2ol.ChatReport => 'ChatReport',
       _i860mpd8.ChatRoom => 'ChatRoom',
+      _im9yt7uy.ClubQueryRequest => 'ClubQueryRequest',
       _itkhxrdg.ContactMessage => 'ContactMessage',
       _i18h4dy9.EventCertificate => 'EventCertificate',
       _it1gnu2n.EventRsvp => 'EventRsvp',
@@ -2949,7 +4266,11 @@ class Protocol extends _is.DatabaseSerializationManager {
       _ikawkn1p.LeaderboardEntry => 'LeaderboardEntry',
       _ivs2wzhx.LeaderboardUpdate => 'LeaderboardUpdate',
       _i25xzg8r.MinutesOfMeeting => 'MinutesOfMeeting',
+      _iu2sg8u8.MockInterviewSlot => 'MockInterviewSlot',
       _ihcqna09.PointsLedger => 'PointsLedger',
+      _iue337dt.PrintPointTransaction => 'PrintPointTransaction',
+      _ie4rsrbk.PrintPointWallet => 'PrintPointWallet',
+      _isllut2n.PrintRequest => 'PrintRequest',
       _icbmbpey.QuizAnswerSubmission => 'QuizAnswerSubmission',
       _ibhufrza.QuizAttempt => 'QuizAttempt',
       _i6b38qpb.QuizQuestion => 'QuizQuestion',
@@ -2962,6 +4283,7 @@ class Protocol extends _is.DatabaseSerializationManager {
       _imxb4b9a.SearchItem => 'SearchItem',
       _iz2tuvmq.SearchResponse => 'SearchResponse',
       _iyrk4e0o.SectionTimetable => 'SectionTimetable',
+      _ieehbuqz.SeniorExperience => 'SeniorExperience',
       _i76e3tnf.StudentFreeSlot => 'StudentFreeSlot',
       _iovtxv26.StudentProfile => 'StudentProfile',
       _i2p0wucy.StudyRequest => 'StudyRequest',
@@ -2990,6 +4312,10 @@ class Protocol extends _is.DatabaseSerializationManager {
         return 'AdminAuditLog';
       case _ixvdsmvt.AttendanceRecord():
         return 'AttendanceRecord';
+      case _iwba3fjr.CampusClub():
+        return 'CampusClub';
+      case _igqutz9d.CampusCompany():
+        return 'CampusCompany';
       case _ieh998j0.CampusEvent():
         return 'CampusEvent';
       case _ik9ino7k.CampusNotification():
@@ -3000,6 +4326,8 @@ class Protocol extends _is.DatabaseSerializationManager {
         return 'ChatReport';
       case _i860mpd8.ChatRoom():
         return 'ChatRoom';
+      case _im9yt7uy.ClubQueryRequest():
+        return 'ClubQueryRequest';
       case _itkhxrdg.ContactMessage():
         return 'ContactMessage';
       case _i18h4dy9.EventCertificate():
@@ -3014,8 +4342,16 @@ class Protocol extends _is.DatabaseSerializationManager {
         return 'LeaderboardUpdate';
       case _i25xzg8r.MinutesOfMeeting():
         return 'MinutesOfMeeting';
+      case _iu2sg8u8.MockInterviewSlot():
+        return 'MockInterviewSlot';
       case _ihcqna09.PointsLedger():
         return 'PointsLedger';
+      case _iue337dt.PrintPointTransaction():
+        return 'PrintPointTransaction';
+      case _ie4rsrbk.PrintPointWallet():
+        return 'PrintPointWallet';
+      case _isllut2n.PrintRequest():
+        return 'PrintRequest';
       case _icbmbpey.QuizAnswerSubmission():
         return 'QuizAnswerSubmission';
       case _ibhufrza.QuizAttempt():
@@ -3040,6 +4376,8 @@ class Protocol extends _is.DatabaseSerializationManager {
         return 'SearchResponse';
       case _iyrk4e0o.SectionTimetable():
         return 'SectionTimetable';
+      case _ieehbuqz.SeniorExperience():
+        return 'SeniorExperience';
       case _i76e3tnf.StudentFreeSlot():
         return 'StudentFreeSlot';
       case _iovtxv26.StudentProfile():
@@ -3085,6 +4423,12 @@ class Protocol extends _is.DatabaseSerializationManager {
     if (dataClassName == 'AttendanceRecord') {
       return deserialize<_ixvdsmvt.AttendanceRecord>(data['data']);
     }
+    if (dataClassName == 'CampusClub') {
+      return deserialize<_iwba3fjr.CampusClub>(data['data']);
+    }
+    if (dataClassName == 'CampusCompany') {
+      return deserialize<_igqutz9d.CampusCompany>(data['data']);
+    }
     if (dataClassName == 'CampusEvent') {
       return deserialize<_ieh998j0.CampusEvent>(data['data']);
     }
@@ -3099,6 +4443,9 @@ class Protocol extends _is.DatabaseSerializationManager {
     }
     if (dataClassName == 'ChatRoom') {
       return deserialize<_i860mpd8.ChatRoom>(data['data']);
+    }
+    if (dataClassName == 'ClubQueryRequest') {
+      return deserialize<_im9yt7uy.ClubQueryRequest>(data['data']);
     }
     if (dataClassName == 'ContactMessage') {
       return deserialize<_itkhxrdg.ContactMessage>(data['data']);
@@ -3121,8 +4468,20 @@ class Protocol extends _is.DatabaseSerializationManager {
     if (dataClassName == 'MinutesOfMeeting') {
       return deserialize<_i25xzg8r.MinutesOfMeeting>(data['data']);
     }
+    if (dataClassName == 'MockInterviewSlot') {
+      return deserialize<_iu2sg8u8.MockInterviewSlot>(data['data']);
+    }
     if (dataClassName == 'PointsLedger') {
       return deserialize<_ihcqna09.PointsLedger>(data['data']);
+    }
+    if (dataClassName == 'PrintPointTransaction') {
+      return deserialize<_iue337dt.PrintPointTransaction>(data['data']);
+    }
+    if (dataClassName == 'PrintPointWallet') {
+      return deserialize<_ie4rsrbk.PrintPointWallet>(data['data']);
+    }
+    if (dataClassName == 'PrintRequest') {
+      return deserialize<_isllut2n.PrintRequest>(data['data']);
     }
     if (dataClassName == 'QuizAnswerSubmission') {
       return deserialize<_icbmbpey.QuizAnswerSubmission>(data['data']);
@@ -3159,6 +4518,9 @@ class Protocol extends _is.DatabaseSerializationManager {
     }
     if (dataClassName == 'SectionTimetable') {
       return deserialize<_iyrk4e0o.SectionTimetable>(data['data']);
+    }
+    if (dataClassName == 'SeniorExperience') {
+      return deserialize<_ieehbuqz.SeniorExperience>(data['data']);
     }
     if (dataClassName == 'StudentFreeSlot') {
       return deserialize<_i76e3tnf.StudentFreeSlot>(data['data']);
@@ -3222,14 +4584,22 @@ class Protocol extends _is.DatabaseSerializationManager {
         return _ihc3ja42.AdminAuditLog.t;
       case _ixvdsmvt.AttendanceRecord:
         return _ixvdsmvt.AttendanceRecord.t;
+      case _iwba3fjr.CampusClub:
+        return _iwba3fjr.CampusClub.t;
+      case _igqutz9d.CampusCompany:
+        return _igqutz9d.CampusCompany.t;
       case _ieh998j0.CampusEvent:
         return _ieh998j0.CampusEvent.t;
+      case _ik9ino7k.CampusNotification:
+        return _ik9ino7k.CampusNotification.t;
       case _ivuncx2e.ChatMessage:
         return _ivuncx2e.ChatMessage.t;
       case _i9uqw2ol.ChatReport:
         return _i9uqw2ol.ChatReport.t;
       case _i860mpd8.ChatRoom:
         return _i860mpd8.ChatRoom.t;
+      case _im9yt7uy.ClubQueryRequest:
+        return _im9yt7uy.ClubQueryRequest.t;
       case _itkhxrdg.ContactMessage:
         return _itkhxrdg.ContactMessage.t;
       case _i18h4dy9.EventCertificate:
@@ -3238,8 +4608,16 @@ class Protocol extends _is.DatabaseSerializationManager {
         return _it1gnu2n.EventRsvp.t;
       case _i25xzg8r.MinutesOfMeeting:
         return _i25xzg8r.MinutesOfMeeting.t;
+      case _iu2sg8u8.MockInterviewSlot:
+        return _iu2sg8u8.MockInterviewSlot.t;
       case _ihcqna09.PointsLedger:
         return _ihcqna09.PointsLedger.t;
+      case _iue337dt.PrintPointTransaction:
+        return _iue337dt.PrintPointTransaction.t;
+      case _ie4rsrbk.PrintPointWallet:
+        return _ie4rsrbk.PrintPointWallet.t;
+      case _isllut2n.PrintRequest:
+        return _isllut2n.PrintRequest.t;
       case _ibhufrza.QuizAttempt:
         return _ibhufrza.QuizAttempt.t;
       case _i6b38qpb.QuizQuestion:
@@ -3248,6 +4626,8 @@ class Protocol extends _is.DatabaseSerializationManager {
         return _izr2b0i4.RewardPerk.t;
       case _iyrk4e0o.SectionTimetable:
         return _iyrk4e0o.SectionTimetable.t;
+      case _ieehbuqz.SeniorExperience:
+        return _ieehbuqz.SeniorExperience.t;
       case _i76e3tnf.StudentFreeSlot:
         return _i76e3tnf.StudentFreeSlot.t;
       case _iovtxv26.StudentProfile:

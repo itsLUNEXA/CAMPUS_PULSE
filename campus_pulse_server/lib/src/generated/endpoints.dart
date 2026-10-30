@@ -10,8 +10,13 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'dart:typed_data' as _idt;
 import 'package:campus_pulse_server/src/generated/quiz_submission.dart'
     as _ikt4w0rg;
+import 'package:campus_pulse_server/src/generated/reward_perk.dart'
+    as _i5apij9o;
+import 'package:campus_pulse_server/src/generated/section_timetable.dart'
+    as _i6o9odyo;
 import 'package:serverpod/serverpod.dart' as _is;
 import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
     as _iacs;
@@ -24,9 +29,13 @@ import '../endpoints/admin_endpoint.dart' as _i5t1w2d2;
 import '../endpoints/attendance_endpoint.dart' as _ieghzlx7;
 import '../endpoints/certificate_endpoint.dart' as _ixxjh8q7;
 import '../endpoints/chat_endpoint.dart' as _ihc7hrsa;
+import '../endpoints/club_endpoint.dart' as _i2t636zb;
 import '../endpoints/event_endpoint.dart' as _icw8lb6p;
+import '../endpoints/interview_prep_endpoint.dart' as _ik7tibzk;
 import '../endpoints/leaderboard_endpoint.dart' as _iy80ldha;
+import '../endpoints/library_endpoint.dart' as _iqlmnpik;
 import '../endpoints/mom_endpoint.dart' as _ifiqiuci;
+import '../endpoints/notification_endpoint.dart' as _ihb11yhk;
 import '../endpoints/points_endpoint.dart' as _isfdgr65;
 import '../endpoints/quiz_endpoint.dart' as _i7z0uw2a;
 import '../endpoints/search_endpoint.dart' as _ipmmezh5;
@@ -82,10 +91,22 @@ class Endpoints extends _is.EndpointDispatch {
           'chat',
           null,
         ),
+      'club': _i2t636zb.ClubEndpoint()
+        ..initialize(
+          server,
+          'club',
+          null,
+        ),
       'event': _icw8lb6p.EventEndpoint()
         ..initialize(
           server,
           'event',
+          null,
+        ),
+      'interviewPrep': _ik7tibzk.InterviewPrepEndpoint()
+        ..initialize(
+          server,
+          'interviewPrep',
           null,
         ),
       'leaderboard': _iy80ldha.LeaderboardEndpoint()
@@ -94,10 +115,22 @@ class Endpoints extends _is.EndpointDispatch {
           'leaderboard',
           null,
         ),
+      'library': _iqlmnpik.LibraryEndpoint()
+        ..initialize(
+          server,
+          'library',
+          null,
+        ),
       'mom': _ifiqiuci.MomEndpoint()
         ..initialize(
           server,
           'mom',
+          null,
+        ),
+      'notification': _ihb11yhk.NotificationEndpoint()
+        ..initialize(
+          server,
+          'notification',
           null,
         ),
       'points': _isfdgr65.PointsEndpoint()
@@ -521,6 +554,18 @@ class Endpoints extends _is.EndpointDispatch {
                         onlyApproved: params['onlyApproved'],
                       ),
         ),
+        'listPendingResources': _is.MethodConnector(
+          name: 'listPendingResources',
+          params: {},
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['academicResource']
+                          as _ipmkipkb.AcademicResourceEndpoint)
+                      .listPendingResources(session),
+        ),
         'setApprovalStatus': _is.MethodConnector(
           name: 'setApprovalStatus',
           params: {
@@ -534,6 +579,11 @@ class Endpoints extends _is.EndpointDispatch {
               type: _is.getType<bool>(),
               nullable: false,
             ),
+            'reason': _is.ParameterDescription(
+              name: 'reason',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
           },
           call:
               (
@@ -546,6 +596,7 @@ class Endpoints extends _is.EndpointDispatch {
                         session,
                         params['resourceId'],
                         params['approved'],
+                        reason: params['reason'],
                       ),
         ),
         'recordDownload': _is.MethodConnector(
@@ -600,6 +651,141 @@ class Endpoints extends _is.EndpointDispatch {
                         branch: params['branch'],
                         semester: params['semester'],
                         subjectCode: params['subjectCode'],
+                      ),
+        ),
+        'uploadPdf': _is.MethodConnector(
+          name: 'uploadPdf',
+          params: {
+            'title': _is.ParameterDescription(
+              name: 'title',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'description': _is.ParameterDescription(
+              name: 'description',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+            'university': _is.ParameterDescription(
+              name: 'university',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'course': _is.ParameterDescription(
+              name: 'course',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'branch': _is.ParameterDescription(
+              name: 'branch',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'academicYear': _is.ParameterDescription(
+              name: 'academicYear',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'semester': _is.ParameterDescription(
+              name: 'semester',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'subjectCode': _is.ParameterDescription(
+              name: 'subjectCode',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'subjectName': _is.ParameterDescription(
+              name: 'subjectName',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'unitNumber': _is.ParameterDescription(
+              name: 'unitNumber',
+              type: _is.getType<int?>(),
+              nullable: true,
+            ),
+            'resourceType': _is.ParameterDescription(
+              name: 'resourceType',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'filename': _is.ParameterDescription(
+              name: 'filename',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'fileBytes': _is.ParameterDescription(
+              name: 'fileBytes',
+              type: _is.getType<_idt.ByteData>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['academicResource']
+                          as _ipmkipkb.AcademicResourceEndpoint)
+                      .uploadPdf(
+                        session,
+                        title: params['title'],
+                        description: params['description'],
+                        university: params['university'],
+                        course: params['course'],
+                        branch: params['branch'],
+                        academicYear: params['academicYear'],
+                        semester: params['semester'],
+                        subjectCode: params['subjectCode'],
+                        subjectName: params['subjectName'],
+                        unitNumber: params['unitNumber'],
+                        resourceType: params['resourceType'],
+                        filename: params['filename'],
+                        fileBytes: params['fileBytes'],
+                      ),
+        ),
+        'downloadPdf': _is.MethodConnector(
+          name: 'downloadPdf',
+          params: {
+            'resourceId': _is.ParameterDescription(
+              name: 'resourceId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['academicResource']
+                          as _ipmkipkb.AcademicResourceEndpoint)
+                      .downloadPdf(
+                        session,
+                        params['resourceId'],
+                      ),
+        ),
+        'isPdfAvailable': _is.MethodConnector(
+          name: 'isPdfAvailable',
+          params: {
+            'resourceId': _is.ParameterDescription(
+              name: 'resourceId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['academicResource']
+                          as _ipmkipkb.AcademicResourceEndpoint)
+                      .isPdfAvailable(
+                        session,
+                        params['resourceId'],
                       ),
         ),
       },
@@ -694,6 +880,100 @@ class Endpoints extends _is.EndpointDispatch {
                     scope: params['scope'],
                   ),
         ),
+        'revokeRole': _is.MethodConnector(
+          name: 'revokeRole',
+          params: {
+            'targetUserId': _is.ParameterDescription(
+              name: 'targetUserId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'role': _is.ParameterDescription(
+              name: 'role',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['admin'] as _i5t1w2d2.AdminEndpoint).revokeRole(
+                    session,
+                    params['targetUserId'],
+                    params['role'],
+                  ),
+        ),
+        'getUserRoles': _is.MethodConnector(
+          name: 'getUserRoles',
+          params: {
+            'targetUserId': _is.ParameterDescription(
+              name: 'targetUserId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['admin'] as _i5t1w2d2.AdminEndpoint).getUserRoles(
+                    session,
+                    params['targetUserId'],
+                  ),
+        ),
+        'listStudents': _is.MethodConnector(
+          name: 'listStudents',
+          params: {
+            'search': _is.ParameterDescription(
+              name: 'search',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+            'limit': _is.ParameterDescription(
+              name: 'limit',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'offset': _is.ParameterDescription(
+              name: 'offset',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['admin'] as _i5t1w2d2.AdminEndpoint).listStudents(
+                    session,
+                    search: params['search'],
+                    limit: params['limit'],
+                    offset: params['offset'],
+                  ),
+        ),
+        'getStudentCount': _is.MethodConnector(
+          name: 'getStudentCount',
+          params: {
+            'search': _is.ParameterDescription(
+              name: 'search',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['admin'] as _i5t1w2d2.AdminEndpoint)
+                  .getStudentCount(
+                    session,
+                    search: params['search'],
+                  ),
+        ),
         'getMyRoles': _is.MethodConnector(
           name: 'getMyRoles',
           params: {},
@@ -707,8 +987,23 @@ class Endpoints extends _is.EndpointDispatch {
         'listAuditLogs': _is.MethodConnector(
           name: 'listAuditLogs',
           params: {
+            'search': _is.ParameterDescription(
+              name: 'search',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+            'actionType': _is.ParameterDescription(
+              name: 'actionType',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
             'limit': _is.ParameterDescription(
               name: 'limit',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'offset': _is.ParameterDescription(
+              name: 'offset',
               type: _is.getType<int>(),
               nullable: false,
             ),
@@ -720,7 +1015,10 @@ class Endpoints extends _is.EndpointDispatch {
               ) async =>
                   (endpoints['admin'] as _i5t1w2d2.AdminEndpoint).listAuditLogs(
                     session,
+                    search: params['search'],
+                    actionType: params['actionType'],
                     limit: params['limit'],
+                    offset: params['offset'],
                   ),
         ),
       },
@@ -1139,6 +1437,77 @@ class Endpoints extends _is.EndpointDispatch {
               ) async => (endpoints['chat'] as _ihc7hrsa.ChatEndpoint)
                   .listMyRooms(session),
         ),
+        'createCustomRoom': _is.MethodConnector(
+          name: 'createCustomRoom',
+          params: {
+            'name': _is.ParameterDescription(
+              name: 'name',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'description': _is.ParameterDescription(
+              name: 'description',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+            'topic': _is.ParameterDescription(
+              name: 'topic',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+            'allowedBranch': _is.ParameterDescription(
+              name: 'allowedBranch',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+            'allowedAcademicYear': _is.ParameterDescription(
+              name: 'allowedAcademicYear',
+              type: _is.getType<int?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['chat'] as _ihc7hrsa.ChatEndpoint)
+                  .createCustomRoom(
+                    session,
+                    name: params['name'],
+                    description: params['description'],
+                    topic: params['topic'],
+                    allowedBranch: params['allowedBranch'],
+                    allowedAcademicYear: params['allowedAcademicYear'],
+                  ),
+        ),
+        'joinRoom': _is.MethodConnector(
+          name: 'joinRoom',
+          params: {
+            'roomId': _is.ParameterDescription(
+              name: 'roomId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['chat'] as _ihc7hrsa.ChatEndpoint).joinRoom(
+                session,
+                params['roomId'],
+              ),
+        ),
+        'listAllAccessibleRooms': _is.MethodConnector(
+          name: 'listAllAccessibleRooms',
+          params: {},
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['chat'] as _ihc7hrsa.ChatEndpoint)
+                  .listAllAccessibleRooms(session),
+        ),
         'streamChatMessages': _is.MethodStreamConnector(
           name: 'streamChatMessages',
           params: {
@@ -1159,6 +1528,164 @@ class Endpoints extends _is.EndpointDispatch {
                   .streamChatMessages(
                     session,
                     params['roomId'],
+                  ),
+        ),
+      },
+    );
+    connectors['club'] = _is.EndpointConnector(
+      name: 'club',
+      endpoint: endpoints['club']!,
+      methodConnectors: {
+        'listClubs': _is.MethodConnector(
+          name: 'listClubs',
+          params: {
+            'category': _is.ParameterDescription(
+              name: 'category',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['club'] as _i2t636zb.ClubEndpoint).listClubs(
+                    session,
+                    category: params['category'],
+                  ),
+        ),
+        'getClub': _is.MethodConnector(
+          name: 'getClub',
+          params: {
+            'clubId': _is.ParameterDescription(
+              name: 'clubId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['club'] as _i2t636zb.ClubEndpoint).getClub(
+                session,
+                params['clubId'],
+              ),
+        ),
+        'submitClubQuery': _is.MethodConnector(
+          name: 'submitClubQuery',
+          params: {
+            'clubId': _is.ParameterDescription(
+              name: 'clubId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'targetTeam': _is.ParameterDescription(
+              name: 'targetTeam',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'category': _is.ParameterDescription(
+              name: 'category',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'subject': _is.ParameterDescription(
+              name: 'subject',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'message': _is.ParameterDescription(
+              name: 'message',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['club'] as _i2t636zb.ClubEndpoint).submitClubQuery(
+                    session,
+                    clubId: params['clubId'],
+                    targetTeam: params['targetTeam'],
+                    category: params['category'],
+                    subject: params['subject'],
+                    message: params['message'],
+                  ),
+        ),
+        'getMyClubQueries': _is.MethodConnector(
+          name: 'getMyClubQueries',
+          params: {},
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['club'] as _i2t636zb.ClubEndpoint)
+                  .getMyClubQueries(session),
+        ),
+        'getClubQueries': _is.MethodConnector(
+          name: 'getClubQueries',
+          params: {
+            'clubId': _is.ParameterDescription(
+              name: 'clubId',
+              type: _is.getType<int?>(),
+              nullable: true,
+            ),
+            'targetTeam': _is.ParameterDescription(
+              name: 'targetTeam',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+            'status': _is.ParameterDescription(
+              name: 'status',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['club'] as _i2t636zb.ClubEndpoint).getClubQueries(
+                    session,
+                    clubId: params['clubId'],
+                    targetTeam: params['targetTeam'],
+                    status: params['status'],
+                  ),
+        ),
+        'respondToClubQuery': _is.MethodConnector(
+          name: 'respondToClubQuery',
+          params: {
+            'queryId': _is.ParameterDescription(
+              name: 'queryId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'responseMessage': _is.ParameterDescription(
+              name: 'responseMessage',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'responderName': _is.ParameterDescription(
+              name: 'responderName',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['club'] as _i2t636zb.ClubEndpoint)
+                  .respondToClubQuery(
+                    session,
+                    queryId: params['queryId'],
+                    responseMessage: params['responseMessage'],
+                    responderName: params['responderName'],
                   ),
         ),
       },
@@ -1614,6 +2141,60 @@ class Endpoints extends _is.EndpointDispatch {
                     params['eventId'],
                   ),
         ),
+        'getPendingEvents': _is.MethodConnector(
+          name: 'getPendingEvents',
+          params: {
+            'limit': _is.ParameterDescription(
+              name: 'limit',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'offset': _is.ParameterDescription(
+              name: 'offset',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['event'] as _icw8lb6p.EventEndpoint)
+                  .getPendingEvents(
+                    session,
+                    limit: params['limit'],
+                    offset: params['offset'],
+                  ),
+        ),
+        'getPendingEventsCount': _is.MethodConnector(
+          name: 'getPendingEventsCount',
+          params: {},
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['event'] as _icw8lb6p.EventEndpoint)
+                  .getPendingEventsCount(session),
+        ),
+        'getMyEvents': _is.MethodConnector(
+          name: 'getMyEvents',
+          params: {
+            'status': _is.ParameterDescription(
+              name: 'status',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['event'] as _icw8lb6p.EventEndpoint).getMyEvents(
+                    session,
+                    status: params['status'],
+                  ),
+        ),
         'streamRsvpUpdates': _is.MethodStreamConnector(
           name: 'streamRsvpUpdates',
           params: {},
@@ -1626,6 +2207,153 @@ class Endpoints extends _is.EndpointDispatch {
                 Map<String, Stream> streamParams,
               ) => (endpoints['event'] as _icw8lb6p.EventEndpoint)
                   .streamRsvpUpdates(session),
+        ),
+      },
+    );
+    connectors['interviewPrep'] = _is.EndpointConnector(
+      name: 'interviewPrep',
+      endpoint: endpoints['interviewPrep']!,
+      methodConnectors: {
+        'listCompanies': _is.MethodConnector(
+          name: 'listCompanies',
+          params: {},
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['interviewPrep']
+                          as _ik7tibzk.InterviewPrepEndpoint)
+                      .listCompanies(session),
+        ),
+        'listSeniorExperiences': _is.MethodConnector(
+          name: 'listSeniorExperiences',
+          params: {
+            'companyName': _is.ParameterDescription(
+              name: 'companyName',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['interviewPrep']
+                          as _ik7tibzk.InterviewPrepEndpoint)
+                      .listSeniorExperiences(
+                        session,
+                        companyName: params['companyName'],
+                      ),
+        ),
+        'requestMockInterview': _is.MethodConnector(
+          name: 'requestMockInterview',
+          params: {
+            'targetCompany': _is.ParameterDescription(
+              name: 'targetCompany',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'targetRole': _is.ParameterDescription(
+              name: 'targetRole',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'mockRound': _is.ParameterDescription(
+              name: 'mockRound',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'preferredDate': _is.ParameterDescription(
+              name: 'preferredDate',
+              type: _is.getType<DateTime>(),
+              nullable: false,
+            ),
+            'resumeUrl': _is.ParameterDescription(
+              name: 'resumeUrl',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+            'notes': _is.ParameterDescription(
+              name: 'notes',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['interviewPrep']
+                          as _ik7tibzk.InterviewPrepEndpoint)
+                      .requestMockInterview(
+                        session,
+                        targetCompany: params['targetCompany'],
+                        targetRole: params['targetRole'],
+                        mockRound: params['mockRound'],
+                        preferredDate: params['preferredDate'],
+                        resumeUrl: params['resumeUrl'],
+                        notes: params['notes'],
+                      ),
+        ),
+        'getMyMockInterviewSlots': _is.MethodConnector(
+          name: 'getMyMockInterviewSlots',
+          params: {},
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['interviewPrep']
+                          as _ik7tibzk.InterviewPrepEndpoint)
+                      .getMyMockInterviewSlots(session),
+        ),
+        'updateMockInterviewStatus': _is.MethodConnector(
+          name: 'updateMockInterviewStatus',
+          params: {
+            'slotId': _is.ParameterDescription(
+              name: 'slotId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'status': _is.ParameterDescription(
+              name: 'status',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'seniorMentorName': _is.ParameterDescription(
+              name: 'seniorMentorName',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+            'meetingLink': _is.ParameterDescription(
+              name: 'meetingLink',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+            'feedbackNotes': _is.ParameterDescription(
+              name: 'feedbackNotes',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['interviewPrep']
+                          as _ik7tibzk.InterviewPrepEndpoint)
+                      .updateMockInterviewStatus(
+                        session,
+                        slotId: params['slotId'],
+                        status: params['status'],
+                        seniorMentorName: params['seniorMentorName'],
+                        meetingLink: params['meetingLink'],
+                        feedbackNotes: params['feedbackNotes'],
+                      ),
         ),
       },
     );
@@ -1724,6 +2452,289 @@ class Endpoints extends _is.EndpointDispatch {
         ),
       },
     );
+    connectors['library'] = _is.EndpointConnector(
+      name: 'library',
+      endpoint: endpoints['library']!,
+      methodConnectors: {
+        'getStaffProfile': _is.MethodConnector(
+          name: 'getStaffProfile',
+          params: {},
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['library'] as _iqlmnpik.LibraryEndpoint)
+                  .getStaffProfile(session),
+        ),
+        'getAvailableCounters': _is.MethodConnector(
+          name: 'getAvailableCounters',
+          params: {},
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['library'] as _iqlmnpik.LibraryEndpoint)
+                  .getAvailableCounters(session),
+        ),
+        'getLibraryRequests': _is.MethodConnector(
+          name: 'getLibraryRequests',
+          params: {
+            'counterName': _is.ParameterDescription(
+              name: 'counterName',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+            'statusFilter': _is.ParameterDescription(
+              name: 'statusFilter',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+            'searchQuery': _is.ParameterDescription(
+              name: 'searchQuery',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+            'limit': _is.ParameterDescription(
+              name: 'limit',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'offset': _is.ParameterDescription(
+              name: 'offset',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['library'] as _iqlmnpik.LibraryEndpoint)
+                  .getLibraryRequests(
+                    session,
+                    counterName: params['counterName'],
+                    statusFilter: params['statusFilter'],
+                    searchQuery: params['searchQuery'],
+                    limit: params['limit'],
+                    offset: params['offset'],
+                  ),
+        ),
+        'updateRequestStatus': _is.MethodConnector(
+          name: 'updateRequestStatus',
+          params: {
+            'requestId': _is.ParameterDescription(
+              name: 'requestId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'targetStatus': _is.ParameterDescription(
+              name: 'targetStatus',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'reason': _is.ParameterDescription(
+              name: 'reason',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['library'] as _iqlmnpik.LibraryEndpoint)
+                  .updateRequestStatus(
+                    session,
+                    requestId: params['requestId'],
+                    targetStatus: params['targetStatus'],
+                    reason: params['reason'],
+                  ),
+        ),
+        'verifyCollection': _is.MethodConnector(
+          name: 'verifyCollection',
+          params: {
+            'collectionCodeOrToken': _is.ParameterDescription(
+              name: 'collectionCodeOrToken',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['library'] as _iqlmnpik.LibraryEndpoint)
+                  .verifyCollection(
+                    session,
+                    collectionCodeOrToken: params['collectionCodeOrToken'],
+                  ),
+        ),
+        'getStudentPrintRequests': _is.MethodConnector(
+          name: 'getStudentPrintRequests',
+          params: {
+            'paymentStatusFilter': _is.ParameterDescription(
+              name: 'paymentStatusFilter',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['library'] as _iqlmnpik.LibraryEndpoint)
+                  .getStudentPrintRequests(
+                    session,
+                    paymentStatusFilter: params['paymentStatusFilter'],
+                  ),
+        ),
+        'createPrintRequest': _is.MethodConnector(
+          name: 'createPrintRequest',
+          params: {
+            'fileName': _is.ParameterDescription(
+              name: 'fileName',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'fileUrl': _is.ParameterDescription(
+              name: 'fileUrl',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'fileSizeBytes': _is.ParameterDescription(
+              name: 'fileSizeBytes',
+              type: _is.getType<int?>(),
+              nullable: true,
+            ),
+            'pageCount': _is.ParameterDescription(
+              name: 'pageCount',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'copies': _is.ParameterDescription(
+              name: 'copies',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'printType': _is.ParameterDescription(
+              name: 'printType',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'paperSize': _is.ParameterDescription(
+              name: 'paperSize',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'printSide': _is.ParameterDescription(
+              name: 'printSide',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'binding': _is.ParameterDescription(
+              name: 'binding',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'deliveryMode': _is.ParameterDescription(
+              name: 'deliveryMode',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'counterName': _is.ParameterDescription(
+              name: 'counterName',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'pointsToRedeem': _is.ParameterDescription(
+              name: 'pointsToRedeem',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'simulatePaymentFailure': _is.ParameterDescription(
+              name: 'simulatePaymentFailure',
+              type: _is.getType<bool>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['library'] as _iqlmnpik.LibraryEndpoint)
+                  .createPrintRequest(
+                    session,
+                    fileName: params['fileName'],
+                    fileUrl: params['fileUrl'],
+                    fileSizeBytes: params['fileSizeBytes'],
+                    pageCount: params['pageCount'],
+                    copies: params['copies'],
+                    printType: params['printType'],
+                    paperSize: params['paperSize'],
+                    printSide: params['printSide'],
+                    binding: params['binding'],
+                    deliveryMode: params['deliveryMode'],
+                    counterName: params['counterName'],
+                    pointsToRedeem: params['pointsToRedeem'],
+                    simulatePaymentFailure: params['simulatePaymentFailure'],
+                  ),
+        ),
+        'retryPrintPayment': _is.MethodConnector(
+          name: 'retryPrintPayment',
+          params: {
+            'requestId': _is.ParameterDescription(
+              name: 'requestId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'simulatePaymentFailure': _is.ParameterDescription(
+              name: 'simulatePaymentFailure',
+              type: _is.getType<bool>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['library'] as _iqlmnpik.LibraryEndpoint)
+                  .retryPrintPayment(
+                    session,
+                    requestId: params['requestId'],
+                    simulatePaymentFailure: params['simulatePaymentFailure'],
+                  ),
+        ),
+        'getStudentPointWallet': _is.MethodConnector(
+          name: 'getStudentPointWallet',
+          params: {},
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['library'] as _iqlmnpik.LibraryEndpoint)
+                  .getStudentPointWallet(session),
+        ),
+        'getPointTransactions': _is.MethodConnector(
+          name: 'getPointTransactions',
+          params: {
+            'limit': _is.ParameterDescription(
+              name: 'limit',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['library'] as _iqlmnpik.LibraryEndpoint)
+                  .getPointTransactions(
+                    session,
+                    limit: params['limit'],
+                  ),
+        ),
+      },
+    );
     connectors['mom'] = _is.EndpointConnector(
       name: 'mom',
       endpoint: endpoints['mom']!,
@@ -1819,6 +2830,105 @@ class Endpoints extends _is.EndpointDispatch {
         ),
       },
     );
+    connectors['notification'] = _is.EndpointConnector(
+      name: 'notification',
+      endpoint: endpoints['notification']!,
+      methodConnectors: {
+        'getMyNotifications': _is.MethodConnector(
+          name: 'getMyNotifications',
+          params: {
+            'unreadOnly': _is.ParameterDescription(
+              name: 'unreadOnly',
+              type: _is.getType<bool?>(),
+              nullable: true,
+            ),
+            'type': _is.ParameterDescription(
+              name: 'type',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+            'limit': _is.ParameterDescription(
+              name: 'limit',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'offset': _is.ParameterDescription(
+              name: 'offset',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['notification'] as _ihb11yhk.NotificationEndpoint)
+                      .getMyNotifications(
+                        session,
+                        unreadOnly: params['unreadOnly'],
+                        type: params['type'],
+                        limit: params['limit'],
+                        offset: params['offset'],
+                      ),
+        ),
+        'getUnreadCount': _is.MethodConnector(
+          name: 'getUnreadCount',
+          params: {},
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['notification'] as _ihb11yhk.NotificationEndpoint)
+                      .getUnreadCount(session),
+        ),
+        'markAsRead': _is.MethodConnector(
+          name: 'markAsRead',
+          params: {
+            'id': _is.ParameterDescription(
+              name: 'id',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['notification'] as _ihb11yhk.NotificationEndpoint)
+                      .markAsRead(
+                        session,
+                        params['id'],
+                      ),
+        ),
+        'markAllAsRead': _is.MethodConnector(
+          name: 'markAllAsRead',
+          params: {},
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['notification'] as _ihb11yhk.NotificationEndpoint)
+                      .markAllAsRead(session),
+        ),
+        'streamMyNotifications': _is.MethodStreamConnector(
+          name: 'streamMyNotifications',
+          params: {},
+          streamParams: {},
+          returnType: _is.MethodStreamReturnType.streamType,
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+                Map<String, Stream> streamParams,
+              ) => (endpoints['notification'] as _ihb11yhk.NotificationEndpoint)
+                  .streamMyNotifications(session),
+        ),
+      },
+    );
     connectors['points'] = _is.EndpointConnector(
       name: 'points',
       endpoint: endpoints['points']!,
@@ -1909,6 +3019,73 @@ class Endpoints extends _is.EndpointDispatch {
                     description: params['description'],
                     costPoints: params['costPoints'],
                     stockRemaining: params['stockRemaining'],
+                  ),
+        ),
+        'listAllRewards': _is.MethodConnector(
+          name: 'listAllRewards',
+          params: {},
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['points'] as _isfdgr65.PointsEndpoint)
+                  .listAllRewards(session),
+        ),
+        'updateRewardPerk': _is.MethodConnector(
+          name: 'updateRewardPerk',
+          params: {
+            'perk': _is.ParameterDescription(
+              name: 'perk',
+              type: _is.getType<_i5apij9o.RewardPerk>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['points'] as _isfdgr65.PointsEndpoint)
+                  .updateRewardPerk(
+                    session,
+                    params['perk'],
+                  ),
+        ),
+        'deleteRewardPerk': _is.MethodConnector(
+          name: 'deleteRewardPerk',
+          params: {
+            'perkId': _is.ParameterDescription(
+              name: 'perkId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['points'] as _isfdgr65.PointsEndpoint)
+                  .deleteRewardPerk(
+                    session,
+                    params['perkId'],
+                  ),
+        ),
+        'listRedemptions': _is.MethodConnector(
+          name: 'listRedemptions',
+          params: {
+            'limit': _is.ParameterDescription(
+              name: 'limit',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['points'] as _isfdgr65.PointsEndpoint)
+                  .listRedemptions(
+                    session,
+                    limit: params['limit'],
                   ),
         ),
         'redeemReward': _is.MethodConnector(
@@ -2109,6 +3286,16 @@ class Endpoints extends _is.EndpointDispatch {
                 Map<String, dynamic> params,
               ) async => (endpoints['student'] as _if6txhyr.StudentEndpoint)
                   .loginDemo(session),
+        ),
+        'loginDemoStudent2': _is.MethodConnector(
+          name: 'loginDemoStudent2',
+          params: {},
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['student'] as _if6txhyr.StudentEndpoint)
+                  .loginDemoStudent2(session),
         ),
         'registerStudent': _is.MethodConnector(
           name: 'registerStudent',
@@ -2499,6 +3686,11 @@ class Endpoints extends _is.EndpointDispatch {
               type: _is.getType<String>(),
               nullable: false,
             ),
+            'faculty': _is.ParameterDescription(
+              name: 'faculty',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
           },
           call:
               (
@@ -2516,6 +3708,76 @@ class Endpoints extends _is.EndpointDispatch {
                     endTime: params['endTime'],
                     subject: params['subject'],
                     room: params['room'],
+                    faculty: params['faculty'],
+                  ),
+        ),
+        'updateSectionTimetable': _is.MethodConnector(
+          name: 'updateSectionTimetable',
+          params: {
+            'entry': _is.ParameterDescription(
+              name: 'entry',
+              type: _is.getType<_i6o9odyo.SectionTimetable>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['timetable'] as _in4fhk5u.TimetableEndpoint)
+                  .updateSectionTimetable(
+                    session,
+                    params['entry'],
+                  ),
+        ),
+        'deleteSectionTimetable': _is.MethodConnector(
+          name: 'deleteSectionTimetable',
+          params: {
+            'id': _is.ParameterDescription(
+              name: 'id',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['timetable'] as _in4fhk5u.TimetableEndpoint)
+                  .deleteSectionTimetable(
+                    session,
+                    params['id'],
+                  ),
+        ),
+        'listAllTimetables': _is.MethodConnector(
+          name: 'listAllTimetables',
+          params: {
+            'branch': _is.ParameterDescription(
+              name: 'branch',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+            'semester': _is.ParameterDescription(
+              name: 'semester',
+              type: _is.getType<int?>(),
+              nullable: true,
+            ),
+            'section': _is.ParameterDescription(
+              name: 'section',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['timetable'] as _in4fhk5u.TimetableEndpoint)
+                  .listAllTimetables(
+                    session,
+                    branch: params['branch'],
+                    semester: params['semester'],
+                    section: params['section'],
                   ),
         ),
         'getSectionTimetable': _is.MethodConnector(
@@ -2600,6 +3862,31 @@ class Endpoints extends _is.EndpointDispatch {
                     startTime: params['startTime'],
                     endTime: params['endTime'],
                     isFree: params['isFree'],
+                  ),
+        ),
+        'clearFreeSlot': _is.MethodConnector(
+          name: 'clearFreeSlot',
+          params: {
+            'dayOfWeek': _is.ParameterDescription(
+              name: 'dayOfWeek',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'slotLabel': _is.ParameterDescription(
+              name: 'slotLabel',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['timetable'] as _in4fhk5u.TimetableEndpoint)
+                  .clearFreeSlot(
+                    session,
+                    dayOfWeek: params['dayOfWeek'],
+                    slotLabel: params['slotLabel'],
                   ),
         ),
         'findTimetableStudyMatches': _is.MethodConnector(

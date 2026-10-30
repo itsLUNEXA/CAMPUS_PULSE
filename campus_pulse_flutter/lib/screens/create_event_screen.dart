@@ -87,6 +87,17 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       );
 
       setState(() => _isLoading = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Submitted for admin approval. You can track review progress under "My Events".',
+            ),
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: AppleTokens.primaryTeal,
+          ),
+        );
+      }
       widget.onEventCreated();
     } catch (e) {
       setState(() {
@@ -127,6 +138,38 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
               const SizedBox(height: AppleTokens.space8),
               const Text(
                 'Publish an event to the campus feed for your club, department, or student community.',
+              ),
+              const SizedBox(height: AppleTokens.space16),
+
+              Container(
+                padding: const EdgeInsets.all(AppleTokens.space12),
+                decoration: BoxDecoration(
+                  color: AppleTokens.lightMint.withValues(alpha: 0.35),
+                  borderRadius: BorderRadius.circular(AppleTokens.radius12),
+                  border: Border.all(
+                    color: AppleTokens.primaryTeal.withValues(alpha: 0.3),
+                  ),
+                ),
+                child: const Row(
+                  children: [
+                    Icon(
+                      Icons.shield_outlined,
+                      color: AppleTokens.primaryTeal,
+                      size: 20,
+                    ),
+                    SizedBox(width: AppleTokens.space12),
+                    Expanded(
+                      child: Text(
+                        'Event Submission Workflow: All campus events are submitted for administrative review before appearing in the public feed.',
+                        style: TextStyle(
+                          color: AppleTokens.primaryTeal,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: AppleTokens.space24),
 
@@ -204,11 +247,23 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                       ),
                       const SizedBox(height: AppleTokens.space16),
 
-                      SwitchListTile(
-                        title: const Text('Team Event Mode', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                        subtitle: const Text('Require students to register as a team with designated teammates.'),
-                        value: _isTeamEvent,
-                        onChanged: (val) => setState(() => _isTeamEvent = val),
+                      Material(
+                        color: Colors.transparent,
+                        child: SwitchListTile(
+                          title: const Text(
+                            'Team Event Mode',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                          subtitle: const Text(
+                            'Require students to register as a team with designated teammates.',
+                          ),
+                          value: _isTeamEvent,
+                          onChanged: (val) =>
+                              setState(() => _isTeamEvent = val),
+                        ),
                       ),
                       if (_isTeamEvent) ...[
                         Row(
@@ -216,18 +271,26 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                             Expanded(
                               child: TextFormField(
                                 initialValue: '2',
-                                decoration: const InputDecoration(labelText: 'Min Team Size'),
+                                decoration: const InputDecoration(
+                                  labelText: 'Min Team Size',
+                                ),
                                 keyboardType: TextInputType.number,
-                                onChanged: (val) => setState(() => _minTeamSize = int.tryParse(val) ?? 2),
+                                onChanged: (val) => setState(
+                                  () => _minTeamSize = int.tryParse(val) ?? 2,
+                                ),
                               ),
                             ),
                             const SizedBox(width: AppleTokens.space16),
                             Expanded(
                               child: TextFormField(
                                 initialValue: '4',
-                                decoration: const InputDecoration(labelText: 'Max Team Size'),
+                                decoration: const InputDecoration(
+                                  labelText: 'Max Team Size',
+                                ),
                                 keyboardType: TextInputType.number,
-                                onChanged: (val) => setState(() => _maxTeamSize = int.tryParse(val) ?? 4),
+                                onChanged: (val) => setState(
+                                  () => _maxTeamSize = int.tryParse(val) ?? 4,
+                                ),
                               ),
                             ),
                           ],
@@ -260,7 +323,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                           ),
                           const SizedBox(width: AppleTokens.space12),
                           AppleButton(
-                            label: 'Publish Event',
+                            label: 'Submit for Approval',
                             isLoading: _isLoading,
                             height: 40,
                             onPressed: _submit,

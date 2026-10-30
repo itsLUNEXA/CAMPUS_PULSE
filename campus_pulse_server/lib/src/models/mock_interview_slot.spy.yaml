@@ -1,0 +1,22 @@
+class: MockInterviewSlot
+table: mock_interview_slots
+fields:
+  studentAuthUserId: UuidValue
+  studentName: String
+  studentEmail: String
+  targetCompany: String
+  targetRole: String
+  mockRound: String
+  preferredDate: DateTime
+  resumeUrl: String?
+  notes: String?
+  status: String, default='REQUESTED'
+  seniorMentorName: String?
+  meetingLink: String?
+  feedbackNotes: String?
+  createdAt: DateTime, default=now
+
+indexes:
+  mock_slot_user_idx:
+    fields: studentAuthUserId
+

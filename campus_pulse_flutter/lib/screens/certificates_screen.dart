@@ -61,15 +61,20 @@ class _CertificatesScreenState extends State<CertificatesScreen> {
               EventCertificate(
                 certificateId: 'CP-1-A98B47E2',
                 eventId: 1,
-                authUserId: widget.authState.currentProfile?.authUserId ?? UuidValue.fromString('00000000-0000-0000-0000-000000000001'),
-                studentName: widget.authState.currentProfile?.fullName ?? 'Aarav Sharma',
+                authUserId:
+                    widget.authState.currentProfile?.authUserId ??
+                    UuidValue.fromString(
+                      '00000000-0000-0000-0000-000000000001',
+                    ),
+                studentName:
+                    widget.authState.currentProfile?.fullName ?? 'Aarav Sharma',
                 eventName: 'HackPulse 2026: Campus Hackathon',
                 eventDate: now.subtract(const Duration(days: 3)),
                 issuedAt: now.subtract(const Duration(days: 1)),
                 verificationUrl: 'https://campuspulse.edu/verify/CP-1-A98B47E2',
                 status: 'valid',
                 signatureTitle: 'Dean of Student Affairs',
-              )
+              ),
             ];
           }
         });
@@ -106,7 +111,9 @@ class _CertificatesScreenState extends State<CertificatesScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark ? AppleTokens.darkBackground : AppleTokens.warmWhite,
+      backgroundColor: isDark
+          ? AppleTokens.darkBackground
+          : AppleTokens.warmWhite,
       appBar: AppBar(
         title: Text(
           'Event Certificates',
@@ -130,7 +137,11 @@ class _CertificatesScreenState extends State<CertificatesScreen> {
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.verified_user_rounded, color: AppleTokens.darkNavy, size: 24),
+                    const Icon(
+                      Icons.verified_user_rounded,
+                      color: AppleTokens.darkNavy,
+                      size: 24,
+                    ),
                     const SizedBox(width: 10),
                     Text(
                       'Verify Authenticity & Public Audit',
@@ -144,8 +155,11 @@ class _CertificatesScreenState extends State<CertificatesScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Employers, faculty, and recruiters can verify any Campus Pulse certificate ID instantly.',
-                  style: GoogleFonts.inter(fontSize: 12, color: AppleTokens.textMutedGrey),
+                  'Employers, faculty, and recruiters can verify any CAMPULSE certificate ID instantly.',
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    color: AppleTokens.textMutedGrey,
+                  ),
                 ),
                 const SizedBox(height: 12),
                 Row(
@@ -155,7 +169,9 @@ class _CertificatesScreenState extends State<CertificatesScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 14),
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.circular(AppleTokens.radius12),
+                          borderRadius: BorderRadius.circular(
+                            AppleTokens.radius12,
+                          ),
                           border: Border.all(color: AppleTokens.borderPastel),
                         ),
                         child: TextField(
@@ -164,7 +180,10 @@ class _CertificatesScreenState extends State<CertificatesScreen> {
                             hintText: 'Enter ID (e.g. CP-1-A98B47E2)',
                             border: InputBorder.none,
                           ),
-                          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
+                          ),
                         ),
                       ),
                     ),
@@ -195,15 +214,41 @@ class _CertificatesScreenState extends State<CertificatesScreen> {
                       children: [
                         Row(
                           children: [
-                            const Icon(Icons.check_circle, color: Colors.green, size: 20),
+                            const Icon(
+                              Icons.check_circle,
+                              color: Colors.green,
+                              size: 20,
+                            ),
                             const SizedBox(width: 8),
-                            Text('VERIFIED AUTHENTIC CERTIFICATE', style: TextStyle(fontWeight: FontWeight.w800, color: Colors.green.shade900, fontSize: 12)),
+                            Text(
+                              'VERIFIED AUTHENTIC CERTIFICATE',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w800,
+                                color: Colors.green.shade900,
+                                fontSize: 12,
+                              ),
+                            ),
                           ],
                         ),
                         const SizedBox(height: 4),
-                        Text('Awarded to: ${_verifiedResult!.studentName}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                        Text('Event: ${_verifiedResult!.eventName}', style: const TextStyle(fontSize: 12)),
-                        Text('Issued: ${_verifiedResult!.issuedAt.day}/${_verifiedResult!.issuedAt.month}/${_verifiedResult!.issuedAt.year}', style: const TextStyle(fontSize: 11, color: Colors.black54)),
+                        Text(
+                          'Awarded to: ${_verifiedResult!.studentName}',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                          ),
+                        ),
+                        Text(
+                          'Event: ${_verifiedResult!.eventName}',
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                        Text(
+                          'Issued: ${_verifiedResult!.issuedAt.day}/${_verifiedResult!.issuedAt.month}/${_verifiedResult!.issuedAt.year}',
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: Colors.black54,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -237,7 +282,9 @@ class _CertificatesScreenState extends State<CertificatesScreen> {
               ),
             )
           else
-            ..._myCertificates.map((cert) => _buildCertificateCard(cert, isDark)),
+            ..._myCertificates.map(
+              (cert) => _buildCertificateCard(cert, isDark),
+            ),
         ],
       ),
     );
@@ -254,37 +301,62 @@ class _CertificatesScreenState extends State<CertificatesScreen> {
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: AppleTokens.pastelYellow,
                     borderRadius: BorderRadius.circular(AppleTokens.radius999),
                   ),
                   child: Text(
                     'OFFICIAL CREDENTIAL',
-                    style: GoogleFonts.inter(fontWeight: FontWeight.w800, fontSize: 10, color: AppleTokens.darkNavy),
+                    style: GoogleFonts.inter(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 10,
+                      color: AppleTokens.darkNavy,
+                    ),
                   ),
                 ),
                 const Spacer(),
                 Text(
                   'ID: ${cert.certificateId}',
-                  style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold, color: AppleTokens.softLavender),
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: AppleTokens.softLavender,
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 16),
             Text(
               'Certificate of Participation & Achievement',
-              style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: AppleTokens.textMutedGrey),
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: AppleTokens.textMutedGrey,
+              ),
             ),
             const SizedBox(height: 4),
             Text(
               cert.studentName,
-              style: GoogleFonts.inter(fontSize: 22, fontWeight: FontWeight.w800, color: AppleTokens.darkNavy),
+              style: GoogleFonts.inter(
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
+                color: AppleTokens.darkNavy,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
               'Has successfully participated in and satisfied all attendance and academic requirements for ${cert.eventName}.',
-              style: GoogleFonts.inter(fontSize: 13, color: isDark ? AppleTokens.darkTextSecondary : AppleTokens.darkNavy, height: 1.5),
+              style: GoogleFonts.inter(
+                fontSize: 13,
+                color: isDark
+                    ? AppleTokens.darkTextSecondary
+                    : AppleTokens.darkNavy,
+                height: 1.5,
+              ),
             ),
             const SizedBox(height: 16),
             const Divider(),
@@ -295,8 +367,20 @@ class _CertificatesScreenState extends State<CertificatesScreen> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Authorized Signatory', style: TextStyle(fontSize: 11, color: AppleTokens.textMutedGrey)),
-                    Text(cert.signatureTitle, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                    Text(
+                      'Authorized Signatory',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: AppleTokens.textMutedGrey,
+                      ),
+                    ),
+                    Text(
+                      cert.signatureTitle,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                      ),
+                    ),
                   ],
                 ),
                 AppleButton(
@@ -304,7 +388,11 @@ class _CertificatesScreenState extends State<CertificatesScreen> {
                   variant: AppleButtonVariant.secondary,
                   onPressed: () {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Downloading Certificate #${cert.certificateId}...')),
+                      SnackBar(
+                        content: Text(
+                          'Downloading Certificate #${cert.certificateId}...',
+                        ),
+                      ),
                     );
                   },
                 ),

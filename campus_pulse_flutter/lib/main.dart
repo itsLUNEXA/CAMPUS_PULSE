@@ -2,7 +2,6 @@ import 'package:campus_pulse_client/campus_pulse_client.dart';
 import 'package:flutter/material.dart';
 import 'client.dart';
 import 'screens/auth_screen.dart';
-import 'screens/admin_login_screen.dart';
 import 'screens/master_admin_dashboard_screen.dart';
 import 'screens/student_timetable_screen.dart';
 import 'screens/rewards_screen.dart';
@@ -28,6 +27,10 @@ import 'screens/student_discovery_screen.dart';
 import 'screens/student_profile_screen.dart';
 import 'screens/study_requests_screen.dart';
 import 'screens/welcome_onboarding_screen.dart';
+import 'screens/library_staff_dashboard_screen.dart';
+import 'screens/student_print_screen.dart';
+import 'screens/campus_clubs_screen.dart';
+import 'screens/interview_prep_screen.dart';
 import 'services/auth_state.dart';
 import 'services/admin_auth_state.dart';
 import 'services/preferences_service.dart';
@@ -84,7 +87,7 @@ class CampusPulseApp extends StatelessWidget {
       listenable: preferencesService,
       builder: (context, _) {
         return MaterialApp(
-          title: 'Campus Pulse',
+          title: 'CAMPULSE',
           debugShowCheckedModeBanner: false,
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
@@ -155,6 +158,7 @@ class _CampusPulseShellState extends State<CampusPulseShell> {
 
   void _onAuthStateChanged() {
     if (!widget.authState.isAuthenticated) {
+      widget.realtimeService.clearSession();
       // Force navigation to public landing page and clear private state
       if (!_isPublicRoute(_currentRoute)) {
         setState(() {
@@ -164,16 +168,66 @@ class _CampusPulseShellState extends State<CampusPulseShell> {
           _quizResult = null;
         });
       }
+    } else {
+      widget.realtimeService.startListening();
+      if (widget.authState.isAdmin) {
+        if (_currentRoute == 'auth' ||
+            _currentRoute == 'welcome' ||
+            _currentRoute == 'admin_login') {
+          setState(() {
+            _currentRoute = 'master_admin';
+          });
+        }
+      } else {
+        // Authenticated as regular student: Always redirect to home dashboard
+        if (_currentRoute == 'auth' ||
+            _currentRoute == 'welcome' ||
+            _currentRoute == 'admin_login' ||
+            _currentRoute == 'master_admin' ||
+            _currentRoute == 'admin') {
+          setState(() {
+            _currentRoute = 'home';
+          });
+        }
+      }
     }
   }
 
   void _navigateTo(String route) {
-    // Admin route protection: Ensure master admin is authenticated
+    // If admin_login is requested, route through main login portal
+    if (route == 'admin_login') {
+      setState(() {
+        _currentRoute = 'auth';
+      });
+      return;
+    }
+
+    // Admin route protection: Ensure authenticated user has server-verified admin role
     if (route == 'master_admin' || route == 'admin') {
-      if (!widget.adminAuthState.isAdminAuthenticated) {
+      if (!widget.authState.isAuthenticated) {
         setState(() {
-          _currentRoute = 'admin_login';
+          _currentRoute = 'auth';
         });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please sign in with administrator credentials.'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return;
+      }
+      if (!widget.authState.isAdmin) {
+        setState(() {
+          _currentRoute = 'home';
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Access Denied: Master Administrator credentials required.',
+            ),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
         return;
       }
     }
@@ -212,7 +266,13 @@ class _CampusPulseShellState extends State<CampusPulseShell> {
       case 'auth':
         activeScreen = AuthScreen(
           authState: widget.authState,
-          onAuthenticated: () => _navigateTo('home'),
+          onAuthenticated: () {
+            if (widget.authState.isAdmin) {
+              _navigateTo('master_admin');
+            } else {
+              _navigateTo('home');
+            }
+          },
         );
         break;
 
@@ -350,6 +410,25 @@ class _CampusPulseShellState extends State<CampusPulseShell> {
         activeScreen = NotificationsScreen(
           realtimeService: widget.realtimeService,
           onBack: () => _navigateTo('home'),
+          onNavigate: (route) => _navigateTo(route),
+          onNavigateWithTarget: (route, targetId) async {
+            if (route == 'event_detail' && targetId != null) {
+              final id = int.tryParse(targetId);
+              if (id != null) {
+                try {
+                  final ev = await client.event.getEvent(id);
+                  if (ev != null && mounted) {
+                    setState(() {
+                      _selectedEvent = ev;
+                      _currentRoute = 'event_detail';
+                    });
+                    return;
+                  }
+                } catch (_) {}
+              }
+            }
+            _navigateTo(route);
+          },
         );
         break;
 
@@ -395,27 +474,38 @@ class _CampusPulseShellState extends State<CampusPulseShell> {
         break;
 
       case 'admin_login':
-        activeScreen = AdminLoginScreen(
-          adminAuthState: widget.adminAuthState,
-          onAdminAuthenticated: () => _navigateTo('master_admin'),
-          onBackToStudentPortal: () => _navigateTo('welcome'),
+        activeScreen = AuthScreen(
+          authState: widget.authState,
+          onAuthenticated: () {
+            if (widget.authState.isAdmin) {
+              _navigateTo('master_admin');
+            } else {
+              _navigateTo('home');
+            }
+          },
         );
         break;
 
       case 'master_admin':
       case 'admin':
-        if (!widget.adminAuthState.isAdminAuthenticated) {
-          activeScreen = AdminLoginScreen(
-            adminAuthState: widget.adminAuthState,
-            onAdminAuthenticated: () => _navigateTo('master_admin'),
-            onBackToStudentPortal: () => _navigateTo('welcome'),
+        if (!widget.authState.isAuthenticated || !widget.authState.isAdmin) {
+          activeScreen = AuthScreen(
+            authState: widget.authState,
+            onAuthenticated: () {
+              if (widget.authState.isAdmin) {
+                _navigateTo('master_admin');
+              } else {
+                _navigateTo('home');
+              }
+            },
           );
         } else {
           activeScreen = MasterAdminDashboardScreen(
-            adminAuthState: widget.adminAuthState,
+            authState: widget.authState,
             onSignOut: () async {
-              await widget.adminAuthState.signOutAdmin();
-              _navigateTo('admin_login');
+              widget.realtimeService.clearSession();
+              await widget.authState.signOut();
+              _navigateTo('welcome');
             },
             onExitToStudentPortal: () => _navigateTo('home'),
           );
@@ -471,6 +561,44 @@ class _CampusPulseShellState extends State<CampusPulseShell> {
         );
         break;
 
+      case 'print_shop':
+      case 'library_print':
+        activeScreen = StudentPrintScreen(
+          authState: widget.authState,
+          onBackToHome: () => _navigateTo('home'),
+        );
+        break;
+
+      case 'library_panel':
+      case 'library_staff':
+        activeScreen = LibraryStaffDashboardScreen(
+          authState: widget.authState,
+          onBackToHome: () => _navigateTo('home'),
+          onSignOut: () async {
+            widget.realtimeService.clearSession();
+            await widget.authState.signOut();
+            _navigateTo('welcome');
+          },
+        );
+        break;
+
+      case 'clubs':
+      case 'campus_clubs':
+        activeScreen = CampusClubsScreen(
+          authState: widget.authState,
+          onBackToHome: () => _navigateTo('home'),
+        );
+        break;
+
+      case 'interview_prep':
+      case 'mock_interview':
+      case 'placements':
+        activeScreen = InterviewPrepScreen(
+          authState: widget.authState,
+          onBackToHome: () => _navigateTo('home'),
+        );
+        break;
+
       default:
         activeScreen = HomeDashboardScreen(
           authState: widget.authState,
@@ -479,7 +607,9 @@ class _CampusPulseShellState extends State<CampusPulseShell> {
         );
     }
 
-    if (_currentRoute == 'admin_login' || _currentRoute == 'master_admin') {
+    if (_currentRoute == 'admin_login' ||
+        _currentRoute == 'master_admin' ||
+        _currentRoute == 'library_panel') {
       return activeScreen;
     }
 

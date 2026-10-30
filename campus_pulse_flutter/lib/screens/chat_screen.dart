@@ -25,6 +25,7 @@ class _ChatScreenState extends State<ChatScreen> {
   ChatRoom? _selectedRoom;
   List<ChatMessage> _messages = [];
   bool _isLoadingRooms = true;
+  String? _roomsError;
   bool _isLoadingMessages = false;
   final _msgController = TextEditingController();
   StreamSubscription<ChatMessage>? _messageSub;
@@ -43,47 +44,47 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Future<void> _loadRooms() async {
-    setState(() => _isLoadingRooms = true);
+    setState(() {
+      _isLoadingRooms = true;
+      _roomsError = null;
+    });
+
     try {
-      final rooms = await client.chat.listMyRooms();
+      final rooms = await client.chat.listAllAccessibleRooms();
       if (mounted) {
         setState(() {
           _rooms = rooms;
           _isLoadingRooms = false;
-          if (_rooms.isNotEmpty && _selectedRoom == null) {
-            _selectRoom(_rooms.first);
+          _roomsError = null;
+
+          if (_selectedRoom != null) {
+            final match = _rooms
+                .where((r) => r.id == _selectedRoom!.id)
+                .firstOrNull;
+            if (match != null) {
+              _selectedRoom = match;
+            }
+          } else if (_rooms.isNotEmpty) {
+            final myUserId = widget.authState.currentProfile?.authUserId;
+            final myRooms = _rooms
+                .where(
+                  (r) =>
+                      myUserId != null && r.participantIds.contains(myUserId),
+                )
+                .toList();
+            if (myRooms.isNotEmpty) {
+              _selectRoom(myRooms.first);
+            } else {
+              _selectRoom(_rooms.first);
+            }
           }
         });
       }
-    } catch (_) {
+    } catch (e) {
       if (mounted) {
         setState(() {
           _isLoadingRooms = false;
-          // Fallback realistic active campus channels for dev
-          if (_rooms.isEmpty) {
-            _rooms = [
-              ChatRoom(
-                id: 1,
-                roomType: 'event_discussion',
-                referenceId: '1',
-                name: 'HackPulse 2026 Discussion',
-                participantIds: [],
-                lastMessageText: 'Can we form teams across different colleges?',
-                lastMessageAt: DateTime.now().subtract(const Duration(minutes: 5)),
-                createdAt: DateTime.now().subtract(const Duration(days: 2)),
-              ),
-              ChatRoom(
-                id: 2,
-                roomType: 'group',
-                name: 'CSE Year 3 - Operating Systems',
-                participantIds: [],
-                lastMessageText: 'Mid-term assignment is due this Friday!',
-                lastMessageAt: DateTime.now().subtract(const Duration(minutes: 42)),
-                createdAt: DateTime.now().subtract(const Duration(days: 10)),
-              ),
-            ];
-            _selectRoom(_rooms.first);
-          }
+          _roomsError = e.toString();
         });
       }
     }
@@ -107,7 +108,9 @@ class _ChatScreenState extends State<ChatScreen> {
         }
 
         // Live stream subscription
-        _messageSub = client.chat.streamChatMessages(room.id!).listen((incoming) {
+        _messageSub = client.chat.streamChatMessages(room.id!).listen((
+          incoming,
+        ) {
           if (mounted) {
             setState(() {
               if (!_messages.any((m) => m.id != null && m.id == incoming.id)) {
@@ -121,27 +124,35 @@ class _ChatScreenState extends State<ChatScreen> {
       if (mounted) {
         setState(() {
           _isLoadingMessages = false;
-          // Pre-populate sample discussion if empty
-          if (_messages.isEmpty) {
-            final now = DateTime.now();
-            _messages = [
-              ChatMessage(
-                roomId: room.id ?? 1,
-                senderUserId: UuidValue.fromString('00000000-0000-0000-0000-000000000002'),
-                senderName: 'Neha Patel (CSE)',
-                content: 'Welcome everyone to the official room! Let us know if you need study buddies.',
-                createdAt: now.subtract(const Duration(minutes: 30)),
-              ),
-              ChatMessage(
-                roomId: room.id ?? 1,
-                senderUserId: widget.authState.currentProfile?.authUserId ?? UuidValue.fromString('00000000-0000-0000-0000-000000000001'),
-                senderName: widget.authState.currentProfile?.fullName ?? 'Aarav Sharma',
-                content: 'Looking forward to the event and reviewing the shared PYQ papers!',
-                createdAt: now.subtract(const Duration(minutes: 15)),
-              ),
-            ];
-          }
         });
+      }
+    }
+  }
+
+  Future<void> _joinRoom(ChatRoom room) async {
+    if (room.id == null) return;
+    try {
+      final updated = await client.chat.joinRoom(room.id!);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Joined "${updated.name}"!'),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        await _loadRooms();
+        _selectRoom(updated);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Could not join room: $e'),
+            backgroundColor: Colors.redAccent,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       }
     }
   }
@@ -157,7 +168,9 @@ class _ChatScreenState extends State<ChatScreen> {
     final now = DateTime.now();
     final tempMsg = ChatMessage(
       roomId: _selectedRoom!.id ?? 1,
-      senderUserId: widget.authState.currentProfile?.authUserId ?? UuidValue.fromString('00000000-0000-0000-0000-000000000001'),
+      senderUserId:
+          widget.authState.currentProfile?.authUserId ??
+          UuidValue.fromString('00000000-0000-0000-0000-000000000001'),
       senderName: senderName,
       content: text,
       createdAt: now,
@@ -174,7 +187,192 @@ class _ChatScreenState extends State<ChatScreen> {
           content: text,
         );
       }
-    } catch (_) {}
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error sending message: $e'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+
+  void _showCreateRoomDialog() {
+    final nameCtrl = TextEditingController();
+    final topicCtrl = TextEditingController();
+    final descCtrl = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+    bool isCreating = false;
+    String? createError;
+
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (dialogCtx, setDlgState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              title: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppleTokens.softLavender.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(
+                      Icons.group_add_rounded,
+                      color: AppleTokens.darkNavy,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Create Discussion Room',
+                    style: GoogleFonts.inter(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
+                ],
+              ),
+              content: Form(
+                key: formKey,
+                child: SizedBox(
+                  width: 420,
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        TextFormField(
+                          controller: nameCtrl,
+                          decoration: const InputDecoration(
+                            labelText: 'Room Name *',
+                            hintText: 'e.g. Distributed Systems Study Group',
+                            border: OutlineInputBorder(),
+                            isDense: true,
+                          ),
+                          validator: (v) {
+                            if (v == null || v.trim().isEmpty) {
+                              return 'Room name is required';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 12),
+                        TextFormField(
+                          controller: topicCtrl,
+                          decoration: const InputDecoration(
+                            labelText: 'Subject / Topic (Optional)',
+                            hintText: 'e.g. CS-501 or Midterm Prep',
+                            border: OutlineInputBorder(),
+                            isDense: true,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        TextFormField(
+                          controller: descCtrl,
+                          maxLines: 2,
+                          decoration: const InputDecoration(
+                            labelText: 'Description (Optional)',
+                            hintText:
+                                'Brief goal of this study group or channel',
+                            border: OutlineInputBorder(),
+                            isDense: true,
+                          ),
+                        ),
+                        if (createError != null) ...[
+                          const SizedBox(height: 12),
+                          Text(
+                            createError!,
+                            style: const TextStyle(
+                              color: Colors.redAccent,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: isCreating ? null : () => Navigator.pop(ctx),
+                  child: const Text('Cancel'),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppleTokens.darkNavy,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  onPressed: isCreating
+                      ? null
+                      : () async {
+                          if (!formKey.currentState!.validate()) return;
+                          setDlgState(() {
+                            isCreating = true;
+                            createError = null;
+                          });
+
+                          try {
+                            final room = await client.chat.createCustomRoom(
+                              name: nameCtrl.text.trim(),
+                              description: descCtrl.text.trim().isEmpty
+                                  ? null
+                                  : descCtrl.text.trim(),
+                              topic: topicCtrl.text.trim().isEmpty
+                                  ? null
+                                  : topicCtrl.text.trim(),
+                            );
+
+                            if (ctx.mounted) Navigator.pop(ctx);
+                            await _loadRooms();
+                            _selectRoom(room);
+
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Room "${room.name}" created!'),
+                                  backgroundColor: Colors.green,
+                                  behavior: SnackBarBehavior.floating,
+                                ),
+                              );
+                            }
+                          } catch (e) {
+                            setDlgState(() {
+                              isCreating = false;
+                              createError = e.toString().replaceFirst(
+                                'Exception: ',
+                                '',
+                              );
+                            });
+                          }
+                        },
+                  child: isCreating
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text('Create Room'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
   }
 
   void _showReportDialog(ChatMessage msg) {
@@ -185,7 +383,9 @@ class _ChatScreenState extends State<ChatScreen> {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDlgState) => AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
           title: const Text('Report Message'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -193,12 +393,21 @@ class _ChatScreenState extends State<ChatScreen> {
             children: [
               const Text('Why are you reporting this message?'),
               const SizedBox(height: 12),
-              ...['Inappropriate content', 'Harassment or hate speech', 'Spam / Advertising', 'Other'].map(
+              ...[
+                'Inappropriate content',
+                'Harassment or hate speech',
+                'Spam / Advertising',
+                'Other',
+              ].map(
                 (reason) => ListTile(
                   dense: true,
                   leading: Icon(
-                    selectedReason == reason ? Icons.radio_button_checked : Icons.radio_button_off,
-                    color: selectedReason == reason ? AppleTokens.accentPurple : Colors.grey,
+                    selectedReason == reason
+                        ? Icons.radio_button_checked
+                        : Icons.radio_button_off,
+                    color: selectedReason == reason
+                        ? AppleTokens.accentPurple
+                        : Colors.grey,
                   ),
                   title: Text(reason),
                   onTap: () => setDlgState(() => selectedReason = reason),
@@ -207,18 +416,28 @@ class _ChatScreenState extends State<ChatScreen> {
               if (selectedReason == 'Other')
                 TextField(
                   controller: customCtrl,
-                  decoration: const InputDecoration(labelText: 'Explain reason...'),
+                  decoration: const InputDecoration(
+                    labelText: 'Explain reason...',
+                  ),
                 ),
             ],
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancel'),
+            ),
             ElevatedButton(
               onPressed: () async {
-                final reason = selectedReason == 'Other' ? customCtrl.text.trim() : selectedReason;
+                final reason = selectedReason == 'Other'
+                    ? customCtrl.text.trim()
+                    : selectedReason;
                 if (msg.id != null) {
                   try {
-                    await client.chat.reportMessage(messageId: msg.id!, reason: reason);
+                    await client.chat.reportMessage(
+                      messageId: msg.id!,
+                      reason: reason,
+                    );
                   } catch (_) {}
                 }
                 if (ctx.mounted) {
@@ -226,7 +445,11 @@ class _ChatScreenState extends State<ChatScreen> {
                 }
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Message reported to moderators for review.')),
+                    const SnackBar(
+                      content: Text(
+                        'Message reported to moderators for review.',
+                      ),
+                    ),
                   );
                 }
               },
@@ -244,7 +467,9 @@ class _ChatScreenState extends State<ChatScreen> {
     final isWide = MediaQuery.of(context).size.width >= 768;
 
     return Scaffold(
-      backgroundColor: isDark ? AppleTokens.darkBackground : AppleTokens.warmWhite,
+      backgroundColor: isDark
+          ? AppleTokens.darkBackground
+          : AppleTokens.warmWhite,
       appBar: AppBar(
         title: Text(
           'Campus Chat & Study Hub',
@@ -253,6 +478,23 @@ class _ChatScreenState extends State<ChatScreen> {
             color: isDark ? AppleTokens.white : AppleTokens.darkNavy,
           ),
         ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: ElevatedButton.icon(
+              icon: const Icon(Icons.add_rounded, size: 18),
+              label: const Text('Create Room'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppleTokens.darkNavy,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              onPressed: _showCreateRoomDialog,
+            ),
+          ),
+        ],
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
@@ -261,11 +503,13 @@ class _ChatScreenState extends State<ChatScreen> {
           // Left Sidebar (Rooms List)
           if (isWide || _selectedRoom == null)
             Container(
-              width: isWide ? 320 : MediaQuery.of(context).size.width,
+              width: isWide ? 360 : MediaQuery.of(context).size.width,
               decoration: BoxDecoration(
                 border: Border(
                   right: BorderSide(
-                    color: isDark ? AppleTokens.darkBorder : AppleTokens.borderPastel,
+                    color: isDark
+                        ? AppleTokens.darkBorder
+                        : AppleTokens.borderPastel,
                   ),
                 ),
               ),
@@ -276,7 +520,12 @@ class _ChatScreenState extends State<ChatScreen> {
           if (isWide || _selectedRoom != null)
             Expanded(
               child: _selectedRoom == null
-                  ? const Center(child: Text('Select a room to begin chatting'))
+                  ? const Center(
+                      child: Text(
+                        'Select a room to begin chatting',
+                        style: TextStyle(color: AppleTokens.textMutedGrey),
+                      ),
+                    )
                   : _buildChatArea(isDark, !isWide),
             ),
         ],
@@ -289,44 +538,241 @@ class _ChatScreenState extends State<ChatScreen> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.all(12),
-      itemCount: _rooms.length,
-      itemBuilder: (context, index) {
-        final room = _rooms[index];
-        final isSelected = _selectedRoom?.id == room.id;
-
-        return Container(
-          margin: const EdgeInsets.only(bottom: 8),
-          child: InkWell(
-            onTap: () => _selectRoom(room),
-            borderRadius: BorderRadius.circular(16),
-            child: Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? AppleTokens.paleLavender
-                    : (isDark ? AppleTokens.darkSurface : AppleTokens.pureWhite),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: isSelected ? AppleTokens.softLavender : Colors.transparent,
+    if (_roomsError != null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.error_outline_rounded,
+                color: Colors.redAccent,
+                size: 44,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Failed to load chat rooms',
+                style: GoogleFonts.inter(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
                 ),
               ),
-              child: Row(
+              const SizedBox(height: 6),
+              Text(
+                _roomsError!,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: AppleTokens.textMutedGrey,
+                ),
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                icon: const Icon(Icons.refresh_rounded, size: 16),
+                label: const Text('Retry'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppleTokens.darkNavy,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                onPressed: _loadRooms,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (_rooms.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.forum_outlined,
+                size: 48,
+                color: AppleTokens.textMutedGrey,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'No rooms available yet',
+                style: GoogleFonts.inter(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+              const SizedBox(height: 6),
+              const Text(
+                'Create the first study or discussion group on campus.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: AppleTokens.textMutedGrey,
+                ),
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                icon: const Icon(Icons.add_rounded, size: 18),
+                label: const Text('Create Room'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppleTokens.darkNavy,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                onPressed: _showCreateRoomDialog,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final myUserId = widget.authState.currentProfile?.authUserId;
+    final myRooms = _rooms
+        .where((r) => myUserId != null && r.participantIds.contains(myUserId))
+        .toList();
+    final discoverRooms = _rooms
+        .where((r) => myUserId == null || !r.participantIds.contains(myUserId))
+        .toList();
+
+    return ListView(
+      padding: const EdgeInsets.all(12),
+      children: [
+        // My Rooms Section
+        Row(
+          children: [
+            const Icon(
+              Icons.mark_chat_read_rounded,
+              size: 16,
+              color: AppleTokens.darkNavy,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              'My Rooms (${myRooms.length})',
+              style: GoogleFonts.inter(
+                fontWeight: FontWeight.w800,
+                fontSize: 13,
+                color: AppleTokens.darkNavy,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        if (myRooms.isEmpty)
+          Container(
+            padding: const EdgeInsets.all(14),
+            margin: const EdgeInsets.only(bottom: 16),
+            decoration: BoxDecoration(
+              color: isDark ? AppleTokens.darkSurface : AppleTokens.pureWhite,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppleTokens.borderPastel),
+            ),
+            child: const Text(
+              'You have not joined any rooms yet. Join one below or create a new room!',
+              style: TextStyle(fontSize: 12, color: AppleTokens.textMutedGrey),
+            ),
+          )
+        else
+          ...myRooms.map(
+            (room) => _buildRoomCard(room, isDark, isMember: true),
+          ),
+
+        const SizedBox(height: 16),
+
+        // Discover Rooms Section
+        Row(
+          children: [
+            const Icon(
+              Icons.explore_rounded,
+              size: 16,
+              color: AppleTokens.darkNavy,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              'Discover Rooms (${discoverRooms.length})',
+              style: GoogleFonts.inter(
+                fontWeight: FontWeight.w800,
+                fontSize: 13,
+                color: AppleTokens.darkNavy,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        if (discoverRooms.isEmpty)
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: isDark ? AppleTokens.darkSurface : AppleTokens.pureWhite,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppleTokens.borderPastel),
+            ),
+            child: const Text(
+              'No new rooms to discover right now. You are already a member of all active rooms.',
+              style: TextStyle(fontSize: 12, color: AppleTokens.textMutedGrey),
+            ),
+          )
+        else
+          ...discoverRooms.map(
+            (room) => _buildRoomCard(room, isDark, isMember: false),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildRoomCard(ChatRoom room, bool isDark, {required bool isMember}) {
+    final isSelected = _selectedRoom?.id == room.id;
+
+    Color badgeColor = AppleTokens.pastelBlue;
+    if (room.roomType == 'event_discussion')
+      badgeColor = AppleTokens.pastelYellow;
+    if (room.roomType == 'custom_group') badgeColor = AppleTokens.softLavender;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      child: InkWell(
+        onTap: isMember ? () => _selectRoom(room) : null,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? AppleTokens.paleLavender
+                : (isDark ? AppleTokens.darkSurface : AppleTokens.pureWhite),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: isSelected
+                  ? AppleTokens.softLavender
+                  : AppleTokens.borderPastel,
+              width: isSelected ? 1.5 : 1.0,
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
                 children: [
                   CircleAvatar(
-                    backgroundColor: room.roomType == 'event_discussion'
-                        ? AppleTokens.pastelYellow
-                        : AppleTokens.pastelBlue,
+                    radius: 16,
+                    backgroundColor: badgeColor,
                     child: Icon(
                       room.roomType == 'event_discussion'
                           ? Icons.event
-                          : Icons.groups_rounded,
+                          : (room.roomType == 'custom_group'
+                                ? Icons.chat_bubble_outline_rounded
+                                : Icons.groups_rounded),
                       color: AppleTokens.darkNavy,
-                      size: 20,
+                      size: 16,
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -341,12 +787,13 @@ class _ChatScreenState extends State<ChatScreen> {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        if (room.lastMessageText != null)
+                        if (room.topic != null && room.topic!.isNotEmpty)
                           Text(
-                            room.lastMessageText!,
+                            room.topic!,
                             style: GoogleFonts.inter(
-                              fontSize: 12,
-                              color: AppleTokens.textMutedGrey,
+                              fontSize: 11,
+                              color: AppleTokens.accentPurple,
+                              fontWeight: FontWeight.w600,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -354,12 +801,80 @@ class _ChatScreenState extends State<ChatScreen> {
                       ],
                     ),
                   ),
+                  if (isMember)
+                    OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        minimumSize: Size.zero,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      onPressed: () => _selectRoom(room),
+                      child: const Text(
+                        'Open Chat',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    )
+                  else
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppleTokens.darkNavy,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 4,
+                        ),
+                        minimumSize: Size.zero,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      onPressed: () => _joinRoom(room),
+                      child: const Text(
+                        'Join Room',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
                 ],
               ),
-            ),
+              if (room.description != null && room.description!.isNotEmpty) ...[
+                const SizedBox(height: 6),
+                Text(
+                  room.description!,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: AppleTokens.textMutedGrey,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+              if (isMember && room.lastMessageText != null) ...[
+                const SizedBox(height: 6),
+                Text(
+                  room.lastMessageText!,
+                  style: GoogleFonts.inter(
+                    fontSize: 11,
+                    color: AppleTokens.textMutedGrey,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ],
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 
@@ -373,7 +888,9 @@ class _ChatScreenState extends State<ChatScreen> {
             color: isDark ? AppleTokens.darkSurface : AppleTokens.pureWhite,
             border: Border(
               bottom: BorderSide(
-                color: isDark ? AppleTokens.darkBorder : AppleTokens.borderPastel,
+                color: isDark
+                    ? AppleTokens.darkBorder
+                    : AppleTokens.borderPastel,
               ),
             ),
           ),
@@ -390,15 +907,44 @@ class _ChatScreenState extends State<ChatScreen> {
                 child: const Icon(Icons.chat, size: 16, color: Colors.white),
               ),
               const SizedBox(width: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    _selectedRoom?.name ?? '',
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                  ),
-                  const Text('Live WebSocket Encrypted Stream', style: TextStyle(color: Colors.green, fontSize: 11, fontWeight: FontWeight.bold)),
-                ],
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _selectedRoom?.name ?? '',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Row(
+                      children: [
+                        const Text(
+                          'Live WebSocket Encrypted Stream',
+                          style: TextStyle(
+                            color: Colors.green,
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        if (_selectedRoom?.topic != null &&
+                            _selectedRoom!.topic!.isNotEmpty) ...[
+                          const SizedBox(width: 8),
+                          Text(
+                            '• Topic: ${_selectedRoom!.topic}',
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: AppleTokens.textMutedGrey,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -408,33 +954,72 @@ class _ChatScreenState extends State<ChatScreen> {
         Expanded(
           child: _isLoadingMessages
               ? const Center(child: CircularProgressIndicator())
+              : _messages.isEmpty
+              ? Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.chat_bubble_outline_rounded,
+                        size: 40,
+                        color: AppleTokens.textMutedGrey,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'No messages in ${_selectedRoom?.name ?? "this room"} yet.',
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: AppleTokens.textMutedGrey,
+                        ),
+                      ),
+                      const Text(
+                        'Say hi and kick off the conversation!',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppleTokens.textMutedGrey,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
               : ListView.builder(
                   padding: const EdgeInsets.all(16),
                   itemCount: _messages.length,
                   itemBuilder: (context, index) {
                     final msg = _messages[index];
-                    final isMe = msg.senderUserId ==
+                    final isMe =
+                        msg.senderUserId ==
                         (widget.authState.currentProfile?.authUserId ??
-                            UuidValue.fromString('00000000-0000-0000-0000-000000000001'));
+                            UuidValue.fromString(
+                              '00000000-0000-0000-0000-000000000001',
+                            ));
 
                     return Align(
-                      alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+                      alignment: isMe
+                          ? Alignment.centerRight
+                          : Alignment.centerLeft,
                       child: Container(
                         margin: const EdgeInsets.only(bottom: 12),
                         constraints: const BoxConstraints(maxWidth: 420),
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
                         decoration: BoxDecoration(
                           color: isMe
                               ? AppleTokens.darkNavy
-                              : (isDark ? AppleTokens.darkSurface : AppleTokens.pureWhite),
+                              : (isDark
+                                    ? AppleTokens.darkSurface
+                                    : AppleTokens.pureWhite),
                           borderRadius: BorderRadius.circular(18),
                           border: isMe
                               ? null
                               : Border.all(color: AppleTokens.borderPastel),
                         ),
                         child: Column(
-                          crossAxisAlignment:
-                              isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                          crossAxisAlignment: isMe
+                              ? CrossAxisAlignment.end
+                              : CrossAxisAlignment.start,
                           children: [
                             if (!isMe)
                               Row(
@@ -451,14 +1036,20 @@ class _ChatScreenState extends State<ChatScreen> {
                                   const SizedBox(width: 8),
                                   InkWell(
                                     onTap: () => _showReportDialog(msg),
-                                    child: const Icon(Icons.flag_outlined, size: 12, color: AppleTokens.textMutedGrey),
+                                    child: const Icon(
+                                      Icons.flag_outlined,
+                                      size: 12,
+                                      color: AppleTokens.textMutedGrey,
+                                    ),
                                   ),
                                 ],
                               ),
                             Text(
                               msg.content,
                               style: TextStyle(
-                                color: isMe ? Colors.white : AppleTokens.darkNavy,
+                                color: isMe
+                                    ? Colors.white
+                                    : AppleTokens.darkNavy,
                                 fontSize: 14,
                               ),
                             ),
@@ -467,7 +1058,9 @@ class _ChatScreenState extends State<ChatScreen> {
                               '${msg.createdAt.hour}:${msg.createdAt.minute.toString().padLeft(2, '0')}',
                               style: TextStyle(
                                 fontSize: 10,
-                                color: isMe ? Colors.white60 : AppleTokens.textMutedGrey,
+                                color: isMe
+                                    ? Colors.white60
+                                    : AppleTokens.textMutedGrey,
                               ),
                             ),
                           ],
@@ -488,7 +1081,9 @@ class _ChatScreenState extends State<ChatScreen> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   decoration: BoxDecoration(
-                    color: isDark ? AppleTokens.darkBackground : AppleTokens.warmWhite,
+                    color: isDark
+                        ? AppleTokens.darkBackground
+                        : AppleTokens.warmWhite,
                     borderRadius: BorderRadius.circular(24),
                     border: Border.all(color: AppleTokens.borderPastel),
                   ),
@@ -507,7 +1102,11 @@ class _ChatScreenState extends State<ChatScreen> {
                 radius: 22,
                 backgroundColor: AppleTokens.darkNavy,
                 child: IconButton(
-                  icon: const Icon(Icons.send_rounded, color: Colors.white, size: 18),
+                  icon: const Icon(
+                    Icons.send_rounded,
+                    color: Colors.white,
+                    size: 18,
+                  ),
                   onPressed: _sendMessage,
                 ),
               ),

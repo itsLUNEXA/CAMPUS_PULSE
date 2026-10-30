@@ -63,8 +63,8 @@ class ChatEndpoint extends Endpoint {
       if (eventId != null) {
         final rsvp = await EventRsvp.db.findFirstRow(
           session,
-          where:
-              (t) => t.eventId.equals(eventId) & t.authUserId.equals(callerId),
+          where: (t) =>
+              t.eventId.equals(eventId) & t.authUserId.equals(callerId),
         );
         final event = await CampusEvent.db.findById(session, eventId);
         if (rsvp == null && event?.organizerAuthUserId != callerId) {
@@ -124,10 +124,9 @@ class ChatEndpoint extends Endpoint {
     if (roomType == 'event_discussion' && referenceId != null) {
       final existing = await ChatRoom.db.findFirstRow(
         session,
-        where:
-            (t) =>
-                t.roomType.equals('event_discussion') &
-                t.referenceId.equals(referenceId),
+        where: (t) =>
+            t.roomType.equals('event_discussion') &
+            t.referenceId.equals(referenceId),
       );
       if (existing != null) {
         await _assertRoomAccess(session, existing, callerId);
@@ -167,7 +166,8 @@ class ChatEndpoint extends Endpoint {
     }
 
     final trimmedContent = content.trim();
-    if (trimmedContent.isEmpty && (attachmentUrl == null || attachmentUrl.isEmpty)) {
+    if (trimmedContent.isEmpty &&
+        (attachmentUrl == null || attachmentUrl.isEmpty)) {
       throw ArgumentError('Message content cannot be empty.');
     }
 
@@ -205,7 +205,9 @@ class ChatEndpoint extends Endpoint {
     );
 
     // Update room lastMessage metadata
-    room.lastMessageText = trimmedContent.isNotEmpty ? trimmedContent : '[Attachment]';
+    room.lastMessageText = trimmedContent.isNotEmpty
+        ? trimmedContent
+        : '[Attachment]';
     room.lastMessageAt = now;
     await ChatRoom.db.updateRow(session, room);
 
@@ -236,7 +238,8 @@ class ChatEndpoint extends Endpoint {
 
     return await ChatMessage.db.find(
       session,
-      where: (t) => t.roomId.equals(roomId) & t.isDeletedByModerator.equals(false),
+      where: (t) =>
+          t.roomId.equals(roomId) & t.isDeletedByModerator.equals(false),
       orderBy: (t) => t.createdAt,
       limit: limit.clamp(1, 100),
     );
@@ -421,11 +424,13 @@ class ChatEndpoint extends Endpoint {
 
         // Academic group eligibility
         if (room.roomType == 'academic_community' && profile != null) {
-          final branchMatch = room.allowedBranch == null ||
+          final branchMatch =
+              room.allowedBranch == null ||
               room.allowedBranch!.isEmpty ||
               room.allowedBranch == 'All' ||
               room.allowedBranch == profile.branch;
-          final yearMatch = room.allowedAcademicYear == null ||
+          final yearMatch =
+              room.allowedAcademicYear == null ||
               room.allowedAcademicYear == 0 ||
               room.allowedAcademicYear == profile.academicYear;
           if (branchMatch && yearMatch) {
@@ -436,6 +441,150 @@ class ChatEndpoint extends Endpoint {
 
         // Event discussion
         if (room.roomType == 'event_discussion') {
+          accessible.add(room);
+        }
+      } catch (_) {}
+    }
+
+    return accessible;
+  }
+
+  /// Creates a custom room with name, optional description, topic, and academic restrictions.
+  /// Derives creator identity from the authenticated session, adds creator as member,
+  /// and prevents duplicate creation.
+  Future<ChatRoom> createCustomRoom(
+    Session session, {
+    required String name,
+    String? description,
+    String? topic,
+    String? allowedBranch,
+    int? allowedAcademicYear,
+  }) async {
+    final callerId = session.authenticated?.authUserId;
+    if (callerId == null) {
+      throw StateError('Authentication required to create chat rooms.');
+    }
+
+    final trimmedName = name.trim();
+    if (trimmedName.isEmpty) {
+      throw ArgumentError('Room name is required.');
+    }
+
+    // Check for existing room with the same name to prevent duplicates
+    final existing = await ChatRoom.db.findFirstRow(
+      session,
+      where: (t) => t.name.ilike(trimmedName),
+    );
+    if (existing != null) {
+      // Add caller as participant if not present
+      if (!existing.participantIds.contains(callerId)) {
+        existing.participantIds.add(callerId);
+        await ChatRoom.db.updateRow(session, existing);
+      }
+      return existing;
+    }
+
+    final now = DateTime.now().toUtc();
+    final newRoom = await ChatRoom.db.insertRow(
+      session,
+      ChatRoom(
+        roomType: 'custom_group',
+        name: trimmedName,
+        description: description?.trim(),
+        topic: topic?.trim(),
+        creatorAuthUserId: callerId,
+        participantIds: [callerId],
+        allowedBranch: allowedBranch,
+        allowedAcademicYear: allowedAcademicYear,
+        createdAt: now,
+      ),
+    );
+
+    return newRoom;
+  }
+
+  /// Joins an eligible room for non-members, enforcing academic restrictions.
+  Future<ChatRoom> joinRoom(Session session, int roomId) async {
+    final callerId = session.authenticated?.authUserId;
+    if (callerId == null) {
+      throw StateError('Authentication required to join rooms.');
+    }
+
+    final room = await ChatRoom.db.findById(session, roomId);
+    if (room == null) {
+      throw ArgumentError('Chat room not found.');
+    }
+
+    // Verify academic eligibility
+    final profile = await StudentProfile.db.findFirstRow(
+      session,
+      where: (t) => t.authUserId.equals(callerId),
+    );
+
+    if (room.allowedBranch != null &&
+        room.allowedBranch!.isNotEmpty &&
+        room.allowedBranch != 'All' &&
+        profile?.branch != room.allowedBranch) {
+      throw StateError(
+        'Not eligible: Restricted to branch ${room.allowedBranch}.',
+      );
+    }
+    if (room.allowedAcademicYear != null &&
+        room.allowedAcademicYear! > 0 &&
+        profile?.academicYear != room.allowedAcademicYear) {
+      throw StateError(
+        'Not eligible: Restricted to academic year ${room.allowedAcademicYear}.',
+      );
+    }
+
+    if (!room.participantIds.contains(callerId)) {
+      room.participantIds.add(callerId);
+      await ChatRoom.db.updateRow(session, room);
+    }
+
+    return room;
+  }
+
+  /// List all accessible rooms partitioned for My Rooms vs Discover Rooms.
+  Future<List<ChatRoom>> listAllAccessibleRooms(Session session) async {
+    final callerId = session.authenticated?.authUserId;
+    if (callerId == null) return [];
+
+    final profile = await StudentProfile.db.findFirstRow(
+      session,
+      where: (t) => t.authUserId.equals(callerId),
+    );
+
+    final allRooms = await ChatRoom.db.find(
+      session,
+      orderBy: (t) => t.createdAt.desc(),
+      limit: 100,
+    );
+
+    final accessible = <ChatRoom>[];
+    for (final room in allRooms) {
+      try {
+        if (room.participantIds.contains(callerId)) {
+          accessible.add(room);
+          continue;
+        }
+
+        if (profile != null) {
+          final branchMatch =
+              room.allowedBranch == null ||
+              room.allowedBranch!.isEmpty ||
+              room.allowedBranch == 'All' ||
+              room.allowedBranch == profile.branch;
+          final yearMatch =
+              room.allowedAcademicYear == null ||
+              room.allowedAcademicYear == 0 ||
+              room.allowedAcademicYear == profile.academicYear;
+          if (branchMatch && yearMatch) {
+            accessible.add(room);
+            continue;
+          }
+        } else if (room.roomType == 'custom_group' ||
+            room.roomType == 'event_discussion') {
           accessible.add(room);
         }
       } catch (_) {}

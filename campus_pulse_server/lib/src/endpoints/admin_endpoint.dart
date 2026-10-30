@@ -147,6 +147,10 @@ class AdminEndpoint extends Endpoint {
       session,
       where: (t) => t.startTime > now,
     );
+    final pendingEvents = await CampusEvent.db.count(
+      session,
+      where: (t) => t.approvalStatus.equals('pending'),
+    );
     final totalRsvps = await EventRsvp.db.count(session);
     final totalAttendances = await AttendanceRecord.db.count(session);
     final totalCertificates = await EventCertificate.db.count(session);
@@ -162,6 +166,7 @@ class AdminEndpoint extends Endpoint {
       'totalStudents': totalStudents,
       'totalEvents': totalEvents,
       'upcomingEvents': upcomingEvents,
+      'pendingEvents': pendingEvents,
       'totalRsvps': totalRsvps,
       'totalAttendances': totalAttendances,
       'totalCertificates': totalCertificates,
@@ -220,6 +225,128 @@ class AdminEndpoint extends Endpoint {
     return true;
   }
 
+  /// Revoke a role from a user (Admin only, prevents removing last superadmin)
+  Future<bool> revokeRole(
+    Session session,
+    UuidValue targetUserId,
+    String role,
+  ) async {
+    final isAuthorized = await isAdmin(session);
+    if (!isAuthorized) {
+      throw StateError('Unauthorized: Admin access required.');
+    }
+
+    // Prevent accidental removal of the last master superadmin
+    if (role == 'admin') {
+      final adminCount = await UserRole.db.count(
+        session,
+        where: (t) => t.role.equals('admin'),
+      );
+      if (adminCount <= 1) {
+        throw StateError(
+          'Security Protection: Cannot remove the last Master Administrator.',
+        );
+      }
+    }
+
+    final callerId = session.authenticated!.authUserId;
+    final row = await UserRole.db.findFirstRow(
+      session,
+      where: (t) => t.authUserId.equals(targetUserId) & t.role.equals(role),
+    );
+    if (row != null) {
+      await UserRole.db.deleteRow(session, row);
+    }
+
+    await AdminAuditLog.db.insertRow(
+      session,
+      AdminAuditLog(
+        actorUserId: callerId,
+        actorName: 'Master Admin',
+        actionType: 'ROLE_REVOKE',
+        targetEntity: 'user_role',
+        targetId: targetUserId.toString(),
+        details: 'Revoked role $role from student $targetUserId',
+        timestamp: DateTime.now().toUtc(),
+      ),
+    );
+
+    return true;
+  }
+
+  /// Fetch all assigned roles for a target student
+  Future<List<String>> getUserRoles(
+    Session session,
+    UuidValue targetUserId,
+  ) async {
+    final isAuthorized = await isAdmin(session);
+    if (!isAuthorized) {
+      throw StateError('Unauthorized: Admin access required.');
+    }
+
+    final roles = await UserRole.db.find(
+      session,
+      where: (t) => t.authUserId.equals(targetUserId),
+    );
+
+    final list = roles.map((r) => r.role).toList();
+    if (!list.contains('student')) list.add('student');
+    return list;
+  }
+
+  /// Searchable, paginated student roster for admin management
+  Future<List<StudentProfile>> listStudents(
+    Session session, {
+    String? search,
+    int limit = 20,
+    int offset = 0,
+  }) async {
+    final isAuthorized = await isAdmin(session);
+    if (!isAuthorized) {
+      throw StateError('Unauthorized: Admin access required.');
+    }
+
+    return await StudentProfile.db.find(
+      session,
+      where: (t) {
+        if (search != null && search.trim().isNotEmpty) {
+          final q = search.trim();
+          return t.fullName.ilike('%$q%') |
+              t.email.ilike('%$q%') |
+              t.branch.ilike('%$q%');
+        }
+        return Constant.bool(true);
+      },
+      orderBy: (t) => t.fullName,
+      limit: limit,
+      offset: offset,
+    );
+  }
+
+  /// Total count of students matching query
+  Future<int> getStudentCount(
+    Session session, {
+    String? search,
+  }) async {
+    final isAuthorized = await isAdmin(session);
+    if (!isAuthorized) {
+      throw StateError('Unauthorized: Admin access required.');
+    }
+
+    return await StudentProfile.db.count(
+      session,
+      where: (t) {
+        if (search != null && search.trim().isNotEmpty) {
+          final q = search.trim();
+          return t.fullName.ilike('%$q%') |
+              t.email.ilike('%$q%') |
+              t.branch.ilike('%$q%');
+        }
+        return Constant.bool(true);
+      },
+    );
+  }
+
   /// Get roles for current caller
   Future<List<String>> getMyRoles(Session session) async {
     final authUserId = session.authenticated?.authUserId;
@@ -235,10 +362,13 @@ class AdminEndpoint extends Endpoint {
     return list;
   }
 
-  /// List admin audit logs (Admin only)
+  /// List admin audit logs with search, action filtering, and pagination
   Future<List<AdminAuditLog>> listAuditLogs(
     Session session, {
-    int limit = 20,
+    String? search,
+    String? actionType,
+    int limit = 50,
+    int offset = 0,
   }) async {
     final isAuthorized = await isAdmin(session);
     if (!isAuthorized) {
@@ -247,8 +377,26 @@ class AdminEndpoint extends Endpoint {
 
     return await AdminAuditLog.db.find(
       session,
+      where: (t) {
+        Expression expr = Constant.bool(true);
+        if (actionType != null &&
+            actionType.isNotEmpty &&
+            actionType != 'ALL') {
+          expr = expr & t.actionType.equals(actionType);
+        }
+        if (search != null && search.trim().isNotEmpty) {
+          final q = search.trim();
+          expr =
+              expr &
+              (t.actorName.ilike('%$q%') |
+                  t.details.ilike('%$q%') |
+                  t.actionType.ilike('%$q%'));
+        }
+        return expr;
+      },
       orderBy: (t) => t.timestamp.desc(),
       limit: limit,
+      offset: offset,
     );
   }
 }

@@ -18,10 +18,8 @@ class AttendanceEndpoint extends Endpoint {
     // Check existing
     final existing = await AttendanceRecord.db.findFirstRow(
       session,
-      where:
-          (t) =>
-              t.eventId.equals(eventId) &
-              t.authUserId.equals(studentAuthUserId),
+      where: (t) =>
+          t.eventId.equals(eventId) & t.authUserId.equals(studentAuthUserId),
     );
 
     final now = DateTime.now().toUtc();
@@ -59,8 +57,7 @@ class AttendanceEndpoint extends Endpoint {
           actionType: 'ATTENDANCE_MARK',
           targetEntity: 'attendance_record',
           targetId: '${record.id}',
-          details:
-              'Marked $studentName as $status for Event #$eventId',
+          details: 'Marked $studentName as $status for Event #$eventId',
           timestamp: now,
         ),
       );
@@ -89,9 +86,7 @@ class AttendanceEndpoint extends Endpoint {
     // Verify student is RSVP'd
     final rsvp = await EventRsvp.db.findFirstRow(
       session,
-      where:
-          (t) =>
-              t.eventId.equals(eventId) & t.authUserId.equals(callerId),
+      where: (t) => t.eventId.equals(eventId) & t.authUserId.equals(callerId),
     );
     if (rsvp == null) {
       throw StateError(
@@ -102,9 +97,7 @@ class AttendanceEndpoint extends Endpoint {
     // Prevent duplicate check-in
     final existing = await AttendanceRecord.db.findFirstRow(
       session,
-      where:
-          (t) =>
-              t.eventId.equals(eventId) & t.authUserId.equals(callerId),
+      where: (t) => t.eventId.equals(eventId) & t.authUserId.equals(callerId),
     );
     if (existing != null && existing.status == 'attended') {
       return existing;

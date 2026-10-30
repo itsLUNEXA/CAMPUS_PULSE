@@ -79,7 +79,7 @@ class _CookieBannerState extends State<CookieBanner> {
                       ),
                       const SizedBox(height: AppleTokens.space12),
                       Text(
-                        'Campus Pulse uses essential local storage to keep your session authenticated and remember your interface preferences. Optional telemetry is only collected with your explicit consent to improve student matchmaking.',
+                        'CAMPULSE uses essential local storage to keep your session authenticated and remember your interface preferences. Optional telemetry is only collected with your explicit consent to improve student matchmaking.',
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),
                       if (_showPreferences) ...[

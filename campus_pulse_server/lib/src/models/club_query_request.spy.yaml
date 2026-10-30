@@ -1,0 +1,26 @@
+class: ClubQueryRequest
+table: club_query_requests
+fields:
+  clubId: int
+  clubName: String
+  targetTeam: String
+  senderAuthUserId: UuidValue
+  senderName: String
+  senderEmail: String
+  senderBranch: String
+  senderYear: int
+  category: String
+  subject: String
+  message: String
+  status: String, default='PENDING'
+  responseMessage: String?
+  responderName: String?
+  createdAt: DateTime, default=now
+  respondedAt: DateTime?
+
+indexes:
+  club_query_club_idx:
+    fields: clubId
+  club_query_sender_idx:
+    fields: senderAuthUserId
+

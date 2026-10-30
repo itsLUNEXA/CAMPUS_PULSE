@@ -6,7 +6,7 @@ class PreferencesService extends ChangeNotifier {
   static const String _keyCookieConsent = 'campus_pulse_cookie_consent';
   static const String _keyAnalyticsConsent = 'campus_pulse_analytics_consent';
 
-  ThemeMode _themeMode = ThemeMode.system;
+  ThemeMode _themeMode = ThemeMode.light;
   bool? _cookieConsent; // null = pending, true = accepted, false = rejected
   bool _analyticsConsent = false;
 
@@ -22,7 +22,9 @@ class PreferencesService extends ChangeNotifier {
       if (themeStr != null) {
         if (themeStr == 'light') _themeMode = ThemeMode.light;
         if (themeStr == 'dark') _themeMode = ThemeMode.dark;
-        if (themeStr == 'system') _themeMode = ThemeMode.system;
+        if (themeStr == 'system') _themeMode = ThemeMode.light;
+      } else {
+        _themeMode = ThemeMode.light;
       }
 
       if (prefs.containsKey(_keyCookieConsent)) {

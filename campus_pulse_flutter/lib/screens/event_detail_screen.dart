@@ -66,11 +66,23 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
       return;
     }
 
-    final isExpired = _currentEvent.registrationDeadline != null &&
+    if (_currentEvent.approvalStatus != 'approved') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Registrations are only open for approved events.'),
+        ),
+      );
+      return;
+    }
+
+    final isExpired =
+        _currentEvent.registrationDeadline != null &&
         DateTime.now().toUtc().isAfter(_currentEvent.registrationDeadline!);
     if (isExpired && !_isRsvpd) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Registration deadline for this event has passed.')),
+        const SnackBar(
+          content: Text('Registration deadline for this event has passed.'),
+        ),
       );
       return;
     }
@@ -133,7 +145,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text('Team Registration (${_currentEvent.minTeamSize}-${_currentEvent.maxTeamSize} Members)'),
+        title: Text(
+          'Team Registration (${_currentEvent.minTeamSize}-${_currentEvent.maxTeamSize} Members)',
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -152,7 +166,10 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
           ElevatedButton(
             onPressed: () async {
               final teamName = teamNameCtrl.text.trim();
@@ -184,7 +201,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                 if (mounted) {
                   setState(() => _isLoading = false);
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))),
+                    SnackBar(
+                      content: Text(e.toString().replaceAll('Exception: ', '')),
+                    ),
                   );
                 }
               }
@@ -221,6 +240,102 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
               ),
               const SizedBox(height: AppleTokens.space16),
 
+              // Review Status Banner (for Pending or Rejected Events)
+              if (_currentEvent.approvalStatus == 'pending') ...[
+                Container(
+                  padding: const EdgeInsets.all(AppleTokens.space16),
+                  decoration: BoxDecoration(
+                    color: AppleTokens.lightMint.withValues(alpha: 0.5),
+                    borderRadius: BorderRadius.circular(AppleTokens.radius12),
+                    border: Border.all(
+                      color: AppleTokens.primaryTeal.withValues(alpha: 0.4),
+                    ),
+                  ),
+                  child: const Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(
+                        Icons.hourglass_top_rounded,
+                        color: AppleTokens.primaryTeal,
+                        size: 22,
+                      ),
+                      SizedBox(width: AppleTokens.space12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Submitted for Admin Approval',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 14,
+                                color: AppleTokens.primaryTeal,
+                              ),
+                            ),
+                            SizedBox(height: 4),
+                            Text(
+                              'This event is currently awaiting administrative review and is not visible in the public feed. Registrations will open once approved.',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: AppleTokens.deepForest,
+                                height: 1.4,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: AppleTokens.space16),
+              ] else if (_currentEvent.approvalStatus == 'rejected') ...[
+                Container(
+                  padding: const EdgeInsets.all(AppleTokens.space16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFDE2E2),
+                    borderRadius: BorderRadius.circular(AppleTokens.radius12),
+                    border: Border.all(color: const Color(0xFFFCA5A5)),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(
+                        Icons.cancel_rounded,
+                        color: Color(0xFF9B1C1C),
+                        size: 22,
+                      ),
+                      SizedBox(width: AppleTokens.space12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Event Submission Rejected',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 14,
+                                color: Color(0xFF9B1C1C),
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Reason: ${_currentEvent.rejectionReason ?? "Event details did not meet campus activity criteria."}',
+                              style: const TextStyle(
+                                fontSize: 13,
+                                color: Color(0xFF9B1C1C),
+                                fontWeight: FontWeight.w500,
+                                height: 1.4,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: AppleTokens.space16),
+              ],
+
               // Banner Image if available
               if (_currentEvent.bannerUrl != null &&
                   _currentEvent.bannerUrl!.isNotEmpty)
@@ -252,10 +367,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                             vertical: 5,
                           ),
                           decoration: BoxDecoration(
-                            color:
-                                isDark
-                                    ? AppleTokens.darkSurfaceElevated
-                                    : AppleTokens.palePurple,
+                            color: isDark
+                                ? AppleTokens.darkSurfaceElevated
+                                : AppleTokens.palePurple,
                             borderRadius: BorderRadius.circular(
                               AppleTokens.radius999,
                             ),
@@ -263,10 +377,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                           child: Text(
                             _currentEvent.category.toUpperCase(),
                             style: TextStyle(
-                              color:
-                                  isDark
-                                      ? AppleTokens.darkTextPrimary
-                                      : AppleTokens.deepNavy,
+                              color: isDark
+                                  ? AppleTokens.darkTextPrimary
+                                  : AppleTokens.deepNavy,
                               fontWeight: FontWeight.w700,
                               fontSize: 12,
                             ),
@@ -276,10 +389,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                         Icon(
                           Icons.people_outline_rounded,
                           size: 18,
-                          color:
-                              isDark
-                                  ? AppleTokens.darkAccentPurple
-                                  : AppleTokens.accentPurple,
+                          color: isDark
+                              ? AppleTokens.darkAccentPurple
+                              : AppleTokens.accentPurple,
                         ),
                         const SizedBox(width: 6),
                         Text(
@@ -287,10 +399,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                           style: TextStyle(
                             fontWeight: FontWeight.w700,
                             fontSize: 14,
-                            color:
-                                isDark
-                                    ? AppleTokens.darkTextPrimary
-                                    : AppleTokens.deepNavy,
+                            color: isDark
+                                ? AppleTokens.darkTextPrimary
+                                : AppleTokens.deepNavy,
                           ),
                         ),
                       ],
@@ -304,10 +415,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                         fontSize: 28,
                         fontWeight: FontWeight.w700,
                         letterSpacing: -0.5,
-                        color:
-                            isDark
-                                ? AppleTokens.darkTextPrimary
-                                : AppleTokens.deepNavy,
+                        color: isDark
+                            ? AppleTokens.darkTextPrimary
+                            : AppleTokens.deepNavy,
                       ),
                     ),
                     const SizedBox(height: AppleTokens.space24),
@@ -316,18 +426,16 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                     Container(
                       padding: const EdgeInsets.all(AppleTokens.space16),
                       decoration: BoxDecoration(
-                        color:
-                            isDark
-                                ? AppleTokens.darkSurfaceElevated
-                                : AppleTokens.background,
+                        color: isDark
+                            ? AppleTokens.darkSurfaceElevated
+                            : AppleTokens.background,
                         borderRadius: BorderRadius.circular(
                           AppleTokens.radius12,
                         ),
                         border: Border.all(
-                          color:
-                              isDark
-                                  ? AppleTokens.darkBorder
-                                  : AppleTokens.border,
+                          color: isDark
+                              ? AppleTokens.darkBorder
+                              : AppleTokens.border,
                         ),
                       ),
                       child: Column(
@@ -378,23 +486,36 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                       spacing: AppleTokens.space16,
                       runSpacing: AppleTokens.space12,
                       children: [
-                        AppleButton(
-                          label: _isRsvpd
-                              ? 'Cancel Registration'
-                              : 'Register for Event',
-                          variant: _isRsvpd
-                              ? AppleButtonVariant.outline
-                              : AppleButtonVariant.primary,
-                          icon: _isRsvpd
-                              ? Icons.check_circle_outline
-                              : Icons.bookmark_border,
-                          isLoading: _isLoading,
-                          height: 44,
-                          onPressed: _handleRsvp,
-                        ),
+                        if (_currentEvent.approvalStatus == 'approved')
+                          AppleButton(
+                            label: _isRsvpd
+                                ? 'Cancel Registration'
+                                : 'Register for Event',
+                            variant: _isRsvpd
+                                ? AppleButtonVariant.outline
+                                : AppleButtonVariant.primary,
+                            icon: _isRsvpd
+                                ? Icons.check_circle_outline
+                                : Icons.bookmark_border,
+                            isLoading: _isLoading,
+                            height: 44,
+                            onPressed: _handleRsvp,
+                          )
+                        else
+                          AppleButton(
+                            label: _currentEvent.approvalStatus == 'pending'
+                                ? 'Pending Admin Approval'
+                                : 'Registration Closed (Rejected)',
+                            variant: AppleButtonVariant.subtle,
+                            icon: _currentEvent.approvalStatus == 'pending'
+                                ? Icons.hourglass_top_rounded
+                                : Icons.block_rounded,
+                            height: 44,
+                            onPressed: null,
+                          ),
                         CopyButton(
                           textToCopy:
-                              'Campus Pulse Event: ${_currentEvent.title} on ${_formatDate(_currentEvent.startTime)} at ${_currentEvent.venue}',
+                              'CAMPULSE Event: ${_currentEvent.title} on ${_formatDate(_currentEvent.startTime)} at ${_currentEvent.venue}',
                           label: 'Share Event',
                         ),
                       ],
@@ -416,7 +537,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
         Icon(
           icon,
           size: 18,
-          color: isDark ? AppleTokens.darkAccentPurple : AppleTokens.accentPurple,
+          color: isDark
+              ? AppleTokens.darkAccentPurple
+              : AppleTokens.accentPurple,
         ),
         const SizedBox(width: AppleTokens.space12),
         Text(
@@ -432,7 +555,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
             value,
             style: TextStyle(
               fontSize: 13,
-              color: isDark ? AppleTokens.darkTextSecondary : AppleTokens.bodyText,
+              color: isDark
+                  ? AppleTokens.darkTextSecondary
+                  : AppleTokens.bodyText,
             ),
           ),
         ),

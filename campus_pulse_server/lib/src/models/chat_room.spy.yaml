@@ -4,6 +4,9 @@ fields:
   roomType: String
   referenceId: String?
   name: String
+  description: String?
+  topic: String?
+  creatorAuthUserId: UuidValue?
   participantIds: List<UuidValue>
   allowedBranch: String?
   allowedAcademicYear: int?

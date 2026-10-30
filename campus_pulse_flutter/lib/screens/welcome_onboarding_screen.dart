@@ -1,31 +1,9 @@
+import 'dart:ui';
 import 'package:campus_pulse_client/campus_pulse_client.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../client.dart';
-
-/// Design tokens matching the Pastel Mobile Reference (media_1793301247002_85f7d33a.jpg)
-class MindlyTokens {
-  static const Color background = Color(0xFFFAFAF8); // Warm White: #FAFAF8
-  static const Color lavender = Color(0xFFE6DFFF); // Lavender Background: #E6DFFF
-  static const Color palePurple = Color(0xFFF1EDFF); // Pale Lavender: #F1EDFF
-  static const Color warmCream = Color(0xFFFFC45B); // Pastel Yellow: #FFC45B
-  static const Color softBlue = Color(0xFFA9CCFF); // Pastel Blue: #A9CCFF
-  static const Color accentPurple = Color(0xFFB9A0FF); // Soft Lavender: #B9A0FF
-  static const Color deepNavy = Color(0xFF10111C); // Dark Navy: #10111C
-  static const Color bodyText = Color(0xFF777783); // Secondary Text: #777783
-  static const Color cardBg = Color(0xFFFFFFFF); // White: #FFFFFF
-  static const Color border = Color(0xFFE9E6EF); // Border: #E9E6EF
-  static const Color yellowAccent = Color(0xFFFFC45B); // Pastel Yellow: #FFC45B
-  static const Color yellowSoft = Color(0xFFFFF3D6);
-  static const Color pastelPink = Color(0xFFF18CE5); // Pastel Pink: #F18CE5
-  static const Color pastelBlue = Color(0xFFA9CCFF);
-  static const Color pastelYellow = Color(0xFFFFC45B);
-  static const Color softLavender = Color(0xFFB9A0FF);
-  static const Color lavenderBg = Color(0xFFE6DFFF);
-  static const Color deepForest = Color(0xFF10111C);
-  static const Color burntAmber = Color(0xFFB9A0FF);
-  static const Color sageGreen = Color(0xFFB9A0FF);
-}
+import '../theme/apple_tokens.dart';
 
 class WelcomeOnboardingScreen extends StatefulWidget {
   final VoidCallback onGetStarted;
@@ -44,61 +22,70 @@ class WelcomeOnboardingScreen extends StatefulWidget {
       _WelcomeOnboardingScreenState();
 }
 
-class _WelcomeOnboardingScreenState extends State<WelcomeOnboardingScreen> {
+class _WelcomeOnboardingScreenState extends State<WelcomeOnboardingScreen>
+    with SingleTickerProviderStateMixin {
   final ScrollController _scrollController = ScrollController();
 
   // Section global keys for smooth anchor scrolling
+  final GlobalKey _featuresKey = GlobalKey();
   final GlobalKey _howItWorksKey = GlobalKey();
+  final GlobalKey _aboutKey = GlobalKey();
   final GlobalKey _eventsKey = GlobalKey();
-  final GlobalKey _studyBuddyKey = GlobalKey();
-  final GlobalKey _communityKey = GlobalKey();
-  final GlobalKey _leaderboardKey = GlobalKey();
 
-  // Live data fetched from Serverpod backend
+  // Live campus events from backend
   List<CampusEvent> _liveEvents = [];
-  List<StudentProfile> _liveStudents = [];
-  List<LeaderboardEntry> _liveLeaderboard = [];
-  bool _isLoadingData = true;
-  String _selectedEventCategory = 'All';
+  bool _isLoadingEvents = true;
+  bool _eventsError = false;
+
+  // Floating animation controller for lightweight 3D depth
+  late final AnimationController _floatController;
+  late final Animation<double> _floatAnimation;
+
+  // Mouse parallax offset on desktop
+  Offset _pointerOffset = Offset.zero;
 
   @override
   void initState() {
     super.initState();
+    _floatController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 3600),
+    )..repeat(reverse: true);
+
+    _floatAnimation = Tween<double>(begin: -6.0, end: 6.0).animate(
+      CurvedAnimation(
+        parent: _floatController,
+        curve: Curves.easeInOut,
+      ),
+    );
+
     _loadLiveContent();
   }
 
   @override
   void dispose() {
+    _floatController.dispose();
     _scrollController.dispose();
     super.dispose();
   }
 
   Future<void> _loadLiveContent() async {
     try {
-      final results = await Future.wait([
-        client.event
-            .listEvents(limit: 6, offset: 0)
-            .timeout(const Duration(seconds: 4)),
-        client.student
-            .discoverStudents(limit: 4, offset: 0)
-            .timeout(const Duration(seconds: 4)),
-        client.leaderboard
-            .getLeaderboard(limit: 4, offset: 0)
-            .timeout(const Duration(seconds: 4)),
-      ]);
-
+      final events = await client.event
+          .listEvents(limit: 3, offset: 0)
+          .timeout(const Duration(seconds: 4));
       if (mounted) {
         setState(() {
-          _liveEvents = results[0] as List<CampusEvent>;
-          _liveStudents = results[1] as List<StudentProfile>;
-          _liveLeaderboard = results[2] as List<LeaderboardEntry>;
-          _isLoadingData = false;
+          _liveEvents = events;
+          _isLoadingEvents = false;
+          _eventsError = false;
         });
       }
     } catch (_) {
       if (mounted) {
         setState(() {
-          _isLoadingData = false;
+          _isLoadingEvents = false;
+          _eventsError = true;
         });
       }
     }
@@ -109,764 +96,851 @@ class _WelcomeOnboardingScreenState extends State<WelcomeOnboardingScreen> {
     if (context != null) {
       Scrollable.ensureVisible(
         context,
-        duration: const Duration(milliseconds: 600),
+        duration: const Duration(milliseconds: 550),
         curve: Curves.easeInOutCubic,
       );
     }
   }
 
-  TextStyle _serifHeadline({
-    double fontSize = 48,
-    FontWeight fontWeight = FontWeight.w600,
-    Color color = MindlyTokens.deepNavy,
-    double height = 1.15,
-  }) {
-    try {
-      return GoogleFonts.newsreader(
-        fontSize: fontSize,
-        fontWeight: fontWeight,
-        color: color,
-        height: height,
-        letterSpacing: -0.6,
-      );
-    } catch (_) {
-      return TextStyle(
-        fontFamily: 'serif',
-        fontSize: fontSize,
-        fontWeight: fontWeight,
-        color: color,
-        height: height,
-        letterSpacing: -0.6,
-      );
-    }
-  }
-
-  TextStyle _sansText({
-    double fontSize = 16,
-    FontWeight fontWeight = FontWeight.w400,
-    Color color = MindlyTokens.bodyText,
-    double height = 1.5,
-  }) {
-    try {
-      return GoogleFonts.inter(
-        fontSize: fontSize,
-        fontWeight: fontWeight,
-        color: color,
-        height: height,
-      );
-    } catch (_) {
-      return TextStyle(
-        fontSize: fontSize,
-        fontWeight: fontWeight,
-        color: color,
-        height: height,
-      );
-    }
+  void _showMobileMenu(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        width: 28,
+                        height: 28,
+                        decoration: BoxDecoration(
+                          color: AppleTokens.primaryTeal,
+                          borderRadius: BorderRadius.circular(
+                            AppleTokens.radius8,
+                          ),
+                        ),
+                        child: const Center(
+                          child: Text(
+                            'C',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'CAMPULSE',
+                        style: GoogleFonts.inter(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                          color: AppleTokens.neutralDark,
+                        ),
+                      ),
+                    ],
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close_rounded, size: 20),
+                    onPressed: () => Navigator.pop(ctx),
+                  ),
+                ],
+              ),
+              const Divider(color: AppleTokens.borderSubtle, height: 20),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(
+                  Icons.stars_rounded,
+                  size: 20,
+                  color: AppleTokens.primaryTeal,
+                ),
+                title: const Text('Features'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _scrollToKey(_featuresKey);
+                },
+              ),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(
+                  Icons.alt_route_rounded,
+                  size: 20,
+                  color: AppleTokens.primaryTeal,
+                ),
+                title: const Text('How It Works'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _scrollToKey(_howItWorksKey);
+                },
+              ),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(
+                  Icons.info_outline_rounded,
+                  size: 20,
+                  color: AppleTokens.primaryTeal,
+                ),
+                title: const Text('About'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _scrollToKey(_aboutKey);
+                },
+              ),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(
+                  Icons.event_outlined,
+                  size: 20,
+                  color: AppleTokens.primaryTeal,
+                ),
+                title: const Text('Campus Events'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  widget.onBrowseEvents();
+                },
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () {
+                        Navigator.pop(ctx);
+                        widget.onNavigate?.call('auth');
+                      },
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppleTokens.primaryText,
+                        side: const BorderSide(color: AppleTokens.borderSubtle),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                            AppleTokens.radius8,
+                          ),
+                        ),
+                      ),
+                      child: const Text('Log In'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(ctx);
+                        widget.onGetStarted();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppleTokens.primaryButton,
+                        foregroundColor: AppleTokens.primaryButtonText,
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                            AppleTokens.radius8,
+                          ),
+                        ),
+                      ),
+                      child: const Text('Sign Up'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-    final isDesktop = width >= 900;
-    final isTablet = width >= 600 && width < 900;
+    final isDesktop = width >= 960;
+    final disableMotion = MediaQuery.of(context).disableAnimations;
 
     return Scaffold(
-      backgroundColor: MindlyTokens.background,
-      body: SingleChildScrollView(
-        controller: _scrollController,
-        child: Column(
-          children: [
-            // 1. TOP NAVBAR (Mindly layout)
-            _buildNavbar(context, isDesktop),
-
-            // 2. HERO SECTION with delicate grid, pastel glow, headline & layered cards
-            _buildHeroSection(context, isDesktop, isTablet, width),
-
-            // 3. HOW IT WORKS (Section 1)
-            _buildHowItWorksSection(context, isDesktop),
-
-            // 4. EXPLORE CAMPUS EVENTS (Section 2)
-            _buildEventsSection(context, isDesktop),
-
-            // 5. FIND YOUR STUDY BUDDY (Section 3)
-            _buildStudyBuddySection(context, isDesktop),
-
-            // 6. CAMPUS COMMUNITY & QUIZZES (Section 4)
-            _buildCommunitySection(context, isDesktop),
-
-            // 7. LIVE LEADERBOARD (Section 5)
-            _buildLeaderboardSection(context, isDesktop),
-
-            // 8. FINAL CTA (Section 6)
-            _buildFinalCtaSection(context),
-
-            // 9. FOOTER
-            _buildFooter(context, isDesktop),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // ==========================================
-  // 1. NAVBAR
-  // ==========================================
-  Widget _buildNavbar(BuildContext context, bool isDesktop) {
-    final width = MediaQuery.of(context).size.width;
-    final showFullNav = width >= 980;
-    final isMobile = width < 600;
-
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: isDesktop ? 40 : 12,
-        vertical: 14,
-      ),
-      constraints: const BoxConstraints(maxWidth: 1280),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      backgroundColor: AppleTokens.pageBackground,
+      body: Stack(
         children: [
-          // Brand Logo
-          Expanded(
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: InkWell(
-                onTap: () {
-                  _scrollController.animateTo(
-                    0,
-                    duration: const Duration(milliseconds: 500),
-                    curve: Curves.easeOut,
-                  );
-                },
-                borderRadius: BorderRadius.circular(8),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 32,
-                      height: 32,
-                      decoration: BoxDecoration(
-                        color: MindlyTokens.deepForest,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Center(
-                        child: Icon(
-                          Icons.bolt_rounded,
-                          color: MindlyTokens.sageGreen,
-                          size: 20,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Flexible(
-                      child: Text(
-                        'Campus Pulse',
-                        overflow: TextOverflow.ellipsis,
-                        style: _serifHeadline(
-                          fontSize: isMobile ? 18 : 22,
-                          fontWeight: FontWeight.w700,
-                          color: MindlyTokens.deepForest,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+          // Main Scrollable Page Content
+          SingleChildScrollView(
+            controller: _scrollController,
+            child: Column(
+              children: [
+                // Top spacing to account for sticky frosted navbar
+                const SizedBox(height: 70),
+
+                // 1. HERO SECTION (Two-column desktop with 3D Depth Illustration)
+                _buildHeroSection(context, isDesktop, disableMotion),
+
+                // 2. FEATURES SECTION (Interactive Grid with hover lift & 3D tilt)
+                _buildFeaturesSection(context, isDesktop),
+
+                // 3. HOW IT WORKS (Connected 3-Step Journey)
+                _buildHowItWorksSection(context, isDesktop),
+
+                // 4. ABOUT SECTION (Narrow reading column & verified pillars)
+                _buildAboutSection(context, isDesktop),
+
+                // 5. REAL LIVE EVENTS (Real-time backend queries)
+                _buildUpcomingEventsSection(context, isDesktop),
+
+                // 6. FINAL CALL TO ACTION (Mint gradient banner)
+                _buildFinalCtaSection(context, isDesktop),
+
+                // 7. FOOTER
+                _buildFooter(context, isDesktop),
+              ],
             ),
           ),
 
-          // Desktop Center Nav Links
-          if (showFullNav)
-            Flexible(
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _navLink('How It Works', () => _scrollToKey(_howItWorksKey)),
-                    const SizedBox(width: 16),
-                    _navLink(
-                      'Campus Community',
-                      () => _scrollToKey(_communityKey),
-                    ),
-                    const SizedBox(width: 16),
-                    _navLink('Events', () => _scrollToKey(_eventsKey)),
-                    const SizedBox(width: 16),
-                    _navLink('About', () => widget.onNavigate?.call('faq')),
-                  ],
-                ),
-              ),
-            ),
-
-          // Right Auth Actions
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextButton(
-                onPressed: widget.onGetStarted,
-                style: TextButton.styleFrom(
-                  foregroundColor: MindlyTokens.deepForest,
-                  padding: EdgeInsets.symmetric(
-                    horizontal: isMobile ? 8 : 14,
-                    vertical: isMobile ? 6 : 8,
-                  ),
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                child: Text(
-                  'Log In',
-                  style: _sansText(
-                    fontSize: isMobile ? 12 : 14,
-                    fontWeight: FontWeight.w600,
-                    color: MindlyTokens.deepForest,
-                  ),
-                ),
-              ),
-              SizedBox(width: isMobile ? 6 : 8),
-              ElevatedButton(
-                onPressed: widget.onGetStarted,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: MindlyTokens.burntAmber,
-                  foregroundColor: Colors.white,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                  padding: EdgeInsets.symmetric(
-                    horizontal: isMobile ? 12 : 20,
-                    vertical: isMobile ? 7 : 10,
-                  ),
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                child: Text(
-                  'Get Started',
-                  style: _sansText(
-                    fontSize: isMobile ? 12 : 14,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ],
+          // Pinned Sticky Frosted Navbar
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: _buildStickyNavbar(context, isDesktop),
           ),
         ],
       ),
     );
   }
 
-  Widget _navLink(String label, VoidCallback onTap) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(6),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-        child: Text(
-          label,
-          style: _sansText(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: MindlyTokens.deepNavy,
+  // ==========================================
+  // STICKY FROSTED NAVBAR
+  // ==========================================
+  Widget _buildStickyNavbar(BuildContext context, bool isDesktop) {
+    return ClipRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+        child: Container(
+          width: double.infinity,
+          height: 68,
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.88),
+            border: const Border(
+              bottom: BorderSide(
+                color: AppleTokens.borderSubtle,
+                width: 1.0,
+              ),
+            ),
+          ),
+          child: Center(
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 1200),
+              padding: EdgeInsets.symmetric(
+                horizontal: isDesktop ? 32 : 20,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Logo / Wordmark
+                  InkWell(
+                    onTap: () {
+                      _scrollController.animateTo(
+                        0,
+                        duration: const Duration(milliseconds: 400),
+                        curve: Curves.easeOut,
+                      );
+                    },
+                    borderRadius: BorderRadius.circular(AppleTokens.radius8),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 34,
+                          height: 34,
+                          decoration: BoxDecoration(
+                            color: AppleTokens.primaryTeal,
+                            borderRadius: BorderRadius.circular(
+                              AppleTokens.radius8,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppleTokens.primaryTeal.withValues(
+                                  alpha: 0.25,
+                                ),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: const Center(
+                            child: Text(
+                              'C',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 19,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          'CAMPULSE',
+                          style: GoogleFonts.inter(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -0.4,
+                            color: AppleTokens.neutralDark,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Desktop Navigation Links
+                  if (isDesktop)
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _navHoverLink(
+                          'Features',
+                          () => _scrollToKey(_featuresKey),
+                        ),
+                        const SizedBox(width: 8),
+                        _navHoverLink(
+                          'How It Works',
+                          () => _scrollToKey(_howItWorksKey),
+                        ),
+                        const SizedBox(width: 8),
+                        _navHoverLink('About', () => _scrollToKey(_aboutKey)),
+                        const SizedBox(width: 8),
+                        _navHoverLink('Events', widget.onBrowseEvents),
+                      ],
+                    ),
+
+                  // Desktop Auth CTA / Mobile Hamburger
+                  if (isDesktop)
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        TextButton(
+                          onPressed: () => widget.onNavigate?.call('auth'),
+                          style: TextButton.styleFrom(
+                            foregroundColor: AppleTokens.primaryText,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                          ),
+                          child: Text(
+                            'Log In',
+                            style: GoogleFonts.inter(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: AppleTokens.primaryText,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        ElevatedButton(
+                          onPressed: widget.onGetStarted,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppleTokens.primaryButton,
+                            foregroundColor: AppleTokens.primaryButtonText,
+                            elevation: 0,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 11,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                AppleTokens.radius8,
+                              ),
+                            ),
+                          ),
+                          child: Text(
+                            'Sign Up',
+                            style: GoogleFonts.inter(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: AppleTokens.primaryButtonText,
+                            ),
+                          ),
+                        ),
+                      ],
+                    )
+                  else
+                    IconButton(
+                      icon: const Icon(
+                        Icons.menu_rounded,
+                        color: AppleTokens.neutralDark,
+                      ),
+                      tooltip: 'Menu',
+                      onPressed: () => _showMobileMenu(context),
+                    ),
+                ],
+              ),
+            ),
           ),
         ),
       ),
     );
   }
 
+  Widget _navHoverLink(String label, VoidCallback onTap) {
+    return _HoverNavButton(label: label, onTap: onTap);
+  }
+
   // ==========================================
-  // 2. HERO SECTION
+  // 1. HERO SECTION WITH 3D DEPTH
   // ==========================================
   Widget _buildHeroSection(
     BuildContext context,
     bool isDesktop,
-    bool isTablet,
-    double screenWidth,
+    bool disableMotion,
   ) {
-    return SizedBox(
+    return Container(
       width: double.infinity,
-      child: Stack(
-        clipBehavior: Clip.none,
-        alignment: Alignment.topCenter,
-        children: [
-          // A. Ambient Pastel Mesh Glows (Lavender bottom-left, Warm Cream bottom-right)
-          Positioned(
-            left: -120,
-            bottom: 40,
-            child: Container(
-              width: 520,
-              height: 480,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    MindlyTokens.lavender.withValues(alpha: 0.55),
-                    MindlyTokens.palePurple.withValues(alpha: 0.25),
-                    MindlyTokens.background.withValues(alpha: 0.0),
+      color: Colors.white,
+      padding: EdgeInsets.symmetric(
+        horizontal: isDesktop ? 32 : 20,
+        vertical: isDesktop ? 60 : 36,
+      ),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1200),
+          child: isDesktop
+              ? Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // Left Column: Copy & Actions
+                    Expanded(
+                      flex: 11,
+                      child: _buildHeroLeftContent(context, isDesktop),
+                    ),
+                    const SizedBox(width: 48),
+                    // Right Column: Interactive 3D Depth Campus Illustration
+                    Expanded(
+                      flex: 10,
+                      child: _build3DCampusIllustration(
+                        disableMotion,
+                        isDesktop,
+                      ),
+                    ),
                   ],
-                  stops: const [0.0, 0.55, 1.0],
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            right: -100,
-            bottom: 60,
-            child: Container(
-              width: 560,
-              height: 500,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    MindlyTokens.warmCream.withValues(alpha: 0.65),
-                    MindlyTokens.softBlue.withValues(alpha: 0.20),
-                    MindlyTokens.background.withValues(alpha: 0.0),
+                )
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    _buildHeroLeftContent(context, isDesktop),
+                    const SizedBox(height: 32),
+                    _build3DCampusIllustration(disableMotion, isDesktop),
                   ],
-                  stops: const [0.0, 0.6, 1.0],
                 ),
-              ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeroLeftContent(BuildContext context, bool isDesktop) {
+    return Column(
+      crossAxisAlignment: isDesktop
+          ? CrossAxisAlignment.start
+          : CrossAxisAlignment.center,
+      children: [
+        // Subtle Brand Role Badge
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+          decoration: BoxDecoration(
+            color: AppleTokens.lightMint,
+            borderRadius: BorderRadius.circular(AppleTokens.radius8),
+            border: Border.all(
+              color: AppleTokens.primaryTeal.withValues(alpha: 0.25),
             ),
           ),
-
-          // B. Delicate Faint Grid across the hero
-          Positioned.fill(
-            child: CustomPaint(
-              painter: _HeroGridPainter(),
-            ),
-          ),
-
-          // C. Floating Decorative Circles
-          // Top-Right Lavender Heart/Pulse Pill
-          Positioned(
-            right: isDesktop ? screenWidth * 0.18 : 24,
-            top: 60,
-            child: _buildFloatingLavenderBadge(),
-          ),
-
-          // Middle-Left Warm Yellow Spark Circle
-          Positioned(
-            left: isDesktop ? screenWidth * 0.18 : 16,
-            top: 200,
-            child: _buildFloatingYellowBadge(),
-          ),
-
-          // D. Foreground Content: Headline, Subtitle, CTAs, and Layered Cards
-          Column(
+          child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const SizedBox(height: 36),
-              // Headline
-              ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 780),
+              const Icon(
+                Icons.school_rounded,
+                size: 16,
+                color: AppleTokens.primaryTeal,
+              ),
+              const SizedBox(width: 8),
+              Flexible(
                 child: Text(
-                  'Your campus life deserves\na place to connect',
-                  textAlign: TextAlign.center,
-                  style: _serifHeadline(
-                    fontSize: isDesktop ? 54 : (isTablet ? 42 : 32),
-                    fontWeight: FontWeight.w600,
-                    height: 1.15,
+                  'Campus Community Platform',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.inter(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w700,
+                    color: AppleTokens.primaryTeal,
+                    letterSpacing: 0.2,
                   ),
                 ),
               ),
-              const SizedBox(height: 18),
+            ],
+          ),
+        ),
+        const SizedBox(height: 22),
 
-              // Subtitle
-              ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 620),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Text(
-                    'Discover campus events, find your study buddies, share knowledge, and stay connected with your college community — all in one calm, judgment-free space.',
-                    textAlign: TextAlign.center,
-                    style: _sansText(
-                      fontSize: isDesktop ? 16 : 14,
-                      color: MindlyTokens.bodyText,
-                      height: 1.6,
-                    ),
-                  ),
+        // Hero Headline
+        RichText(
+          textAlign: isDesktop ? TextAlign.start : TextAlign.center,
+          text: TextSpan(
+            style: GoogleFonts.inter(
+              fontSize: isDesktop ? 48 : 34,
+              fontWeight: FontWeight.w800,
+              color: AppleTokens.neutralDark,
+              letterSpacing: -1.0,
+              height: 1.15,
+            ),
+            children: const [
+              TextSpan(text: 'Your campus,\n'),
+              TextSpan(
+                text: 'connected.',
+                style: TextStyle(
+                  color: AppleTokens.primaryTeal,
                 ),
               ),
-              const SizedBox(height: 28),
+            ],
+          ),
+        ),
+        const SizedBox(height: 18),
 
-              // Pill CTA Buttons
-              Wrap(
-                alignment: WrapAlignment.center,
-                spacing: 14,
-                runSpacing: 12,
+        // Description
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 520),
+          child: Text(
+            'Find campus events, share verified lecture notes, join course channels, and connect with peer study partners—all in one place.',
+            textAlign: isDesktop ? TextAlign.start : TextAlign.center,
+            style: GoogleFonts.inter(
+              fontSize: isDesktop ? 17 : 15,
+              fontWeight: FontWeight.w400,
+              color: AppleTokens.neutralBrown,
+              height: 1.55,
+            ),
+          ),
+        ),
+        const SizedBox(height: 32),
+
+        // Actions
+        Wrap(
+          spacing: 14,
+          runSpacing: 12,
+          alignment: isDesktop ? WrapAlignment.start : WrapAlignment.center,
+          children: [
+            ElevatedButton(
+              onPressed: widget.onGetStarted,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppleTokens.primaryButton,
+                foregroundColor: AppleTokens.primaryButtonText,
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 26,
+                  vertical: 16,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppleTokens.radius8),
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      widget.onBrowseEvents();
-                      widget.onNavigate?.call('events');
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: MindlyTokens.burntAmber,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 28,
-                        vertical: 14,
-                      ),
-                    ),
-                    child: Text(
-                      'Explore Campus',
-                      style: _sansText(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
-                      ),
+                  Text(
+                    'Get Started',
+                    style: GoogleFonts.inter(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: AppleTokens.primaryButtonText,
                     ),
                   ),
-                  OutlinedButton(
-                    onPressed: () {
-                      widget.onGetStarted();
-                      widget.onNavigate?.call('study_buddies');
-                    },
-                    style: OutlinedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: MindlyTokens.deepForest,
-                      side: const BorderSide(
-                        color: MindlyTokens.border,
-                        width: 1.2,
-                      ),
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 26,
-                        vertical: 14,
-                      ),
-                    ),
-                    child: Text(
-                      'Join Your Community',
-                      style: _sansText(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: MindlyTokens.deepForest,
-                      ),
-                    ),
-                  ),
+                  const SizedBox(width: 8),
+                  const Icon(Icons.arrow_forward_rounded, size: 16),
                 ],
               ),
-              const SizedBox(height: 48),
-
-              // F. Layered Cards Stack
-              _buildHeroCardStack(context, isDesktop, screenWidth),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Floating Decorative Badges
-  Widget _buildFloatingLavenderBadge() {
-    return Container(
-      width: 54,
-      height: 54,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        shape: BoxShape.circle,
-        border: Border.all(color: MindlyTokens.palePurple, width: 1.5),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 18,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: Center(
-        child: Container(
-          width: 36,
-          height: 36,
-          decoration: const BoxDecoration(
-            color: MindlyTokens.palePurple,
-            shape: BoxShape.circle,
-          ),
-          child: const Center(
-            child: Icon(
-              Icons.favorite_rounded,
-              size: 20,
-              color: MindlyTokens.accentPurple,
             ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFloatingYellowBadge() {
-    return Container(
-      width: 44,
-      height: 44,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        shape: BoxShape.circle,
-        border: Border.all(color: MindlyTokens.warmCream, width: 1.5),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 14,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Center(
-        child: Container(
-          width: 28,
-          height: 28,
-          decoration: const BoxDecoration(
-            color: MindlyTokens.yellowAccent,
-            shape: BoxShape.circle,
-          ),
-          child: const Center(
-            child: Icon(
-              Icons.auto_awesome_rounded,
-              size: 16,
-              color: Colors.white,
+            OutlinedButton(
+              onPressed: () => widget.onNavigate?.call('auth'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppleTokens.primaryText,
+                backgroundColor: Colors.white,
+                side: const BorderSide(
+                  color: AppleTokens.borderSubtle,
+                  width: 1.2,
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 16,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppleTokens.radius8),
+                ),
+              ),
+              child: Text(
+                'Log In',
+                style: GoogleFonts.inter(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: AppleTokens.primaryText,
+                ),
+              ),
             ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBlobMascot() {
-    return Container(
-      width: 72,
-      height: 64,
-      decoration: BoxDecoration(
-        color: MindlyTokens.lavender,
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(36),
-          topRight: Radius.circular(36),
-          bottomLeft: Radius.circular(16),
-          bottomRight: Radius.circular(16),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: MindlyTokens.accentPurple.withValues(alpha: 0.25),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // Eye 1
-          Container(
-            width: 8,
-            height: 12,
-            margin: const EdgeInsets.symmetric(horizontal: 4),
-            decoration: BoxDecoration(
-              color: MindlyTokens.deepNavy,
-              borderRadius: BorderRadius.circular(6),
-            ),
-          ),
-          // Eye 2
-          Container(
-            width: 8,
-            height: 12,
-            margin: const EdgeInsets.symmetric(horizontal: 4),
-            decoration: BoxDecoration(
-              color: MindlyTokens.deepNavy,
-              borderRadius: BorderRadius.circular(6),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Layered Cards Composition
-  Widget _buildHeroCardStack(
-    BuildContext context,
-    bool isDesktop,
-    double screenWidth,
-  ) {
-    if (!isDesktop) {
-      // Mobile / Tablet layout: Clean horizontal scroll or single center card
-      return SizedBox(
-        height: 380,
-        child: ListView(
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          children: [
-            _buildCenterCard(width: 300, isElevated: true),
-            const SizedBox(width: 16),
-            _buildLeftStudyCard(width: 290, rotation: 0),
-            const SizedBox(width: 16),
-            _buildRightDiscussionCard(width: 290, rotation: 0),
           ],
         ),
-      );
-    }
+        const SizedBox(height: 28),
 
-    // Desktop: Exact Mindly layered rotated composition
-    return SizedBox(
-      height: 420,
-      child: Center(
-        child: SizedBox(
-          width: 880,
-          height: 420,
-          child: Stack(
-            alignment: Alignment.bottomCenter,
-            clipBehavior: Clip.none,
-            children: [
-              // Cute Blob Mascot peeking behind left card
-              Positioned(
-                left: 70,
-                bottom: 230,
-                child: _buildBlobMascot(),
-              ),
+        // Real trust highlights
+        Wrap(
+          spacing: 16,
+          runSpacing: 8,
+          alignment: isDesktop ? WrapAlignment.start : WrapAlignment.center,
+          children: [
+            _trustPill(
+              'Verified Student Accounts',
+              Icons.verified_user_outlined,
+            ),
+            _trustPill('Syllabus-Aligned Quizzes', Icons.check_circle_outline),
+            _trustPill('Official Class Timetables', Icons.schedule_outlined),
+          ],
+        ),
+      ],
+    );
+  }
 
-              // 1. Left Card (-6.5 degrees)
-              Positioned(
-                left: 40,
-                bottom: -20,
-                child: Transform.rotate(
-                  angle: -0.11,
-                  alignment: Alignment.bottomCenter,
-                  child: _buildLeftStudyCard(width: 300, rotation: -0.11),
-                ),
-              ),
-
-              // 2. Right Card (+6.5 degrees)
-              Positioned(
-                right: 40,
-                bottom: -20,
-                child: Transform.rotate(
-                  angle: 0.11,
-                  alignment: Alignment.bottomCenter,
-                  child: _buildRightDiscussionCard(width: 300, rotation: 0.11),
-                ),
-              ),
-
-              // 3. Center Featured Event Card (Upright, elevated, on top)
-              Positioned(
-                bottom: 0,
-                child: _buildCenterCard(width: 330, isElevated: true),
-              ),
-            ],
+  Widget _trustPill(String label, IconData icon) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 14, color: AppleTokens.primaryTeal),
+        const SizedBox(width: 5),
+        Text(
+          label,
+          style: GoogleFonts.inter(
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            color: AppleTokens.neutralBrown,
           ),
         ),
+      ],
+    );
+  }
+
+  // --- Lightweight 3D-Style Campus Illustration ---
+  Widget _build3DCampusIllustration(bool disableMotion, bool isDesktop) {
+    return MouseRegion(
+      onHover: (event) {
+        if (!disableMotion && isDesktop) {
+          final box = context.findRenderObject() as RenderBox?;
+          if (box != null && box.hasSize) {
+            final center = box.size.center(Offset.zero);
+            setState(() {
+              _pointerOffset = Offset(
+                ((event.localPosition.dx - center.dx) / 50).clamp(-10.0, 10.0),
+                ((event.localPosition.dy - center.dy) / 50).clamp(-10.0, 10.0),
+              );
+            });
+          }
+        }
+      },
+      onExit: (_) {
+        if (!disableMotion) {
+          setState(() => _pointerOffset = Offset.zero);
+        }
+      },
+      child: AnimatedBuilder(
+        animation: _floatAnimation,
+        builder: (context, _) {
+          final floatOffset = disableMotion ? 0.0 : _floatAnimation.value;
+          final pX = (disableMotion || !isDesktop) ? 0.0 : _pointerOffset.dx;
+          final pY = (disableMotion || !isDesktop) ? 0.0 : _pointerOffset.dy;
+
+          return SizedBox(
+            height: isDesktop ? 400 : 360,
+            child: Stack(
+              clipBehavior: Clip.none,
+              alignment: Alignment.center,
+              children: [
+                // Soft background radial aura
+                Positioned(
+                  top: 30,
+                  child: Container(
+                    width: isDesktop ? 300 : 260,
+                    height: isDesktop ? 300 : 260,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: RadialGradient(
+                        colors: [
+                          AppleTokens.lightMint.withValues(alpha: 0.6),
+                          AppleTokens.lightCyan.withValues(alpha: 0.2),
+                          Colors.transparent,
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+
+                // Card 1: Floating Event Ticket Card (Top Left)
+                Positioned(
+                  top: 15 + floatOffset + (pY * 0.4),
+                  left: isDesktop ? 10 + (pX * 0.4) : 0,
+                  child: Transform(
+                    transform: Matrix4.identity()
+                      ..setEntry(3, 2, 0.001)
+                      ..rotateY(-0.06)
+                      ..rotateX(0.04),
+                    child: _buildEventTicketCard(isDesktop),
+                  ),
+                ),
+
+                // Card 2: Lecture Notes & PYQs Card (Center)
+                Positioned(
+                  top: 130 - (floatOffset * 0.8) + (pY * 0.7),
+                  right: isDesktop ? 10 - (pX * 0.6) : 0,
+                  child: Transform(
+                    transform: Matrix4.identity()
+                      ..setEntry(3, 2, 0.001)
+                      ..rotateY(0.05)
+                      ..rotateX(-0.03),
+                    child: _buildStudyBookCard(isDesktop),
+                  ),
+                ),
+
+                // Card 3: Peer Study Buddy Card (Bottom Left)
+                Positioned(
+                  bottom: 25 + floatOffset - (pY * 0.5),
+                  left: isDesktop ? 20 + (pX * 0.5) : 10,
+                  child: Transform(
+                    transform: Matrix4.identity()
+                      ..setEntry(3, 2, 0.001)
+                      ..rotateY(-0.04)
+                      ..rotateX(0.03),
+                    child: _buildStudyBuddyCard(isDesktop),
+                  ),
+                ),
+
+                // Card 4: Quiz & Leaderboard Badge Card (Bottom Right)
+                Positioned(
+                  bottom: 10 - (floatOffset * 0.6) + (pY * 0.3),
+                  right: isDesktop ? 20 - (pX * 0.4) : 10,
+                  child: Transform(
+                    transform: Matrix4.identity()
+                      ..setEntry(3, 2, 0.001)
+                      ..rotateY(0.04)
+                      ..rotateX(0.02),
+                    child: _buildQuizRankBadge(isDesktop),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
 
-  // Center Hero Card: Featured Campus Event / Question
-  Widget _buildCenterCard({required double width, bool isElevated = true}) {
-    final featuredEvent = _liveEvents.isNotEmpty ? _liveEvents.first : null;
-
+  Widget _buildEventTicketCard(bool isDesktop) {
     return Container(
-      width: width,
-      height: 380,
-      padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 26),
+      width: isDesktop ? 230 : 200,
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: MindlyTokens.cardBg,
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(28),
-          topRight: Radius.circular(28),
-        ),
-        border: Border.all(color: MindlyTokens.border, width: 1.2),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(AppleTokens.radius14),
+        border: Border.all(color: AppleTokens.borderSubtle),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: isElevated ? 0.08 : 0.03),
-            blurRadius: 32,
+            color: AppleTokens.primaryTeal.withValues(alpha: 0.12),
+            blurRadius: 18,
             offset: const Offset(0, 8),
           ),
         ],
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          // Top circular icon badge
-          Container(
-            width: 36,
-            height: 36,
-            decoration: const BoxDecoration(
-              color: MindlyTokens.palePurple,
-              shape: BoxShape.circle,
-            ),
-            child: const Center(
-              child: Icon(
-                Icons.event_available_rounded,
-                size: 18,
-                color: MindlyTokens.accentPurple,
-              ),
-            ),
-          ),
-          const SizedBox(height: 24),
-
-          // Centered Serif Headline
-          Text(
-            featuredEvent?.title ??
-                'HackPulse 2026: Campus 36-Hour Hackathon',
-            textAlign: TextAlign.center,
-            maxLines: 3,
-            overflow: TextOverflow.ellipsis,
-            style: _serifHeadline(
-              fontSize: 22,
-              fontWeight: FontWeight.w600,
-              height: 1.25,
-            ),
-          ),
-          const SizedBox(height: 12),
-
-          // Short description
-          Text(
-            featuredEvent?.description ??
-                'Build innovative solutions for campus sustainability and productivity with top mentors.',
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: _sansText(
-              fontSize: 13,
-              color: MindlyTokens.bodyText,
-              height: 1.45,
-            ),
-          ),
-
-          const Spacer(),
-
-          // Bottom Metadata row
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: MindlyTokens.background,
-              borderRadius: BorderRadius.circular(999),
-            ),
-            child: Wrap(
-              crossAxisAlignment: WrapCrossAlignment.center,
-              spacing: 6,
-              children: [
-                const Icon(
-                  Icons.people_alt_outlined,
-                  size: 13,
-                  color: MindlyTokens.bodyText,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: AppleTokens.lightMint,
+                  borderRadius: BorderRadius.circular(4),
                 ),
-                Text(
-                  '${featuredEvent?.rsvpCount ?? 42} attending',
-                  style: _sansText(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: MindlyTokens.bodyText,
+                child: Text(
+                  'WORKSHOP',
+                  style: GoogleFonts.inter(
+                    fontSize: 8.5,
+                    fontWeight: FontWeight.w800,
+                    color: AppleTokens.primaryTeal,
                   ),
                 ),
-                const Text(
-                  '•',
-                  style: TextStyle(color: MindlyTokens.bodyText, fontSize: 11),
-                ),
-                Text(
-                  featuredEvent?.category ?? 'Hackathon',
-                  style: _sansText(
-                    fontSize: 11,
+              ),
+              const SizedBox(width: 4),
+              Flexible(
+                child: Text(
+                  'Nov 12 · 10 AM',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.inter(
+                    fontSize: 9.5,
                     fontWeight: FontWeight.w600,
-                    color: MindlyTokens.accentPurple,
+                    color: AppleTokens.neutralBrown,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'HackPulse 2026',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.inter(
+              fontSize: 13,
+              fontWeight: FontWeight.w800,
+              color: AppleTokens.neutralDark,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            'Main Auditorium',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.inter(
+              fontSize: 10,
+              color: AppleTokens.neutralBrown,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+            decoration: BoxDecoration(
+              color: AppleTokens.pageBackground,
+              borderRadius: BorderRadius.circular(4),
+              border: Border.all(color: AppleTokens.borderSubtle),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.check_circle_rounded,
+                  size: 11,
+                  color: AppleTokens.primaryTeal,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  'RSVP Confirmed',
+                  style: GoogleFonts.inter(
+                    fontSize: 9,
+                    fontWeight: FontWeight.w700,
+                    color: AppleTokens.primaryTeal,
                   ),
                 ),
               ],
@@ -877,75 +951,93 @@ class _WelcomeOnboardingScreenState extends State<WelcomeOnboardingScreen> {
     );
   }
 
-  // Left Hero Card: Study-Buddy Request
-  Widget _buildLeftStudyCard({required double width, required double rotation}) {
+  Widget _buildStudyBookCard(bool isDesktop) {
     return Container(
-      width: width,
-      height: 360,
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+      width: isDesktop ? 230 : 205,
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: MindlyTokens.cardBg,
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(24),
-          topRight: Radius.circular(24),
-        ),
-        border: Border.all(color: MindlyTokens.border, width: 1.0),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(AppleTokens.radius14),
+        border: Border.all(color: AppleTokens.borderSubtle),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 20,
-            offset: const Offset(0, 6),
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 18,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
-      child: Column(
+      child: Row(
         children: [
-          // Circular Avatar
-          CircleAvatar(
-            radius: 18,
-            backgroundColor: MindlyTokens.lavender,
-            child: const Text(
-              'A',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                color: MindlyTokens.deepNavy,
+          Container(
+            width: 36,
+            height: 42,
+            decoration: BoxDecoration(
+              color: AppleTokens.lightCyan,
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(
+                color: AppleTokens.primaryTeal.withValues(alpha: 0.3),
+              ),
+            ),
+            child: const Center(
+              child: Icon(
+                Icons.menu_book_rounded,
+                color: AppleTokens.primaryTeal,
+                size: 18,
               ),
             ),
           ),
-          const SizedBox(height: 20),
-
-          // Serif question / request
-          Text(
-            'Looking for a DSA & OS study buddy for LeetCode contests?',
-            textAlign: TextAlign.center,
-            maxLines: 3,
-            overflow: TextOverflow.ellipsis,
-            style: _serifHeadline(
-              fontSize: 19,
-              fontWeight: FontWeight.w600,
-              height: 1.25,
-            ),
-          ),
-          const SizedBox(height: 12),
-
-          Text(
-            'Preparing for summer engineering internships. Daily practice on dynamic programming and graphs.',
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: _sansText(fontSize: 12, color: MindlyTokens.bodyText),
-          ),
-
-          const Spacer(),
-
-          // Bottom metadata
-          Text(
-            'Available evenings • 3rd Year CSE',
-            style: _sansText(
-              fontSize: 11,
-              fontWeight: FontWeight.w500,
-              color: MindlyTokens.bodyText,
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Data Structures',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                    color: AppleTokens.neutralDark,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Sem 5 · Notes & PYQs',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.inter(
+                    fontSize: 10,
+                    color: AppleTokens.neutralBrown,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.verified_rounded,
+                      size: 11,
+                      color: AppleTokens.primaryTeal,
+                    ),
+                    const SizedBox(width: 3),
+                    Flexible(
+                      child: Text(
+                        'Verified PDF',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.inter(
+                          fontSize: 9,
+                          fontWeight: FontWeight.w700,
+                          color: AppleTokens.primaryTeal,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         ],
@@ -953,78 +1045,181 @@ class _WelcomeOnboardingScreenState extends State<WelcomeOnboardingScreen> {
     );
   }
 
-  // Right Hero Card: Campus Discussion
-  Widget _buildRightDiscussionCard({
-    required double width,
-    required double rotation,
-  }) {
+  Widget _buildStudyBuddyCard(bool isDesktop) {
     return Container(
-      width: width,
-      height: 360,
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+      width: isDesktop ? 220 : 190,
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: MindlyTokens.cardBg,
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(24),
-          topRight: Radius.circular(24),
-        ),
-        border: Border.all(color: MindlyTokens.border, width: 1.0),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(AppleTokens.radius14),
+        border: Border.all(color: AppleTokens.borderSubtle),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 20,
+            color: Colors.black.withValues(alpha: 0.07),
+            blurRadius: 16,
             offset: const Offset(0, 6),
           ),
         ],
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          // Circular Avatar
-          CircleAvatar(
-            radius: 18,
-            backgroundColor: MindlyTokens.softBlue,
-            child: const Text(
-              'P',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                color: MindlyTokens.deepNavy,
+          Row(
+            children: [
+              SizedBox(
+                width: 48,
+                height: 22,
+                child: Stack(
+                  children: [
+                    Positioned(
+                      left: 0,
+                      child: _avatarCircle('AS', AppleTokens.primaryTeal),
+                    ),
+                    Positioned(
+                      left: 14,
+                      child: _avatarCircle('PP', AppleTokens.tealHover),
+                    ),
+                    Positioned(
+                      left: 28,
+                      child: _avatarCircle('+3', AppleTokens.neutralBrown),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  'CSE Study Hub',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.inter(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: AppleTokens.neutralDark,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+            decoration: BoxDecoration(
+              color: AppleTokens.freeBackground,
+              borderRadius: BorderRadius.circular(4),
+              border: Border.all(color: AppleTokens.freeBorder),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.check_circle_outline,
+                  size: 11,
+                  color: AppleTokens.freeText,
+                ),
+                const SizedBox(width: 4),
+                Flexible(
+                  child: Text(
+                    'Free for Study',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.inter(
+                      fontSize: 9,
+                      fontWeight: FontWeight.w700,
+                      color: AppleTokens.freeText,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _avatarCircle(String text, Color bg) {
+    return Container(
+      width: 20,
+      height: 20,
+      decoration: BoxDecoration(
+        color: bg,
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.white, width: 1.5),
+      ),
+      child: Center(
+        child: Text(
+          text,
+          style: const TextStyle(
+            fontSize: 7.5,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuizRankBadge(bool isDesktop) {
+    return Container(
+      width: isDesktop ? 200 : 175,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(AppleTokens.radius14),
+        border: Border.all(color: AppleTokens.borderSubtle),
+        boxShadow: [
+          BoxShadow(
+            color: AppleTokens.primaryTeal.withValues(alpha: 0.1),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 28,
+            height: 28,
+            decoration: const BoxDecoration(
+              color: AppleTokens.lightMint,
+              shape: BoxShape.circle,
+            ),
+            child: const Center(
+              child: Icon(
+                Icons.emoji_events_rounded,
+                color: AppleTokens.primaryTeal,
+                size: 15,
               ),
             ),
           ),
-          const SizedBox(height: 20),
-
-          // Serif question
-          Text(
-            'How do you balance OS coursework with semester placement prep?',
-            textAlign: TextAlign.center,
-            maxLines: 3,
-            overflow: TextOverflow.ellipsis,
-            style: _serifHeadline(
-              fontSize: 19,
-              fontWeight: FontWeight.w600,
-              height: 1.25,
-            ),
-          ),
-          const SizedBox(height: 12),
-
-          Text(
-            'Tips on managing lab submissions, mock interviews, and revision schedules effectively.',
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: _sansText(fontSize: 12, color: MindlyTokens.bodyText),
-          ),
-
-          const Spacer(),
-
-          // Bottom metadata
-          Text(
-            '18 answers • 520 views • Placement Talk',
-            style: _sansText(
-              fontSize: 11,
-              fontWeight: FontWeight.w500,
-              color: MindlyTokens.bodyText,
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Rank #1 in Year 3',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.inter(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    color: AppleTokens.neutralDark,
+                  ),
+                ),
+                Text(
+                  'Operating Systems · 98%',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.inter(
+                    fontSize: 9.5,
+                    color: AppleTokens.neutralBrown,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -1033,588 +1228,324 @@ class _WelcomeOnboardingScreenState extends State<WelcomeOnboardingScreen> {
   }
 
   // ==========================================
-  // 3. SECTION 1: HOW IT WORKS
+  // 2. FEATURES SECTION
+  // ==========================================
+  Widget _buildFeaturesSection(BuildContext context, bool isDesktop) {
+    final features = [
+      _FeatureData(
+        icon: Icons.event_available_rounded,
+        title: 'Events & Registration',
+        description:
+            'Discover upcoming workshops, guest lectures, cultural fests, and club activities. RSVP with a tap and track live attendance.',
+        containerColor: AppleTokens.lightMint,
+        actionLabel: 'Browse Events',
+        onAction: widget.onBrowseEvents,
+      ),
+      _FeatureData(
+        icon: Icons.menu_book_rounded,
+        title: 'Library & Notes',
+        description:
+            'Access verified course notes, reference PDFs, and past semester exam papers contributed by students and faculty.',
+        containerColor: AppleTokens.lightCyan,
+        actionLabel: 'Open Library',
+        onAction: () => widget.onNavigate?.call('academic_resources'),
+      ),
+      _FeatureData(
+        icon: Icons.forum_rounded,
+        title: 'Community Rooms',
+        description:
+            'Join dedicated branch, course, and project discussion channels to collaborate with classmates in real time.',
+        containerColor: AppleTokens.lightBlue,
+        actionLabel: 'Explore Rooms',
+        onAction: () => widget.onNavigate?.call('chat'),
+      ),
+      _FeatureData(
+        icon: Icons.group_rounded,
+        title: 'Study Buddy',
+        description:
+            'Find matching study partners in your branch and year based on shared subjects, timetable free slots, and hostel location.',
+        containerColor: AppleTokens.lightMint,
+        actionLabel: 'Find Buddies',
+        onAction: () => widget.onNavigate?.call('study_buddies'),
+      ),
+      _FeatureData(
+        icon: Icons.quiz_rounded,
+        title: 'Syllabus-Based Quizzes',
+        description:
+            'Reinforce core subject understanding through timed practice quizzes strictly mapped to your university syllabus.',
+        containerColor: AppleTokens.lightLavender,
+        actionLabel: 'Take Quizzes',
+        onAction: () => widget.onNavigate?.call('quiz_selection'),
+      ),
+      _FeatureData(
+        icon: Icons.leaderboard_rounded,
+        title: 'Course & Year Leaderboards',
+        description:
+            'Track quiz results, earned study badges, and academic rankings within your department and graduation year.',
+        containerColor: AppleTokens.lightCyan,
+        actionLabel: 'View Leaderboard',
+        onAction: () => widget.onNavigate?.call('leaderboard'),
+      ),
+    ];
+
+    return Container(
+      key: _featuresKey,
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(
+        horizontal: isDesktop ? 32 : 20,
+        vertical: 60,
+      ),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1200),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 4,
+                    height: 24,
+                    decoration: BoxDecoration(
+                      color: AppleTokens.primaryTeal,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Platform Capabilities',
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: AppleTokens.primaryTeal,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Everything you need to thrive on campus.',
+                style: GoogleFonts.inter(
+                  fontSize: isDesktop ? 30 : 24,
+                  fontWeight: FontWeight.w800,
+                  color: AppleTokens.neutralDark,
+                  letterSpacing: -0.6,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Purpose-built academic and social tools designed specifically for college student collaboration.',
+                style: GoogleFonts.inter(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w400,
+                  color: AppleTokens.neutralBrown,
+                ),
+              ),
+              const SizedBox(height: 36),
+
+              // Responsive Feature Cards Grid
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final crossAxisCount = constraints.maxWidth >= 960
+                      ? 3
+                      : (constraints.maxWidth >= 600 ? 2 : 1);
+                  final itemWidth =
+                      (constraints.maxWidth - ((crossAxisCount - 1) * 20)) /
+                      crossAxisCount;
+
+                  return Wrap(
+                    spacing: 20,
+                    runSpacing: 20,
+                    children: features.map((f) {
+                      return SizedBox(
+                        width: itemWidth,
+                        child: _InteractiveFeatureCard(data: f),
+                      );
+                    }).toList(),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ==========================================
+  // 3. HOW IT WORKS (Connected Journey)
   // ==========================================
   Widget _buildHowItWorksSection(BuildContext context, bool isDesktop) {
+    final steps = [
+      _JourneyStep(
+        number: '01',
+        title: 'Create your account',
+        description:
+            'Sign up with your college email to verify your student identity and securely join your campus network.',
+        icon: Icons.person_add_alt_1_rounded,
+      ),
+      _JourneyStep(
+        number: '02',
+        title: 'Add your course and year',
+        description:
+            'Specify your branch, semester, and section to unlock your section timetable, syllabus quizzes, and matching notes.',
+        icon: Icons.school_rounded,
+      ),
+      _JourneyStep(
+        number: '03',
+        title: 'Explore activities & study resources',
+        description:
+            'RSVP to workshops, access verified exam papers, coordinate peer study slots, and test your knowledge.',
+        icon: Icons.rocket_launch_rounded,
+      ),
+    ];
+
     return Container(
       key: _howItWorksKey,
       width: double.infinity,
       color: Colors.white,
       padding: EdgeInsets.symmetric(
-        horizontal: isDesktop ? 48 : 24,
-        vertical: 84,
+        horizontal: isDesktop ? 32 : 20,
+        vertical: 64,
       ),
       child: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1120),
+          constraints: const BoxConstraints(maxWidth: 1200),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Badge
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: MindlyTokens.palePurple,
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: Text(
-                  'HOW IT WORKS',
-                  style: _sansText(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    color: MindlyTokens.accentPurple,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 18),
-
-              Text(
-                'Everything you need to thrive on campus',
-                textAlign: TextAlign.center,
-                style: _serifHeadline(fontSize: isDesktop ? 38 : 28),
-              ),
-              const SizedBox(height: 12),
-              ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 580),
-                child: Text(
-                  'Three simple pillars designed to keep you informed, connected, and academically motivated throughout your degree.',
-                  textAlign: TextAlign.center,
-                  style: _sansText(fontSize: 15),
-                ),
-              ),
-              const SizedBox(height: 48),
-
-              // 3 Pastel Cards
-              LayoutBuilder(
-                builder: (context, constraints) {
-                  final isWide = constraints.maxWidth >= 840;
-                  final cardWidth = isWide
-                      ? (constraints.maxWidth - 48) / 3
-                      : constraints.maxWidth;
-
-                  return Wrap(
-                    spacing: 24,
-                    runSpacing: 24,
-                    children: [
-                      _buildPillarCard(
-                        width: cardWidth,
-                        step: '01',
-                        title: 'Discover Campus Events',
-                        description:
-                            'Never miss hackathons, club meetups, sports tournaments, or guest lectures. Instant one-tap RSVP with live updates.',
-                        badgeColor: MindlyTokens.lavender,
-                        icon: Icons.calendar_today_rounded,
-                      ),
-                      _buildPillarCard(
-                        width: cardWidth,
-                        step: '02',
-                        title: 'Match Study Buddies',
-                        description:
-                            'Find peers with matching subjects (DSA, OS, DBMS) and campus proximity using deterministic compatibility algorithms.',
-                        badgeColor: MindlyTokens.warmCream,
-                        icon: Icons.people_outline_rounded,
-                      ),
-                      _buildPillarCard(
-                        width: cardWidth,
-                        step: '03',
-                        title: 'Compete & Climb Ranks',
-                        description:
-                            'Test your subject mastery with verified academic quizzes. Real-time WebSocket leaderboards reflect your hard work instantly.',
-                        badgeColor: MindlyTokens.softBlue,
-                        icon: Icons.emoji_events_outlined,
-                      ),
-                    ],
-                  );
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPillarCard({
-    required double width,
-    required String step,
-    required String title,
-    required String description,
-    required Color badgeColor,
-    required IconData icon,
-  }) {
-    return Container(
-      width: width,
-      padding: const EdgeInsets.all(28),
-      decoration: BoxDecoration(
-        color: MindlyTokens.background,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: MindlyTokens.border, width: 1.0),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: badgeColor,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(icon, color: MindlyTokens.deepNavy, size: 22),
-              ),
-              Text(
-                step,
-                style: _serifHeadline(
-                  fontSize: 22,
-                  color: MindlyTokens.bodyText.withValues(alpha: 0.5),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 22),
-          Text(
-            title,
-            style: _serifHeadline(fontSize: 20, fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            description,
-            style: _sansText(fontSize: 14, height: 1.5),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ==========================================
-  // 4. SECTION 2: EXPLORE CAMPUS EVENTS
-  // ==========================================
-  Widget _buildEventsSection(BuildContext context, bool isDesktop) {
-    final filteredEvents = _selectedEventCategory == 'All'
-        ? _liveEvents
-        : _liveEvents
-            .where((e) => e.category == _selectedEventCategory)
-            .toList();
-
-    return Container(
-      key: _eventsKey,
-      width: double.infinity,
-      color: MindlyTokens.background,
-      padding: EdgeInsets.symmetric(
-        horizontal: isDesktop ? 48 : 24,
-        vertical: 84,
-      ),
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1120),
-          child: Column(
-            children: [
-              Text(
-                'Explore Campus Events',
-                textAlign: TextAlign.center,
-                style: _serifHeadline(fontSize: isDesktop ? 38 : 28),
-              ),
-              const SizedBox(height: 12),
-              ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 580),
-                child: Text(
-                  'Join hackathons, tech talks, cultural galas, and sports tournaments organized by student councils and clubs.',
-                  textAlign: TextAlign.center,
-                  style: _sansText(fontSize: 15),
-                ),
-              ),
-              const SizedBox(height: 32),
-
-              // Category Filter Pills
-              Wrap(
-                spacing: 10,
-                runSpacing: 10,
-                alignment: WrapAlignment.center,
-                children: [
-                  'All',
-                  'Tech',
-                  'Sports',
-                  'Cultural',
-                  'Workshop',
-                  'Hackathon',
-                ].map((cat) {
-                  final isSelected = _selectedEventCategory == cat;
-                  return InkWell(
-                    onTap: () {
-                      setState(() {
-                        _selectedEventCategory = cat;
-                      });
-                    },
-                    borderRadius: BorderRadius.circular(999),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 18,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? MindlyTokens.deepNavy
-                            : Colors.white,
-                        borderRadius: BorderRadius.circular(999),
-                        border: Border.all(
-                          color: isSelected
-                              ? MindlyTokens.deepNavy
-                              : MindlyTokens.border,
-                        ),
-                      ),
-                      child: Text(
-                        cat,
-                        style: _sansText(
-                          fontSize: 13,
-                          fontWeight:
-                              isSelected ? FontWeight.w600 : FontWeight.w500,
-                          color: isSelected
-                              ? Colors.white
-                              : MindlyTokens.deepNavy,
-                        ),
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 40),
-
-              // Events Grid
-              if (_isLoadingData)
-                const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(32),
-                    child: CircularProgressIndicator(),
-                  ),
-                )
-              else if (filteredEvents.isEmpty)
-                Container(
-                  padding: const EdgeInsets.all(40),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: MindlyTokens.border),
-                  ),
-                  child: Column(
-                    children: [
-                      const Icon(
-                        Icons.event_busy_rounded,
-                        size: 40,
-                        color: MindlyTokens.bodyText,
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        'No events found in "$_selectedEventCategory"',
-                        style: _sansText(fontSize: 15),
-                      ),
-                    ],
-                  ),
-                )
-              else
-                LayoutBuilder(
-                  builder: (context, constraints) {
-                    final isWide = constraints.maxWidth >= 760;
-                    final cardWidth = isWide
-                        ? (constraints.maxWidth - 24) / 2
-                        : constraints.maxWidth;
-
-                    return Wrap(
-                      spacing: 24,
-                      runSpacing: 24,
-                      children: filteredEvents.map((event) {
-                        return _buildEventCard(cardWidth, event);
-                      }).toList(),
-                    );
-                  },
-                ),
-
-              const SizedBox(height: 36),
-              OutlinedButton(
-                onPressed: widget.onBrowseEvents,
-                style: OutlinedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: MindlyTokens.deepNavy,
-                  side: const BorderSide(color: MindlyTokens.border, width: 1.2),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 26,
-                    vertical: 12,
-                  ),
-                ),
-                child: Text(
-                  'View All Events in Feed',
-                  style: _sansText(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: MindlyTokens.deepNavy,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildEventCard(double width, CampusEvent event) {
-    return Container(
-      width: width,
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: MindlyTokens.border, width: 1.0),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: MindlyTokens.palePurple,
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: Text(
-                  event.category,
-                  style: _sansText(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: MindlyTokens.accentPurple,
-                  ),
-                ),
-              ),
               Row(
                 children: [
-                  const Icon(
-                    Icons.people_alt_outlined,
-                    size: 14,
-                    color: MindlyTokens.bodyText,
+                  Container(
+                    width: 4,
+                    height: 24,
+                    decoration: BoxDecoration(
+                      color: AppleTokens.primaryTeal,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
-                  const SizedBox(width: 4),
+                  const SizedBox(width: 12),
                   Text(
-                    '${event.rsvpCount} RSVPs',
-                    style: _sansText(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: MindlyTokens.bodyText,
+                    'Step-by-Step',
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: AppleTokens.primaryTeal,
+                      letterSpacing: 0.5,
                     ),
                   ),
                 ],
               ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            event.title,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: _serifHeadline(fontSize: 18, fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            event.description,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: _sansText(fontSize: 13, height: 1.45),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              const Icon(
-                Icons.location_on_outlined,
-                size: 15,
-                color: MindlyTokens.bodyText,
-              ),
-              const SizedBox(width: 4),
-              Expanded(
-                child: Text(
-                  event.venue,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: _sansText(fontSize: 12, color: MindlyTokens.bodyText),
-                ),
-              ),
-              const SizedBox(width: 12),
-              InkWell(
-                onTap: widget.onBrowseEvents,
-                child: Text(
-                  'RSVP →',
-                  style: _sansText(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                    color: MindlyTokens.accentPurple,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ==========================================
-  // 5. SECTION 3: FIND YOUR STUDY BUDDY
-  // ==========================================
-  Widget _buildStudyBuddySection(BuildContext context, bool isDesktop) {
-    return Container(
-      key: _studyBuddyKey,
-      width: double.infinity,
-      color: Colors.white,
-      padding: EdgeInsets.symmetric(
-        horizontal: isDesktop ? 48 : 24,
-        vertical: 84,
-      ),
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1120),
-          child: Column(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: MindlyTokens.warmCream,
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: Text(
-                  'PEER MATCHING',
-                  style: _sansText(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    color: const Color(0xFFB28100),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 18),
+              const SizedBox(height: 8),
               Text(
-                'Find Your Study Buddy',
-                textAlign: TextAlign.center,
-                style: _serifHeadline(fontSize: isDesktop ? 38 : 28),
-              ),
-              const SizedBox(height: 12),
-              ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 580),
-                child: Text(
-                  'Connect with classmates sharing your subjects, branch, and academic goals. No guesswork — pure deterministic alignment.',
-                  textAlign: TextAlign.center,
-                  style: _sansText(fontSize: 15),
+                'How It Works',
+                style: GoogleFonts.inter(
+                  fontSize: isDesktop ? 30 : 24,
+                  fontWeight: FontWeight.w800,
+                  color: AppleTokens.neutralDark,
+                  letterSpacing: -0.6,
                 ),
               ),
-              const SizedBox(height: 48),
+              const SizedBox(height: 8),
+              Text(
+                'Three simple steps to unlock your personalized college experience.',
+                style: GoogleFonts.inter(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w400,
+                  color: AppleTokens.neutralBrown,
+                ),
+              ),
+              const SizedBox(height: 40),
 
-              // Students Cards Grid
+              // Connected Step Cards
               LayoutBuilder(
                 builder: (context, constraints) {
-                  final isWide = constraints.maxWidth >= 760;
-                  final cardWidth = isWide
-                      ? (constraints.maxWidth - 24) / 2
+                  final isWide = constraints.maxWidth >= 840;
+                  final itemWidth = isWide
+                      ? (constraints.maxWidth - 40) / 3
                       : constraints.maxWidth;
 
-                  final students = _liveStudents.isNotEmpty
-                      ? _liveStudents
-                      : [
-                          StudentProfile(
-                            authUserId: UuidValue.fromString(
-                              '550e8400-e29b-41d4-a716-446655440021',
-                            ),
-                            fullName: 'Priya Patel',
-                            email: 'priya.patel@campus.edu',
-                            branch: 'CSE',
-                            academicYear: 3,
-                            hostelOrArea: 'Kaveri Hostel Block B',
-                            bio:
-                                'Passionate about Algorithms, System Design and Open Source.',
-                            subjectInterests: [
-                              'DSA',
-                              'Operating Systems',
-                              'System Design',
-                            ],
-                            createdAt: DateTime.now(),
-                            updatedAt: DateTime.now(),
-                          ),
-                          StudentProfile(
-                            authUserId: UuidValue.fromString(
-                              '550e8400-e29b-41d4-a716-446655440022',
-                            ),
-                            fullName: 'Rohan Mehta',
-                            email: 'rohan.mehta@campus.edu',
-                            branch: 'IT',
-                            academicYear: 3,
-                            hostelOrArea: 'Ganga Hostel Block A',
-                            bio:
-                                'Full-stack developer building real-time collaboration tools.',
-                            subjectInterests: [
-                              'DBMS',
-                              'Computer Networks',
-                              'Web Technologies',
-                            ],
-                            createdAt: DateTime.now(),
-                            updatedAt: DateTime.now(),
-                          ),
-                        ];
-
                   return Wrap(
-                    spacing: 24,
-                    runSpacing: 24,
-                    children: students.map((s) {
-                      return _buildStudentCard(cardWidth, s);
+                    spacing: 20,
+                    runSpacing: 20,
+                    children: steps.map((s) {
+                      return SizedBox(
+                        width: itemWidth,
+                        child: Container(
+                          padding: const EdgeInsets.all(26),
+                          decoration: BoxDecoration(
+                            color: AppleTokens.pageBackground,
+                            borderRadius: BorderRadius.circular(
+                              AppleTokens.radius16,
+                            ),
+                            border: Border.all(
+                              color: AppleTokens.borderSubtle,
+                              width: 1.0,
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Container(
+                                    width: 44,
+                                    height: 44,
+                                    decoration: BoxDecoration(
+                                      color: AppleTokens.primaryTeal,
+                                      borderRadius: BorderRadius.circular(
+                                        AppleTokens.radius12,
+                                      ),
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        s.number,
+                                        style: GoogleFonts.inter(
+                                          color: Colors.white,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w800,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  Icon(
+                                    s.icon,
+                                    color: AppleTokens.primaryTeal.withValues(
+                                      alpha: 0.6,
+                                    ),
+                                    size: 24,
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 20),
+                              Text(
+                                s.title,
+                                style: GoogleFonts.inter(
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.w800,
+                                  color: AppleTokens.neutralDark,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                s.description,
+                                style: GoogleFonts.inter(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w400,
+                                  color: AppleTokens.neutralBrown,
+                                  height: 1.5,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
                     }).toList(),
                   );
                 },
-              ),
-
-              const SizedBox(height: 36),
-              ElevatedButton(
-                onPressed: () {
-                  if (widget.onNavigate != null) {
-                    widget.onNavigate!('study_buddies');
-                  } else {
-                    widget.onGetStarted();
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: MindlyTokens.deepNavy,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 26,
-                    vertical: 12,
-                  ),
-                ),
-                child: Text(
-                  'Browse All Study Partners',
-                  style: _sansText(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
-                ),
               ),
             ],
           ),
@@ -1623,498 +1554,125 @@ class _WelcomeOnboardingScreenState extends State<WelcomeOnboardingScreen> {
     );
   }
 
-  Widget _buildStudentCard(double width, StudentProfile student) {
+  // ==========================================
+  // 4. ABOUT SECTION
+  // ==========================================
+  Widget _buildAboutSection(BuildContext context, bool isDesktop) {
     return Container(
-      width: width,
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: MindlyTokens.background,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: MindlyTokens.border, width: 1.0),
+      key: _aboutKey,
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(
+        horizontal: isDesktop ? 32 : 20,
+        vertical: 60,
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 760),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              CircleAvatar(
-                radius: 20,
-                backgroundColor: MindlyTokens.lavender,
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 5,
+                ),
+                decoration: BoxDecoration(
+                  color: AppleTokens.lightMint,
+                  borderRadius: BorderRadius.circular(AppleTokens.radius8),
+                  border: Border.all(
+                    color: AppleTokens.primaryTeal.withValues(alpha: 0.25),
+                  ),
+                ),
                 child: Text(
-                  student.fullName.isNotEmpty
-                      ? student.fullName.substring(0, 1).toUpperCase()
-                      : 'S',
-                  style: const TextStyle(
-                    fontSize: 14,
+                  'Academic Mission',
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
                     fontWeight: FontWeight.w700,
-                    color: MindlyTokens.deepNavy,
+                    color: AppleTokens.primaryTeal,
                   ),
                 ),
               ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+              const SizedBox(height: 16),
+              Text(
+                'Built specifically for student life.',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.inter(
+                  fontSize: isDesktop ? 32 : 26,
+                  fontWeight: FontWeight.w800,
+                  color: AppleTokens.neutralDark,
+                  letterSpacing: -0.6,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'CAMPULSE eliminates the noise and fragmentation of commercial social apps. We centralize official section timetables, verified lecture resources, peer study slot coordination, and event registrations into one intuitive platform.',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.inter(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w400,
+                  color: AppleTokens.neutralBrown,
+                  height: 1.65,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Every student belongs to an authenticated college community where academic resources are shared openly and peer study matching happens seamlessly.',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.inter(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w400,
+                  color: AppleTokens.neutralBrown,
+                  height: 1.65,
+                ),
+              ),
+              const SizedBox(height: 32),
+
+              // Community Verified Pillars Card
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 16,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(AppleTokens.radius14),
+                  border: Border.all(color: AppleTokens.borderSubtle),
+                ),
+                child: Wrap(
+                  spacing: 24,
+                  runSpacing: 12,
+                  alignment: WrapAlignment.center,
                   children: [
-                    Text(
-                      student.fullName,
-                      style: _serifHeadline(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w600,
-                      ),
+                    _aboutPillar(
+                      Icons.verified_rounded,
+                      'Verified Students Only',
                     ),
-                    Text(
-                      '${student.branch} • Year ${student.academicYear} • ${student.hostelOrArea}',
-                      style: _sansText(fontSize: 12),
-                    ),
+                    _aboutPillar(Icons.block_rounded, 'Zero Commercial Ads'),
+                    _aboutPillar(Icons.lock_outline_rounded, 'Privacy First'),
                   ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 14),
-          if (student.bio != null && student.bio!.isNotEmpty)
-            Text(
-              student.bio!,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: _sansText(fontSize: 13, height: 1.45),
-            ),
-          const SizedBox(height: 14),
-          Wrap(
-            spacing: 6,
-            runSpacing: 6,
-            children: student.subjectInterests.map((sub) {
-              return Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 3,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(999),
-                  border: Border.all(color: MindlyTokens.border),
-                ),
-                child: Text(
-                  sub,
-                  style: _sansText(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w500,
-                    color: MindlyTokens.deepNavy,
-                  ),
-                ),
-              );
-            }).toList(),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ==========================================
-  // 6. SECTION 4: CAMPUS COMMUNITY & QUIZZES
-  // ==========================================
-  Widget _buildCommunitySection(BuildContext context, bool isDesktop) {
-    return Container(
-      key: _communityKey,
-      width: double.infinity,
-      color: MindlyTokens.background,
-      padding: EdgeInsets.symmetric(
-        horizontal: isDesktop ? 48 : 24,
-        vertical: 84,
-      ),
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1120),
-          child: Column(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: MindlyTokens.softBlue,
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: Text(
-                  'CAMPUS COMMUNITY & CHALLENGES',
-                  style: _sansText(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    color: const Color(0xFF0056B3),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 18),
-              Text(
-                'Master Core Engineering Subjects',
-                textAlign: TextAlign.center,
-                style: _serifHeadline(fontSize: isDesktop ? 38 : 28),
-              ),
-              const SizedBox(height: 12),
-              ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 580),
-                child: Text(
-                  'Timed academic quizzes authored with verified answer explanations. Test your skills in DBMS, Data Structures, and Operating Systems.',
-                  textAlign: TextAlign.center,
-                  style: _sansText(fontSize: 15),
-                ),
-              ),
-              const SizedBox(height: 48),
-
-              // 3 Quiz Challenge Cards
-              LayoutBuilder(
-                builder: (context, constraints) {
-                  final isWide = constraints.maxWidth >= 840;
-                  final cardWidth = isWide
-                      ? (constraints.maxWidth - 48) / 3
-                      : constraints.maxWidth;
-
-                  return Wrap(
-                    spacing: 24,
-                    runSpacing: 24,
-                    children: [
-                      _buildQuizCard(
-                        width: cardWidth,
-                        subject: 'DBMS',
-                        difficulty: 'Medium',
-                        questionsCount: 5,
-                        description:
-                            'Transactions, ACID guarantees, normalization forms (1NF-BCNF), and SQL execution plans.',
-                        color: MindlyTokens.palePurple,
-                      ),
-                      _buildQuizCard(
-                        width: cardWidth,
-                        subject: 'Data Structures and Algorithms',
-                        difficulty: 'Hard',
-                        questionsCount: 5,
-                        description:
-                            'AVL balance factors, Dijkstra shortest path, amortized array bounds, and dynamic programming.',
-                        color: MindlyTokens.warmCream,
-                      ),
-                      _buildQuizCard(
-                        width: cardWidth,
-                        subject: 'Operating Systems',
-                        difficulty: 'Medium',
-                        questionsCount: 5,
-                        description:
-                            'Process scheduling, semaphore concurrency, deadlocks, and virtual memory paging models.',
-                        color: MindlyTokens.softBlue,
-                      ),
-                    ],
-                  );
-                },
-              ),
-            ],
-          ),
         ),
       ),
     );
   }
 
-  Widget _buildQuizCard({
-    required double width,
-    required String subject,
-    required String difficulty,
-    required int questionsCount,
-    required String description,
-    required Color color,
-  }) {
-    return Container(
-      width: width,
-      padding: const EdgeInsets.all(26),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: MindlyTokens.border, width: 1.0),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: color,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  difficulty,
-                  style: _sansText(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    color: MindlyTokens.deepNavy,
-                  ),
-                ),
-              ),
-              Text(
-                '$questionsCount Questions',
-                style: _sansText(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: MindlyTokens.bodyText,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 18),
-          Text(
-            subject,
-            style: _serifHeadline(fontSize: 19, fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            description,
-            style: _sansText(fontSize: 13, height: 1.45),
-          ),
-          const SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: () {
-              if (widget.onNavigate != null) {
-                widget.onNavigate!('quizzes');
-              } else {
-                widget.onGetStarted();
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: MindlyTokens.deepNavy,
-              foregroundColor: Colors.white,
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(999),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-            ),
-            child: Text(
-              'Start Challenge →',
-              style: _sansText(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ==========================================
-  // 7. SECTION 5: LIVE LEADERBOARD
-  // ==========================================
-  Widget _buildLeaderboardSection(BuildContext context, bool isDesktop) {
-    return Container(
-      key: _leaderboardKey,
-      width: double.infinity,
-      color: Colors.white,
-      padding: EdgeInsets.symmetric(
-        horizontal: isDesktop ? 48 : 24,
-        vertical: 84,
-      ),
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 820),
-          child: Column(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: MindlyTokens.palePurple,
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: Text(
-                  'REAL-TIME RECOGNITION',
-                  style: _sansText(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    color: MindlyTokens.accentPurple,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 18),
-              Text(
-                'Live Campus Leaderboard',
-                textAlign: TextAlign.center,
-                style: _serifHeadline(fontSize: isDesktop ? 38 : 28),
-              ),
-              const SizedBox(height: 12),
-              ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 580),
-                child: Text(
-                  'Celebrate top academic achievements, problem-solving streaks, and quiz excellence updated live via WebSocket streams.',
-                  textAlign: TextAlign.center,
-                  style: _sansText(fontSize: 15),
-                ),
-              ),
-              const SizedBox(height: 40),
-
-              // Leaderboard preview card
-              Container(
-                padding: const EdgeInsets.all(28),
-                decoration: BoxDecoration(
-                  color: MindlyTokens.background,
-                  borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: MindlyTokens.border, width: 1.0),
-                ),
-                child: Column(
-                  children: _liveLeaderboard.isNotEmpty
-                      ? _liveLeaderboard.take(3).toList().asMap().entries.map((entry) {
-                          final idx = entry.key;
-                          final row = entry.value;
-                          final medalColor = idx == 0
-                              ? const Color(0xFFFFD700)
-                              : (idx == 1
-                                  ? const Color(0xFFC0C0C0)
-                                  : const Color(0xFFCD7F32));
-                          return Column(
-                            children: [
-                              if (idx > 0)
-                                const Divider(
-                                  color: MindlyTokens.border,
-                                  height: 24,
-                                ),
-                              _buildLeaderboardRow(
-                                rank: row.rank,
-                                name: row.studentName,
-                                branch: '${row.branch} • ${row.quizzesTaken} challenges',
-                                score: '${row.score} pts',
-                                medalColor: medalColor,
-                              ),
-                            ],
-                          );
-                        }).toList()
-                      : [
-                          _buildLeaderboardRow(
-                            rank: 1,
-                            name: 'Aarav Sharma',
-                            branch: 'CSE • Year 3',
-                            score: '2,480 pts',
-                            medalColor: const Color(0xFFFFD700),
-                          ),
-                          const Divider(color: MindlyTokens.border, height: 24),
-                          _buildLeaderboardRow(
-                            rank: 2,
-                            name: 'Priya Patel',
-                            branch: 'CSE • Year 3',
-                            score: '2,310 pts',
-                            medalColor: const Color(0xFFC0C0C0),
-                          ),
-                          const Divider(color: MindlyTokens.border, height: 24),
-                          _buildLeaderboardRow(
-                            rank: 3,
-                            name: 'Rohan Mehta',
-                            branch: 'IT • Year 3',
-                            score: '2,150 pts',
-                            medalColor: const Color(0xFFCD7F32),
-                          ),
-                        ],
-                ),
-              ),
-
-              const SizedBox(height: 32),
-              OutlinedButton(
-                onPressed: () {
-                  if (widget.onNavigate != null) {
-                    widget.onNavigate!('leaderboard');
-                  } else {
-                    widget.onGetStarted();
-                  }
-                },
-                style: OutlinedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: MindlyTokens.deepNavy,
-                  side: const BorderSide(color: MindlyTokens.border, width: 1.2),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 26,
-                    vertical: 12,
-                  ),
-                ),
-                child: Text(
-                  'View Full Leaderboard',
-                  style: _sansText(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: MindlyTokens.deepNavy,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLeaderboardRow({
-    required int rank,
-    required String name,
-    required String branch,
-    required String score,
-    required Color medalColor,
-  }) {
+  Widget _aboutPillar(IconData icon, String label) {
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Container(
-          width: 32,
-          height: 32,
-          decoration: BoxDecoration(
-            color: medalColor.withValues(alpha: 0.2),
-            shape: BoxShape.circle,
-          ),
-          child: Center(
-            child: Text(
-              '$rank',
-              style: TextStyle(
-                fontWeight: FontWeight.w800,
-                color: medalColor == const Color(0xFFFFD700)
-                    ? const Color(0xFFB28100)
-                    : MindlyTokens.deepNavy,
-                fontSize: 14,
-              ),
+        Icon(icon, size: 16, color: AppleTokens.primaryTeal),
+        const SizedBox(width: 8),
+        Flexible(
+          child: Text(
+            label,
+            style: GoogleFonts.inter(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: AppleTokens.neutralDark,
             ),
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                name,
-                style: _serifHeadline(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              Text(branch, style: _sansText(fontSize: 12)),
-            ],
-          ),
-        ),
-        Text(
-          score,
-          style: _sansText(
-            fontSize: 14,
-            fontWeight: FontWeight.w700,
-            color: MindlyTokens.deepNavy,
           ),
         ),
       ],
@@ -2122,102 +1680,158 @@ class _WelcomeOnboardingScreenState extends State<WelcomeOnboardingScreen> {
   }
 
   // ==========================================
-  // 8. SECTION 6: FINAL CTA
+  // 5. REAL UPCOMING EVENTS
   // ==========================================
-  Widget _buildFinalCtaSection(BuildContext context) {
+  Widget _buildUpcomingEventsSection(BuildContext context, bool isDesktop) {
     return Container(
+      key: _eventsKey,
       width: double.infinity,
-      color: MindlyTokens.background,
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 96),
+      color: Colors.white,
+      padding: EdgeInsets.symmetric(
+        horizontal: isDesktop ? 32 : 20,
+        vertical: 60,
+      ),
       child: Center(
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: 960),
-          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 56),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(32),
-            border: Border.all(color: MindlyTokens.border, width: 1.2),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.04),
-                blurRadius: 32,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1200),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Make more of your campus life.',
-                textAlign: TextAlign.center,
-                style: _serifHeadline(fontSize: 38),
-              ),
-              const SizedBox(height: 14),
-              ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 540),
-                child: Text(
-                  'Join your classmates on Campus Pulse. Sign in with your campus email and unlock events, study partners, and academic challenges today.',
-                  textAlign: TextAlign.center,
-                  style: _sansText(fontSize: 15, height: 1.55),
-                ),
-              ),
-              const SizedBox(height: 32),
               Wrap(
-                spacing: 14,
+                alignment: WrapAlignment.spaceBetween,
+                crossAxisAlignment: WrapCrossAlignment.end,
+                spacing: 16,
                 runSpacing: 12,
-                alignment: WrapAlignment.center,
                 children: [
-                  ElevatedButton(
-                    onPressed: widget.onGetStarted,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: MindlyTokens.deepNavy,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(999),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            width: 4,
+                            height: 24,
+                            decoration: BoxDecoration(
+                              color: AppleTokens.primaryTeal,
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            'Campus Calendar',
+                            style: GoogleFonts.inter(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: AppleTokens.primaryTeal,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
                       ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 32,
-                        vertical: 14,
+                      const SizedBox(height: 8),
+                      Text(
+                        'Upcoming Campus Events',
+                        style: GoogleFonts.inter(
+                          fontSize: isDesktop ? 28 : 22,
+                          fontWeight: FontWeight.w800,
+                          color: AppleTokens.neutralDark,
+                          letterSpacing: -0.5,
+                        ),
                       ),
-                    ),
-                    child: Text(
-                      'Get Started Free',
-                      style: _sansText(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
+                      const SizedBox(height: 4),
+                      Text(
+                        'Real-time activities published by campus organizers.',
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w400,
+                          color: AppleTokens.neutralBrown,
+                        ),
                       ),
-                    ),
+                    ],
                   ),
-                  OutlinedButton(
+                  TextButton.icon(
                     onPressed: widget.onBrowseEvents,
-                    style: OutlinedButton.styleFrom(
-                      backgroundColor: MindlyTokens.background,
-                      foregroundColor: MindlyTokens.deepNavy,
-                      side: const BorderSide(
-                        color: MindlyTokens.border,
-                        width: 1.2,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 28,
-                        vertical: 14,
-                      ),
-                    ),
-                    child: Text(
-                      'Explore Events Feed',
-                      style: _sansText(
+                    icon: const Icon(Icons.arrow_forward_rounded, size: 16),
+                    label: const Text('View All'),
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppleTokens.primaryTeal,
+                      textStyle: GoogleFonts.inter(
                         fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: MindlyTokens.deepNavy,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ),
                 ],
               ),
+              const SizedBox(height: 28),
+
+              // Content based on real events query
+              if (_isLoadingEvents)
+                const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(32.0),
+                    child: CircularProgressIndicator(
+                      color: AppleTokens.primaryTeal,
+                    ),
+                  ),
+                )
+              else if (_eventsError || _liveEvents.isEmpty)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(32),
+                  decoration: BoxDecoration(
+                    color: AppleTokens.pageBackground,
+                    borderRadius: BorderRadius.circular(AppleTokens.radius14),
+                    border: Border.all(color: AppleTokens.borderSubtle),
+                  ),
+                  child: Column(
+                    children: [
+                      const Icon(
+                        Icons.event_note_rounded,
+                        size: 36,
+                        color: AppleTokens.neutralBrown,
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'No events scheduled this week.',
+                        style: GoogleFonts.inter(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: AppleTokens.neutralDark,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        'Campus organizers publish activities regularly. Check back soon!',
+                        style: GoogleFonts.inter(
+                          fontSize: 13,
+                          color: AppleTokens.neutralBrown,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              else
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final count = constraints.maxWidth >= 900
+                        ? 3
+                        : (constraints.maxWidth >= 600 ? 2 : 1);
+                    final itemWidth =
+                        (constraints.maxWidth - ((count - 1) * 20)) / count;
+
+                    return Wrap(
+                      spacing: 20,
+                      runSpacing: 20,
+                      children: _liveEvents.map((event) {
+                        return SizedBox(
+                          width: itemWidth,
+                          child: _buildRichEventCard(event),
+                        );
+                      }).toList(),
+                    );
+                  },
+                ),
             ],
           ),
         ),
@@ -2225,93 +1839,454 @@ class _WelcomeOnboardingScreenState extends State<WelcomeOnboardingScreen> {
     );
   }
 
+  Widget _buildRichEventCard(CampusEvent event) {
+    const months = [
+      'JAN',
+      'FEB',
+      'MAR',
+      'APR',
+      'MAY',
+      'JUN',
+      'JUL',
+      'AUG',
+      'SEP',
+      'OCT',
+      'NOV',
+      'DEC',
+    ];
+    final monthStr = months[(event.startTime.month - 1).clamp(0, 11)];
+
+    return InkWell(
+      onTap: widget.onBrowseEvents,
+      borderRadius: BorderRadius.circular(AppleTokens.radius14),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(AppleTokens.radius14),
+          border: Border.all(
+            color: AppleTokens.borderSubtle,
+            width: 1.0,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Category & Date Badge
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Flexible(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppleTokens.lightMint,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      event.category.toUpperCase(),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.inter(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        color: AppleTokens.primaryTeal,
+                        letterSpacing: 0.3,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppleTokens.pageBackground,
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(color: AppleTokens.borderSubtle),
+                  ),
+                  child: Text(
+                    '${event.startTime.day} $monthStr',
+                    style: GoogleFonts.inter(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: AppleTokens.neutralDark,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+
+            // Event Title
+            Text(
+              event.title,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.inter(
+                fontSize: 16,
+                fontWeight: FontWeight.w800,
+                color: AppleTokens.neutralDark,
+                height: 1.25,
+              ),
+            ),
+            const SizedBox(height: 10),
+
+            // Location Row
+            Row(
+              children: [
+                const Icon(
+                  Icons.location_on_outlined,
+                  size: 15,
+                  color: AppleTokens.neutralBrown,
+                ),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text(
+                    event.venue,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      color: AppleTokens.neutralBrown,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+
+            // Functional action link
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '${event.rsvpCount} Students RSVPed',
+                  style: GoogleFonts.inter(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w600,
+                    color: AppleTokens.primaryTeal,
+                  ),
+                ),
+                const Icon(
+                  Icons.arrow_forward_rounded,
+                  size: 14,
+                  color: AppleTokens.primaryTeal,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   // ==========================================
-  // 9. FOOTER
+  // 6. FINAL CALL TO ACTION SECTION
+  // ==========================================
+  Widget _buildFinalCtaSection(BuildContext context, bool isDesktop) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(
+        horizontal: isDesktop ? 32 : 20,
+        vertical: 64,
+      ),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1200),
+          child: Container(
+            padding: EdgeInsets.symmetric(
+              horizontal: isDesktop ? 48 : 24,
+              vertical: isDesktop ? 52 : 36,
+            ),
+            decoration: BoxDecoration(
+              gradient: AppleTokens.subtleMintGradient,
+              borderRadius: BorderRadius.circular(AppleTokens.radius20),
+              border: Border.all(
+                color: AppleTokens.primaryTeal.withValues(alpha: 0.25),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: AppleTokens.primaryTeal.withValues(alpha: 0.08),
+                  blurRadius: 30,
+                  offset: const Offset(0, 12),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  'Make the most of your campus.',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.inter(
+                    fontSize: isDesktop ? 34 : 26,
+                    fontWeight: FontWeight.w800,
+                    color: AppleTokens.neutralDark,
+                    letterSpacing: -0.8,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 580),
+                  child: Text(
+                    'Join your classmates on CAMPULSE to discover upcoming activities, exchange study materials, and prepare for exams together.',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.inter(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w400,
+                      color: AppleTokens.neutralBrown,
+                      height: 1.5,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 28),
+                Wrap(
+                  spacing: 14,
+                  runSpacing: 12,
+                  alignment: WrapAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      onPressed: widget.onGetStarted,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppleTokens.primaryButton,
+                        foregroundColor: AppleTokens.primaryButtonText,
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 28,
+                          vertical: 16,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                            AppleTokens.radius8,
+                          ),
+                        ),
+                      ),
+                      child: Text(
+                        'Create Student Account',
+                        style: GoogleFonts.inter(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: AppleTokens.primaryButtonText,
+                        ),
+                      ),
+                    ),
+                    OutlinedButton(
+                      onPressed: widget.onBrowseEvents,
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppleTokens.primaryText,
+                        backgroundColor: Colors.white,
+                        side: const BorderSide(
+                          color: AppleTokens.borderSubtle,
+                          width: 1.2,
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 16,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                            AppleTokens.radius8,
+                          ),
+                        ),
+                      ),
+                      child: Text(
+                        'Browse Events',
+                        style: GoogleFonts.inter(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: AppleTokens.primaryText,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ==========================================
+  // 7. FOOTER
   // ==========================================
   Widget _buildFooter(BuildContext context, bool isDesktop) {
     return Container(
       width: double.infinity,
-      color: Colors.white,
       padding: EdgeInsets.symmetric(
-        horizontal: isDesktop ? 48 : 24,
-        vertical: 40,
+        horizontal: isDesktop ? 32 : 20,
+        vertical: 48,
+      ),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        border: Border(
+          top: BorderSide(
+            color: AppleTokens.borderSubtle,
+            width: 1.0,
+          ),
+        ),
       ),
       child: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1120),
+          constraints: const BoxConstraints(maxWidth: 1200),
           child: Column(
             children: [
               Wrap(
                 alignment: WrapAlignment.spaceBetween,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                spacing: 16,
-                runSpacing: 16,
+                crossAxisAlignment: WrapCrossAlignment.start,
+                spacing: 32,
+                runSpacing: 24,
                 children: [
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: 28,
-                        height: 28,
-                        decoration: BoxDecoration(
-                          color: MindlyTokens.deepNavy,
-                          borderRadius: BorderRadius.circular(8),
+                  // Col 1: Brand
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 280),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 30,
+                              height: 30,
+                              decoration: BoxDecoration(
+                                color: AppleTokens.primaryTeal,
+                                borderRadius: BorderRadius.circular(
+                                  AppleTokens.radius8,
+                                ),
+                              ),
+                              child: const Center(
+                                child: Text(
+                                  'C',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'CAMPULSE',
+                              style: GoogleFonts.inter(
+                                fontSize: 17,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: -0.4,
+                                color: AppleTokens.neutralDark,
+                              ),
+                            ),
+                          ],
                         ),
-                        child: const Center(
-                          child: Icon(
-                            Icons.bolt_rounded,
-                            color: MindlyTokens.palePurple,
-                            size: 16,
+                        const SizedBox(height: 8),
+                        Text(
+                          'Discover. Connect. Compete.',
+                          style: GoogleFonts.inter(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: AppleTokens.primaryTeal,
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Campus Pulse',
-                        style: _serifHeadline(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
+                        const SizedBox(height: 6),
+                        Text(
+                          'The dedicated campus network for students, study groups, and faculty.',
+                          style: GoogleFonts.inter(
+                            fontSize: 12.5,
+                            color: AppleTokens.neutralBrown,
+                            height: 1.45,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                  Wrap(
-                    spacing: 16,
-                    runSpacing: 8,
-                    children: [
-                      _footerLink(
-                        'Events',
-                        () => widget.onNavigate?.call('events'),
-                      ),
-                      _footerLink(
-                        'Study Matching',
-                        () => widget.onNavigate?.call('study_buddies'),
-                      ),
-                      _footerLink(
-                        'Quizzes',
-                        () => widget.onNavigate?.call('quizzes'),
-                      ),
-                      _footerLink(
-                        'Help & FAQ',
-                        () => widget.onNavigate?.call('faq'),
-                      ),
-                    ],
-                  ),
+
+                  // Col 2: Platform Links
+                  _footerLinkColumn('Platform', [
+                    _FooterLinkItem(
+                      'Features',
+                      () => _scrollToKey(_featuresKey),
+                    ),
+                    _FooterLinkItem(
+                      'How It Works',
+                      () => _scrollToKey(_howItWorksKey),
+                    ),
+                    _FooterLinkItem('About', () => _scrollToKey(_aboutKey)),
+                    _FooterLinkItem('Events', widget.onBrowseEvents),
+                  ]),
+
+                  // Col 3: Academic Tools
+                  _footerLinkColumn('Academics', [
+                    _FooterLinkItem(
+                      'Library & Notes',
+                      () => widget.onNavigate?.call('academic_resources'),
+                    ),
+                    _FooterLinkItem(
+                      'Syllabus Quizzes',
+                      () => widget.onNavigate?.call('quiz_selection'),
+                    ),
+                    _FooterLinkItem(
+                      'Leaderboards',
+                      () => widget.onNavigate?.call('leaderboard'),
+                    ),
+                    _FooterLinkItem(
+                      'Section Timetable',
+                      () => widget.onNavigate?.call('timetable'),
+                    ),
+                  ]),
+
+                  // Col 4: Support & Legal
+                  _footerLinkColumn('Support', [
+                    _FooterLinkItem(
+                      'FAQ & Help',
+                      () => widget.onNavigate?.call('faq'),
+                    ),
+                    _FooterLinkItem(
+                      'Contact Support',
+                      () => widget.onNavigate?.call('contact'),
+                    ),
+                    _FooterLinkItem(
+                      'Sign In',
+                      () => widget.onNavigate?.call('auth'),
+                    ),
+                  ]),
                 ],
               ),
-              const Divider(color: MindlyTokens.border, height: 48),
+              const Divider(color: AppleTokens.borderSubtle, height: 44),
               Wrap(
                 alignment: WrapAlignment.spaceBetween,
+                crossAxisAlignment: WrapCrossAlignment.center,
                 spacing: 16,
                 runSpacing: 8,
                 children: [
                   Text(
-                    '© 2026 Campus Pulse. Built with Flutter & Serverpod. All rights reserved.',
-                    style: _sansText(fontSize: 12, color: MindlyTokens.bodyText),
+                    '© 2026 CAMPULSE. All rights reserved.',
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w400,
+                      color: AppleTokens.neutralBrown,
+                    ),
                   ),
                   Text(
-                    'Apple Human Interface Guidelines & WCAG AAA Compliant',
-                    style: _sansText(fontSize: 12, color: MindlyTokens.bodyText),
+                    'College Community Network',
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: AppleTokens.neutralBrown,
+                    ),
                   ),
                 ],
               ),
@@ -2322,18 +2297,157 @@ class _WelcomeOnboardingScreenState extends State<WelcomeOnboardingScreen> {
     );
   }
 
-  Widget _footerLink(String label, VoidCallback onTap) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(4),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-        child: Text(
-          label,
-          style: _sansText(
+  Widget _footerLinkColumn(String heading, List<_FooterLinkItem> links) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          heading,
+          style: GoogleFonts.inter(
             fontSize: 13,
-            fontWeight: FontWeight.w500,
-            color: MindlyTokens.bodyText,
+            fontWeight: FontWeight.w700,
+            color: AppleTokens.neutralDark,
+            letterSpacing: 0.3,
+          ),
+        ),
+        const SizedBox(height: 12),
+        ...links.map(
+          (link) => Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: InkWell(
+              onTap: link.onTap,
+              borderRadius: BorderRadius.circular(4),
+              child: Text(
+                link.label,
+                style: GoogleFonts.inter(
+                  fontSize: 13,
+                  color: AppleTokens.neutralBrown,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ==========================================
+// INTERACTIVE FEATURE CARD WIDGET
+// ==========================================
+class _InteractiveFeatureCard extends StatefulWidget {
+  final _FeatureData data;
+
+  const _InteractiveFeatureCard({required this.data});
+
+  @override
+  State<_InteractiveFeatureCard> createState() =>
+      _InteractiveFeatureCardState();
+}
+
+class _InteractiveFeatureCardState extends State<_InteractiveFeatureCard> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: Transform.translate(
+        offset: Offset(0.0, _isHovered ? -4.0 : 0.0),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeOut,
+          transform: Matrix4.identity()
+            ..setEntry(3, 2, 0.001)
+            ..rotateX(_isHovered ? -0.015 : 0.0)
+            ..rotateY(_isHovered ? 0.015 : 0.0),
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(AppleTokens.radius14),
+            border: Border.all(
+              color: _isHovered
+                  ? AppleTokens.primaryTeal.withValues(alpha: 0.6)
+                  : AppleTokens.borderSubtle,
+              width: _isHovered ? 1.4 : 1.0,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: _isHovered
+                    ? AppleTokens.primaryTeal.withValues(alpha: 0.1)
+                    : Colors.black.withValues(alpha: 0.04),
+                blurRadius: _isHovered ? 20 : 8,
+                offset: Offset(0, _isHovered ? 8 : 4),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: widget.data.containerColor,
+                  borderRadius: BorderRadius.circular(AppleTokens.radius12),
+                ),
+                child: Center(
+                  child: Icon(
+                    widget.data.icon,
+                    size: 24,
+                    color: AppleTokens.primaryTeal,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 18),
+              Text(
+                widget.data.title,
+                style: GoogleFonts.inter(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w800,
+                  color: AppleTokens.neutralDark,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                widget.data.description,
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                  color: AppleTokens.neutralBrown,
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 20),
+              InkWell(
+                onTap: widget.data.onAction,
+                borderRadius: BorderRadius.circular(6),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      widget.data.actionLabel,
+                      style: GoogleFonts.inter(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: _isHovered
+                            ? AppleTokens.primaryTeal
+                            : AppleTokens.neutralDark,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Icon(
+                      Icons.arrow_forward_rounded,
+                      size: 14,
+                      color: _isHovered
+                          ? AppleTokens.primaryTeal
+                          : AppleTokens.neutralDark,
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -2341,28 +2455,92 @@ class _WelcomeOnboardingScreenState extends State<WelcomeOnboardingScreen> {
   }
 }
 
-/// Custom painter for the delicate, faint grid background across the hero
-class _HeroGridPainter extends CustomPainter {
+// ==========================================
+// HOVER NAVBAR BUTTON
+// ==========================================
+class _HoverNavButton extends StatefulWidget {
+  final String label;
+  final VoidCallback onTap;
+
+  const _HoverNavButton({required this.label, required this.onTap});
+
   @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = const Color(0xFF9CAF88).withValues(alpha: 0.18)
-      ..strokeWidth = 1.0
-      ..style = PaintingStyle.stroke;
+  State<_HoverNavButton> createState() => _HoverNavButtonState();
+}
 
-    const double gridSize = 72.0;
+class _HoverNavButtonState extends State<_HoverNavButton> {
+  bool _isHovered = false;
 
-    // Draw vertical grid lines
-    for (double x = 0; x <= size.width; x += gridSize) {
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
-    }
-
-    // Draw horizontal grid lines
-    for (double y = 0; y <= size.height; y += gridSize) {
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
-    }
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: InkWell(
+        onTap: widget.onTap,
+        borderRadius: BorderRadius.circular(AppleTokens.radius8),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: _isHovered
+                ? AppleTokens.lightMint.withValues(alpha: 0.5)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(AppleTokens.radius8),
+          ),
+          child: Text(
+            widget.label,
+            style: GoogleFonts.inter(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: _isHovered
+                  ? AppleTokens.primaryTeal
+                  : AppleTokens.neutralBrown,
+            ),
+          ),
+        ),
+      ),
+    );
   }
+}
 
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+// ==========================================
+// MODELS
+// ==========================================
+class _FeatureData {
+  final IconData icon;
+  final String title;
+  final String description;
+  final Color containerColor;
+  final String actionLabel;
+  final VoidCallback onAction;
+
+  _FeatureData({
+    required this.icon,
+    required this.title,
+    required this.description,
+    required this.containerColor,
+    required this.actionLabel,
+    required this.onAction,
+  });
+}
+
+class _JourneyStep {
+  final String number;
+  final String title;
+  final String description;
+  final IconData icon;
+
+  _JourneyStep({
+    required this.number,
+    required this.title,
+    required this.description,
+    required this.icon,
+  });
+}
+
+class _FooterLinkItem {
+  final String label;
+  final VoidCallback onTap;
+
+  _FooterLinkItem(this.label, this.onTap);
 }

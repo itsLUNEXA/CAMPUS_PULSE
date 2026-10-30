@@ -20,6 +20,9 @@ abstract class ChatRoom
     required this.roomType,
     this.referenceId,
     required this.name,
+    this.description,
+    this.topic,
+    this.creatorAuthUserId,
     required this.participantIds,
     this.allowedBranch,
     this.allowedAcademicYear,
@@ -33,6 +36,9 @@ abstract class ChatRoom
     required String roomType,
     String? referenceId,
     required String name,
+    String? description,
+    String? topic,
+    _isc.UuidValue? creatorAuthUserId,
     required List<_isc.UuidValue> participantIds,
     String? allowedBranch,
     int? allowedAcademicYear,
@@ -47,6 +53,13 @@ abstract class ChatRoom
       roomType: jsonSerialization['roomType'] as String,
       referenceId: jsonSerialization['referenceId'] as String?,
       name: jsonSerialization['name'] as String,
+      description: jsonSerialization['description'] as String?,
+      topic: jsonSerialization['topic'] as String?,
+      creatorAuthUserId: jsonSerialization['creatorAuthUserId'] == null
+          ? null
+          : _isc.UuidValueJsonExtension.fromJson(
+              jsonSerialization['creatorAuthUserId'],
+            ),
       participantIds: _il98xzab.Protocol().deserialize<List<_isc.UuidValue>>(
         jsonSerialization['participantIds'],
       ),
@@ -75,6 +88,12 @@ abstract class ChatRoom
 
   String name;
 
+  String? description;
+
+  String? topic;
+
+  _isc.UuidValue? creatorAuthUserId;
+
   List<_isc.UuidValue> participantIds;
 
   String? allowedBranch;
@@ -95,6 +114,9 @@ abstract class ChatRoom
     String? roomType,
     String? referenceId,
     String? name,
+    String? description,
+    String? topic,
+    _isc.UuidValue? creatorAuthUserId,
     List<_isc.UuidValue>? participantIds,
     String? allowedBranch,
     int? allowedAcademicYear,
@@ -110,6 +132,10 @@ abstract class ChatRoom
       'roomType': roomType,
       if (referenceId != null) 'referenceId': referenceId,
       'name': name,
+      if (description != null) 'description': description,
+      if (topic != null) 'topic': topic,
+      if (creatorAuthUserId != null)
+        'creatorAuthUserId': creatorAuthUserId?.toJson(),
       'participantIds': participantIds.toJson(valueToJson: (v) => v.toJson()),
       if (allowedBranch != null) 'allowedBranch': allowedBranch,
       if (allowedAcademicYear != null)
@@ -128,6 +154,10 @@ abstract class ChatRoom
       'roomType': roomType,
       if (referenceId != null) 'referenceId': referenceId,
       'name': name,
+      if (description != null) 'description': description,
+      if (topic != null) 'topic': topic,
+      if (creatorAuthUserId != null)
+        'creatorAuthUserId': creatorAuthUserId?.toJson(),
       'participantIds': participantIds.toJson(valueToJson: (v) => v.toJson()),
       if (allowedBranch != null) 'allowedBranch': allowedBranch,
       if (allowedAcademicYear != null)
@@ -152,6 +182,9 @@ class _ChatRoomImpl extends ChatRoom {
     required String roomType,
     String? referenceId,
     required String name,
+    String? description,
+    String? topic,
+    _isc.UuidValue? creatorAuthUserId,
     required List<_isc.UuidValue> participantIds,
     String? allowedBranch,
     int? allowedAcademicYear,
@@ -163,6 +196,9 @@ class _ChatRoomImpl extends ChatRoom {
          roomType: roomType,
          referenceId: referenceId,
          name: name,
+         description: description,
+         topic: topic,
+         creatorAuthUserId: creatorAuthUserId,
          participantIds: participantIds,
          allowedBranch: allowedBranch,
          allowedAcademicYear: allowedAcademicYear,
@@ -180,6 +216,9 @@ class _ChatRoomImpl extends ChatRoom {
     String? roomType,
     Object? referenceId = _Undefined,
     String? name,
+    Object? description = _Undefined,
+    Object? topic = _Undefined,
+    Object? creatorAuthUserId = _Undefined,
     List<_isc.UuidValue>? participantIds,
     Object? allowedBranch = _Undefined,
     Object? allowedAcademicYear = _Undefined,
@@ -192,6 +231,11 @@ class _ChatRoomImpl extends ChatRoom {
       roomType: roomType ?? this.roomType,
       referenceId: referenceId is String? ? referenceId : this.referenceId,
       name: name ?? this.name,
+      description: description is String? ? description : this.description,
+      topic: topic is String? ? topic : this.topic,
+      creatorAuthUserId: creatorAuthUserId is _isc.UuidValue?
+          ? creatorAuthUserId
+          : this.creatorAuthUserId,
       participantIds:
           participantIds ?? this.participantIds.map((e0) => e0).toList(),
       allowedBranch: allowedBranch is String?

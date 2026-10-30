@@ -1,0 +1,44 @@
+class: PrintRequest
+table: print_requests
+fields:
+  studentAuthUserId: UuidValue
+  studentName: String
+  studentBranch: String
+  studentYear: int
+  hostelOrLocation: String
+  fileName: String
+  fileUrl: String
+  fileSizeBytes: int?
+  pageCount: int
+  copies: int
+  totalPages: int
+  printType: String # 'Black & White' or 'Colour'
+  paperSize: String # 'A4' or 'A3'
+  printSide: String # 'Single-side' or 'Double-side'
+  binding: String # 'None', 'Staple', 'Spiral'
+  deliveryMode: String # 'Library pickup' or 'Hostel delivery'
+  counterName: String # e.g. 'Central Library Main Counter'
+  amountPaid: double
+  pointsUsed: int
+  pointsEarned: int
+  pointsAwarded: bool, default=false
+  paymentStatus: String # 'SUCCESS', 'FAILED', 'PENDING'
+  paymentTransactionId: String?
+  paymentFailureReason: String?
+  status: String # 'QUEUED', 'PRINTING', 'READY', 'COLLECTED', 'CANCELLED', 'REFUNDED'
+  collectionCode: String?
+  collectionQrToken: String?
+  statusReason: String?
+  processedByStaffName: String?
+  createdAt: DateTime, default=now
+  updatedAt: DateTime, default=now
+  collectedAt: DateTime?
+
+indexes:
+  print_req_student_idx:
+    fields: studentAuthUserId, createdAt
+  print_req_counter_status_idx:
+    fields: counterName, status, paymentStatus
+  print_req_code_idx:
+    fields: collectionCode
+

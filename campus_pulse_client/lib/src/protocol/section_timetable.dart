@@ -25,6 +25,7 @@ abstract class SectionTimetable
     required this.endTime,
     required this.subject,
     required this.room,
+    this.faculty,
     DateTime? createdAt,
   }) : createdAt = createdAt ?? DateTime.now();
 
@@ -39,6 +40,7 @@ abstract class SectionTimetable
     required String endTime,
     required String subject,
     required String room,
+    String? faculty,
     DateTime? createdAt,
   }) = _SectionTimetableImpl;
 
@@ -54,6 +56,7 @@ abstract class SectionTimetable
       endTime: jsonSerialization['endTime'] as String,
       subject: jsonSerialization['subject'] as String,
       room: jsonSerialization['room'] as String,
+      faculty: jsonSerialization['faculty'] as String?,
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
@@ -83,6 +86,8 @@ abstract class SectionTimetable
 
   String room;
 
+  String? faculty;
+
   DateTime createdAt;
 
   /// Returns a shallow copy of this [SectionTimetable]
@@ -99,6 +104,7 @@ abstract class SectionTimetable
     String? endTime,
     String? subject,
     String? room,
+    String? faculty,
     DateTime? createdAt,
   });
   @override
@@ -115,6 +121,7 @@ abstract class SectionTimetable
       'endTime': endTime,
       'subject': subject,
       'room': room,
+      if (faculty != null) 'faculty': faculty,
       'createdAt': createdAt.toJson(),
     };
   }
@@ -133,6 +140,7 @@ abstract class SectionTimetable
       'endTime': endTime,
       'subject': subject,
       'room': room,
+      if (faculty != null) 'faculty': faculty,
       'createdAt': createdAt.toJson(),
     };
   }
@@ -157,6 +165,7 @@ class _SectionTimetableImpl extends SectionTimetable {
     required String endTime,
     required String subject,
     required String room,
+    String? faculty,
     DateTime? createdAt,
   }) : super._(
          id: id,
@@ -169,6 +178,7 @@ class _SectionTimetableImpl extends SectionTimetable {
          endTime: endTime,
          subject: subject,
          room: room,
+         faculty: faculty,
          createdAt: createdAt,
        );
 
@@ -187,6 +197,7 @@ class _SectionTimetableImpl extends SectionTimetable {
     String? endTime,
     String? subject,
     String? room,
+    Object? faculty = _Undefined,
     DateTime? createdAt,
   }) {
     return SectionTimetable(
@@ -200,6 +211,7 @@ class _SectionTimetableImpl extends SectionTimetable {
       endTime: endTime ?? this.endTime,
       subject: subject ?? this.subject,
       room: room ?? this.room,
+      faculty: faculty is String? ? faculty : this.faculty,
       createdAt: createdAt ?? this.createdAt,
     );
   }

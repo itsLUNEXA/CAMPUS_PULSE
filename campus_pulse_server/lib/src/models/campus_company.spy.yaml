@@ -1,0 +1,18 @@
+class: CampusCompany
+table: campus_companies
+fields:
+  name: String
+  tier: String
+  avgPackageLpa: double
+  eligibleBranches: List<String>
+  cgpaCutoff: double
+  hiringRounds: List<String>
+  keyFocusAreas: List<String>
+  description: String
+  logoUrl: String?
+  createdAt: DateTime, default=now
+
+indexes:
+  company_name_idx:
+    fields: name
+

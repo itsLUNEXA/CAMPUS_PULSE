@@ -1,0 +1,17 @@
+class: PrintPointTransaction
+table: print_point_transactions
+fields:
+  authUserId: UuidValue
+  printRequestId: int?
+  type: String # 'EARNED', 'REDEEMED', 'REFUNDED'
+  points: int
+  balanceAfter: int
+  description: String
+  createdAt: DateTime, default=now
+
+indexes:
+  print_tx_user_idx:
+    fields: authUserId, createdAt
+  print_tx_req_idx:
+    fields: printRequestId
+

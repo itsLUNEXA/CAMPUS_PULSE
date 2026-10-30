@@ -18,6 +18,7 @@ fields:
   uploaderName: String
   isApproved: bool, default=false
   approvedByUserId: UuidValue?
+  rejectionReason: String?
   createdAt: DateTime, default=now
   downloadCount: int, default=0
 
@@ -26,4 +27,3 @@ indexes:
     fields: university, course, branch, semester, subjectCode
   resource_approval_idx:
     fields: isApproved
-

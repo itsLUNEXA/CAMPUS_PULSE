@@ -1,0 +1,21 @@
+class: SeniorExperience
+table: senior_experiences
+fields:
+  companyName: String
+  seniorName: String
+  seniorBranch: String
+  batchYear: int
+  placedRole: String
+  packageOffered: String?
+  difficultyRating: int, default=3
+  interviewQuestions: List<String>
+  experienceReview: String
+  tipsForJuniors: String
+  contactHandle: String?
+  verified: bool, default=true
+  createdAt: DateTime, default=now
+
+indexes:
+  senior_exp_company_idx:
+    fields: companyName
+

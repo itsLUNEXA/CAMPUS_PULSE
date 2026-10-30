@@ -80,7 +80,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
       );
       if (mounted) {
         setState(() {
-          _statusMessage = 'Check-in confirmed! You are now eligible for event certificate.';
+          _statusMessage =
+              'Check-in confirmed! You are now eligible for event certificate.';
           _isError = false;
           _codeController.clear();
         });
@@ -104,7 +105,9 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark ? AppleTokens.darkBackground : AppleTokens.warmWhite,
+      backgroundColor: isDark
+          ? AppleTokens.darkBackground
+          : AppleTokens.warmWhite,
       appBar: AppBar(
         title: Text(
           'Event Attendance & Check-In',
@@ -128,7 +131,11 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.qr_code_scanner_rounded, color: AppleTokens.darkNavy, size: 28),
+                    const Icon(
+                      Icons.qr_code_scanner_rounded,
+                      color: AppleTokens.darkNavy,
+                      size: 28,
+                    ),
                     const SizedBox(width: 12),
                     Text(
                       'Live Event Check-In',
@@ -157,7 +164,9 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.circular(AppleTokens.radius16),
+                          borderRadius: BorderRadius.circular(
+                            AppleTokens.radius16,
+                          ),
                         ),
                         child: TextField(
                           controller: _codeController,
@@ -165,7 +174,10 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                             hintText: 'Enter code (e.g. HACK2026)',
                             border: InputBorder.none,
                           ),
-                          style: const TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.2),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1.2,
+                          ),
                         ),
                       ),
                     ),
@@ -182,14 +194,20 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: _isError ? Colors.red.shade100 : Colors.green.shade100,
+                      color: _isError
+                          ? Colors.red.shade100
+                          : Colors.green.shade100,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
                       children: [
                         Icon(
-                          _isError ? Icons.error_outline : Icons.check_circle_outline,
-                          color: _isError ? Colors.red.shade800 : Colors.green.shade800,
+                          _isError
+                              ? Icons.error_outline
+                              : Icons.check_circle_outline,
+                          color: _isError
+                              ? Colors.red.shade800
+                              : Colors.green.shade800,
                           size: 20,
                         ),
                         const SizedBox(width: 8),
@@ -197,7 +215,9 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                           child: Text(
                             _statusMessage!,
                             style: TextStyle(
-                              color: _isError ? Colors.red.shade900 : Colors.green.shade900,
+                              color: _isError
+                                  ? Colors.red.shade900
+                                  : Colors.green.shade900,
                               fontWeight: FontWeight.w600,
                               fontSize: 12,
                             ),
@@ -245,10 +265,16 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                   child: Row(
                     children: [
                       CircleAvatar(
-                        backgroundColor: rec.status == 'attended' ? Colors.green.shade100 : AppleTokens.paleLavender,
+                        backgroundColor: rec.status == 'attended'
+                            ? Colors.green.shade100
+                            : AppleTokens.paleLavender,
                         child: Icon(
-                          rec.status == 'attended' ? Icons.check : Icons.access_time_rounded,
-                          color: rec.status == 'attended' ? Colors.green.shade800 : AppleTokens.darkNavy,
+                          rec.status == 'attended'
+                              ? Icons.check
+                              : Icons.access_time_rounded,
+                          color: rec.status == 'attended'
+                              ? Colors.green.shade800
+                              : AppleTokens.darkNavy,
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -256,14 +282,29 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Event #${rec.eventId} Participation', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                            Text('Status: ${rec.status.toUpperCase()} • Code: ${rec.checkInCode ?? "Manual"}', style: const TextStyle(color: AppleTokens.textMutedGrey, fontSize: 13)),
+                            Text(
+                              'Event #${rec.eventId} Participation',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                              ),
+                            ),
+                            Text(
+                              'Status: ${rec.status.toUpperCase()} • Code: ${rec.checkInCode ?? "Manual"}',
+                              style: const TextStyle(
+                                color: AppleTokens.textMutedGrey,
+                                fontSize: 13,
+                              ),
+                            ),
                           ],
                         ),
                       ),
                       Text(
                         '${rec.markedAt.day}/${rec.markedAt.month}/${rec.markedAt.year}',
-                        style: const TextStyle(color: AppleTokens.textMutedGrey, fontSize: 12),
+                        style: const TextStyle(
+                          color: AppleTokens.textMutedGrey,
+                          fontSize: 12,
+                        ),
                       ),
                     ],
                   ),

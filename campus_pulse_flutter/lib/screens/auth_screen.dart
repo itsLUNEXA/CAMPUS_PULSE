@@ -37,6 +37,13 @@ class _AuthScreenState extends State<AuthScreen>
   final _regHostelCtrl = TextEditingController();
   final _regBioCtrl = TextEditingController();
 
+  // Admin Quick Login Controllers
+  final _adminFormKey = GlobalKey<FormState>();
+  final _adminEmailCtrl = TextEditingController(text: 'admin@campuspulse.edu');
+  final _adminPassCtrl = TextEditingController(
+    text: 'AdminMasterPassword2026!',
+  );
+
   String _selectedBranch = 'CSE';
   int _selectedYear = 2;
   final Set<String> _selectedSubjects = {'DSA', 'DBMS'};
@@ -60,7 +67,7 @@ class _AuthScreenState extends State<AuthScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
   }
 
   @override
@@ -73,6 +80,8 @@ class _AuthScreenState extends State<AuthScreen>
     _regPassCtrl.dispose();
     _regHostelCtrl.dispose();
     _regBioCtrl.dispose();
+    _adminEmailCtrl.dispose();
+    _adminPassCtrl.dispose();
     super.dispose();
   }
 
@@ -115,6 +124,26 @@ class _AuthScreenState extends State<AuthScreen>
     }
   }
 
+  /// Instant Master Admin Quick Login
+  void _loginAsDemoAdmin() async {
+    final success = await widget.authState.loginMasterAdminDemo();
+    if (success && mounted) {
+      widget.onAuthenticated();
+    }
+  }
+
+  /// Dedicated Administrator Login with credentials
+  void _onAdminLogin() async {
+    if (!_adminFormKey.currentState!.validate()) return;
+    final success = await widget.authState.loginAdmin(
+      _adminEmailCtrl.text.trim(),
+      _adminPassCtrl.text,
+    );
+    if (success && mounted) {
+      widget.onAuthenticated();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -129,30 +158,35 @@ class _AuthScreenState extends State<AuthScreen>
           constraints: const BoxConstraints(maxWidth: 480),
           child: Column(
             children: [
-              // Logo (Sage & Deep Forest)
+              // Logo
               Container(
-                width: 52,
-                height: 52,
+                width: 48,
+                height: 48,
                 decoration: BoxDecoration(
-                  color: isDark ? AppleTokens.darkSurfaceElevated : AppleTokens.deepForest,
-                  borderRadius: BorderRadius.circular(16),
+                  color: AppleTokens.primaryTeal,
+                  borderRadius: BorderRadius.circular(AppleTokens.radius8),
                 ),
                 child: const Center(
-                  child: Icon(
-                    Icons.bolt_rounded,
-                    size: 30,
-                    color: AppleTokens.sageGreen,
+                  child: Text(
+                    'C',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                 ),
               ),
               const SizedBox(height: AppleTokens.space16),
               Text(
-                'Welcome to Campus Pulse',
-                style: GoogleFonts.newsreader(
-                  fontSize: 28,
+                'Welcome to CAMPULSE',
+                style: GoogleFonts.inter(
+                  fontSize: 24,
                   fontWeight: FontWeight.w700,
-                  color: isDark ? AppleTokens.darkTextPrimary : AppleTokens.deepForest,
-                  letterSpacing: -0.5,
+                  color: isDark
+                      ? AppleTokens.darkTextPrimary
+                      : AppleTokens.neutralDark,
+                  letterSpacing: -0.4,
                 ),
               ),
               const SizedBox(height: AppleTokens.space8),
@@ -161,7 +195,9 @@ class _AuthScreenState extends State<AuthScreen>
                 textAlign: TextAlign.center,
                 style: GoogleFonts.inter(
                   fontSize: 14,
-                  color: isDark ? AppleTokens.darkTextSecondary : AppleTokens.mutedGrey,
+                  color: isDark
+                      ? AppleTokens.darkTextSecondary
+                      : AppleTokens.neutralBrown,
                   height: 1.5,
                 ),
               ),
@@ -180,7 +216,7 @@ class _AuthScreenState extends State<AuthScreen>
                       decoration: BoxDecoration(
                         color: AppleTokens.error.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(
-                          AppleTokens.radius12,
+                          AppleTokens.radius8,
                         ),
                         border: Border.all(
                           color: AppleTokens.error.withValues(alpha: 0.3),
@@ -213,35 +249,33 @@ class _AuthScreenState extends State<AuthScreen>
 
               // Card with Tabs
               AppleCard(
-                padding: const EdgeInsets.all(AppleTokens.space28),
+                padding: const EdgeInsets.all(24.0),
                 child: Column(
                   children: [
                     // Tabs
                     Container(
-                      height: 44,
+                      height: 40,
                       padding: const EdgeInsets.all(3),
                       decoration: BoxDecoration(
                         color: isDark
                             ? AppleTokens.darkSurfaceElevated
-                            : AppleTokens.softSage,
+                            : AppleTokens.lightMint,
                         borderRadius: BorderRadius.circular(
-                          AppleTokens.radius999,
+                          AppleTokens.radius8,
                         ),
                       ),
                       child: TabBar(
                         controller: _tabController,
                         indicator: BoxDecoration(
-                          color: isDark
-                              ? AppleTokens.sageGreen
-                              : AppleTokens.deepForest,
+                          color: AppleTokens.primaryTeal,
                           borderRadius: BorderRadius.circular(
-                            AppleTokens.radius999,
+                            AppleTokens.radius8,
                           ),
                         ),
                         labelColor: Colors.white,
                         unselectedLabelColor: isDark
                             ? AppleTokens.darkTextSecondary
-                            : AppleTokens.mutedGrey,
+                            : AppleTokens.neutralBrown,
                         indicatorSize: TabBarIndicatorSize.tab,
                         dividerColor: Colors.transparent,
                         labelStyle: GoogleFonts.inter(
@@ -251,6 +285,7 @@ class _AuthScreenState extends State<AuthScreen>
                         tabs: const [
                           Tab(text: 'Sign In'),
                           Tab(text: 'Register'),
+                          Tab(text: 'Admin Quick Login'),
                         ],
                       ),
                     ),
@@ -260,9 +295,13 @@ class _AuthScreenState extends State<AuthScreen>
                     AnimatedBuilder(
                       animation: _tabController,
                       builder: (context, _) {
-                        return _tabController.index == 0
-                            ? _buildLoginForm(isDark)
-                            : _buildRegisterForm(isDark);
+                        if (_tabController.index == 0) {
+                          return _buildLoginForm(isDark);
+                        } else if (_tabController.index == 1) {
+                          return _buildRegisterForm(isDark);
+                        } else {
+                          return _buildAdminQuickLoginForm(isDark);
+                        }
                       },
                     ),
                   ],
@@ -273,10 +312,19 @@ class _AuthScreenState extends State<AuthScreen>
 
               // Instant Demo Student Login
               AppleButton(
-                label: 'Instant Demo Login (Aarav - CSE Year 3)',
+                label: 'Instant Demo Student Login (Aarav - CSE Year 3)',
                 variant: AppleButtonVariant.outline,
-                icon: Icons.bolt_rounded,
+                icon: Icons.account_circle_outlined,
                 onPressed: _loginAsDemoStudent,
+              ),
+              const SizedBox(height: AppleTokens.space12),
+
+              // Instant Demo Admin Quick Login
+              AppleButton(
+                label: '⚡ 1-Click Master Admin Dashboard Access',
+                variant: AppleButtonVariant.secondary,
+                icon: Icons.admin_panel_settings_rounded,
+                onPressed: _loginAsDemoAdmin,
               ),
             ],
           ),
@@ -464,6 +512,126 @@ class _AuthScreenState extends State<AuthScreen>
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildAdminQuickLoginForm(bool isDark) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Admin Info Banner
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: AppleTokens.lightMint,
+            borderRadius: BorderRadius.circular(AppleTokens.radius8),
+            border: Border.all(
+              color: AppleTokens.purple.withValues(alpha: 0.35),
+            ),
+          ),
+          child: Row(
+            children: [
+              const Icon(
+                Icons.admin_panel_settings_rounded,
+                color: AppleTokens.primaryTeal,
+                size: 22,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'Authorized Master Admin access to manage section timetables, campus events, syllabus quizzes, and rosters.',
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: AppleTokens.neutralDark,
+                    height: 1.35,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: AppleTokens.space20),
+
+        // 1-Click Instant Master Admin Quick Login
+        AppleButton(
+          label: '⚡ 1-Click Quick Login as Master Admin',
+          variant: AppleButtonVariant.primary,
+          isLoading: widget.authState.isLoading,
+          onPressed: _loginAsDemoAdmin,
+        ),
+        const SizedBox(height: AppleTokens.space16),
+
+        // Neutral divider
+        Row(
+          children: [
+            Expanded(
+              child: Container(
+                height: 1,
+                color: AppleTokens.borderSubtle,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: Text(
+                'OR SIGN IN WITH ADMIN CREDENTIALS',
+                style: GoogleFonts.inter(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  color: AppleTokens.neutralBrown,
+                  letterSpacing: 0.6,
+                ),
+              ),
+            ),
+            Expanded(
+              child: Container(
+                height: 1,
+                color: AppleTokens.borderSubtle,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppleTokens.space16),
+
+        // Admin Credentials Form
+        Form(
+          key: _adminFormKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TextFormField(
+                controller: _adminEmailCtrl,
+                keyboardType: TextInputType.emailAddress,
+                decoration: const InputDecoration(
+                  labelText: 'Admin Email',
+                  hintText: 'admin@campuspulse.edu',
+                  prefixIcon: Icon(
+                    Icons.admin_panel_settings_outlined,
+                    size: 20,
+                  ),
+                ),
+                validator: (v) =>
+                    v == null || v.trim().isEmpty ? 'Enter admin email' : null,
+              ),
+              const SizedBox(height: AppleTokens.space16),
+              PasswordTextField(
+                controller: _adminPassCtrl,
+                validator: (v) => v == null || v.length < 6
+                    ? 'Password must be at least 6 characters'
+                    : null,
+                onFieldSubmitted: (_) => _onAdminLogin(),
+              ),
+              const SizedBox(height: AppleTokens.space20),
+              AppleButton(
+                label: 'Sign In as Administrator',
+                variant: AppleButtonVariant.secondary,
+                isLoading: widget.authState.isLoading,
+                onPressed: _onAdminLogin,
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

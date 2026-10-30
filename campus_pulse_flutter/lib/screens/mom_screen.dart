@@ -50,10 +50,20 @@ class _MomScreenState extends State<MomScreen> {
               MinutesOfMeeting(
                 title: 'Technical Fest & Hackathon Organizing Committee Sync',
                 meetingDate: DateTime.now().subtract(const Duration(days: 2)),
-                organizerUserId: widget.authState.currentProfile?.authUserId ?? UuidValue.fromString('00000000-0000-0000-0000-000000000001'),
+                organizerUserId:
+                    widget.authState.currentProfile?.authUserId ??
+                    UuidValue.fromString(
+                      '00000000-0000-0000-0000-000000000001',
+                    ),
                 organizerName: 'Prof. Alok Gupta & Aarav Sharma',
-                attendeeNames: ['Aarav Sharma', 'Neha Patel', 'Rohan Das', 'Kavya Singh'],
-                agenda: 'Finalize HackPulse 2026 track categories, venue Wi-Fi bandwidth, food sponsors, and digital certificate issuing criteria.',
+                attendeeNames: [
+                  'Aarav Sharma',
+                  'Neha Patel',
+                  'Rohan Das',
+                  'Kavya Singh',
+                ],
+                agenda:
+                    'Finalize HackPulse 2026 track categories, venue Wi-Fi bandwidth, food sponsors, and digital certificate issuing criteria.',
                 discussionPoints: [
                   'Confirmed Auditorium Hall B for opening ceremony and coding labs for 24-hr sprint.',
                   'Agreed on requiring >= 80% event attendance duration before generating official certificates.',
@@ -81,7 +91,9 @@ class _MomScreenState extends State<MomScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark ? AppleTokens.darkBackground : AppleTokens.warmWhite,
+      backgroundColor: isDark
+          ? AppleTokens.darkBackground
+          : AppleTokens.warmWhite,
       appBar: AppBar(
         title: Text(
           'Minutes of Meeting (MoM)',
@@ -101,7 +113,10 @@ class _MomScreenState extends State<MomScreen> {
               Expanded(
                 child: Text(
                   'Official Meeting Records & Action Items',
-                  style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w800),
+                  style: GoogleFonts.inter(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
               ),
               AppleButton(
@@ -119,7 +134,10 @@ class _MomScreenState extends State<MomScreen> {
             AppleCard(
               padding: const EdgeInsets.all(32),
               child: Center(
-                child: Text('No meeting records logged yet.', style: GoogleFonts.inter(color: AppleTokens.textMutedGrey)),
+                child: Text(
+                  'No meeting records logged yet.',
+                  style: GoogleFonts.inter(color: AppleTokens.textMutedGrey),
+                ),
               ),
             )
           else
@@ -140,35 +158,79 @@ class _MomScreenState extends State<MomScreen> {
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(color: AppleTokens.pastelYellow, borderRadius: BorderRadius.circular(10)),
-                  child: Text('OFFICIAL MINUTES', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 10)),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppleTokens.pastelYellow,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    'OFFICIAL MINUTES',
+                    style: GoogleFonts.inter(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 10,
+                    ),
+                  ),
                 ),
                 const Spacer(),
                 Text(
                   '${mom.meetingDate.day}/${mom.meetingDate.month}/${mom.meetingDate.year}',
-                  style: const TextStyle(fontWeight: FontWeight.bold, color: AppleTokens.textMutedGrey),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: AppleTokens.textMutedGrey,
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 12),
-            Text(mom.title, style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w800, color: AppleTokens.darkNavy)),
+            Text(
+              mom.title,
+              style: GoogleFonts.inter(
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                color: AppleTokens.darkNavy,
+              ),
+            ),
             const SizedBox(height: 6),
-            Text('Organizer: ${mom.organizerName} • Attendees: ${mom.attendeeNames.join(", ")}', style: const TextStyle(color: AppleTokens.textMutedGrey, fontSize: 12)),
+            Text(
+              'Organizer: ${mom.organizerName} • Attendees: ${mom.attendeeNames.join(", ")}',
+              style: const TextStyle(
+                color: AppleTokens.textMutedGrey,
+                fontSize: 12,
+              ),
+            ),
             const SizedBox(height: 14),
-            Text('Agenda: ${mom.agenda}', style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+            Text(
+              'Agenda: ${mom.agenda}',
+              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+            ),
             const SizedBox(height: 12),
-            const Text('Decisions Taken:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-            ...mom.decisions.map((d) => Padding(
-              padding: const EdgeInsets.only(top: 4, left: 8),
-              child: Text('• $d', style: const TextStyle(fontSize: 13)),
-            )),
+            const Text(
+              'Decisions Taken:',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+            ),
+            ...mom.decisions.map(
+              (d) => Padding(
+                padding: const EdgeInsets.only(top: 4, left: 8),
+                child: Text('• $d', style: const TextStyle(fontSize: 13)),
+              ),
+            ),
             const SizedBox(height: 12),
-            const Text('Action Items:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-            ...mom.actionItems.map((a) => Padding(
-              padding: const EdgeInsets.only(top: 4, left: 8),
-              child: Text('→ $a', style: const TextStyle(fontSize: 13, color: Colors.blueGrey)),
-            )),
+            const Text(
+              'Action Items:',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+            ),
+            ...mom.actionItems.map(
+              (a) => Padding(
+                padding: const EdgeInsets.only(top: 4, left: 8),
+                child: Text(
+                  '→ $a',
+                  style: const TextStyle(fontSize: 13, color: Colors.blueGrey),
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -183,29 +245,51 @@ class _MomScreenState extends State<MomScreen> {
       context: context,
       builder: (ctx) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
           title: const Text('Record Minutes of Meeting'),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                TextField(controller: titleCtrl, decoration: const InputDecoration(labelText: 'Meeting Title')),
-                TextField(controller: agendaCtrl, decoration: const InputDecoration(labelText: 'Agenda Summary')),
+                TextField(
+                  controller: titleCtrl,
+                  decoration: const InputDecoration(labelText: 'Meeting Title'),
+                ),
+                TextField(
+                  controller: agendaCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Agenda Summary',
+                  ),
+                ),
               ],
             ),
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancel'),
+            ),
             ElevatedButton(
               onPressed: () async {
                 final student = widget.authState.currentProfile;
                 await client.mom.createMom(
-                  title: titleCtrl.text.trim().isEmpty ? 'Committee Sync' : titleCtrl.text.trim(),
+                  title: titleCtrl.text.trim().isEmpty
+                      ? 'Committee Sync'
+                      : titleCtrl.text.trim(),
                   meetingDate: DateTime.now(),
                   organizerName: student?.fullName ?? 'Organizer',
-                  attendeeNames: [student?.fullName ?? 'Organizer', 'Faculty Advisor'],
-                  agenda: agendaCtrl.text.trim().isEmpty ? 'General Operations' : agendaCtrl.text.trim(),
-                  discussionPoints: ['Reviewed student feedback and campus priorities.'],
+                  attendeeNames: [
+                    student?.fullName ?? 'Organizer',
+                    'Faculty Advisor',
+                  ],
+                  agenda: agendaCtrl.text.trim().isEmpty
+                      ? 'General Operations'
+                      : agendaCtrl.text.trim(),
+                  discussionPoints: [
+                    'Reviewed student feedback and campus priorities.',
+                  ],
                   decisions: ['Approved project milestones.'],
                   actionItems: ['Follow up in next weekly sprint.'],
                 );

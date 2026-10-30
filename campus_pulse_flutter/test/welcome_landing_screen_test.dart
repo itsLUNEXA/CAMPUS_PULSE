@@ -5,108 +5,108 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('Mindly-styled WelcomeOnboardingScreen renders all hero & section elements',
-      (tester) async {
-    // Set desktop screen size to match reference dimensions
-    tester.view.physicalSize = const Size(1280, 960);
-    tester.view.devicePixelRatio = 1.0;
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
+  testWidgets(
+    'Redesigned WelcomeOnboardingScreen renders all hero, 3D cards, features, and journey elements on desktop',
+    (tester) async {
+      tester.view.physicalSize = const Size(1280, 960);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
 
-    bool getStartedTapped = false;
-    bool browseEventsTapped = false;
+      bool getStartedTapped = false;
+      bool browseEventsTapped = false;
+      String? navigatedRoute;
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: WelcomeOnboardingScreen(
-          onGetStarted: () => getStartedTapped = true,
-          onBrowseEvents: () => browseEventsTapped = true,
+      await tester.pumpWidget(
+        MaterialApp(
+          home: WelcomeOnboardingScreen(
+            onGetStarted: () => getStartedTapped = true,
+            onBrowseEvents: () => browseEventsTapped = true,
+            onNavigate: (route) => navigatedRoute = route,
+          ),
         ),
-      ),
-    );
+      );
 
-    // Initial pump
-    await tester.pump();
+      // Initial pump
+      await tester.pump();
+      expect(navigatedRoute, isNull);
+      expect(navigatedRoute, isNull);
 
-    // Verify Brand & Navbar
-    expect(find.text('Campus Pulse'), findsAtLeast(1));
-    expect(find.text('How It Works'), findsAtLeast(1));
-    expect(find.text('Campus Community'), findsAtLeast(1));
-    expect(find.text('Events'), findsAtLeast(1));
-    expect(find.text('Log In'), findsOneWidget);
-    expect(find.text('Get Started'), findsOneWidget);
+      // Verify Sticky Frosted Navbar
+      expect(find.text('CAMPULSE'), findsAtLeast(1));
+      expect(find.text('Features'), findsAtLeast(1));
+      expect(find.text('How It Works'), findsAtLeast(1));
+      expect(find.text('About'), findsAtLeast(1));
+      expect(find.text('Events'), findsAtLeast(1));
+      expect(find.text('Log In'), findsAtLeast(1));
+      expect(find.text('Sign Up'), findsAtLeast(1));
 
-    // Verify Hero Headline & Subtitle
-    expect(
-      find.text('Your campus life deserves\na place to connect'),
-      findsOneWidget,
-    );
-    expect(
-      find.textContaining('Discover campus events, find your study buddies'),
-      findsOneWidget,
-    );
+      // Verify Hero Section
+      expect(find.text('Campus Community Platform'), findsOneWidget);
+      expect(find.text('Get Started'), findsAtLeast(1));
 
-    // Verify CTAs
-    expect(find.text('Explore Campus'), findsOneWidget);
-    expect(find.text('Join Your Community'), findsOneWidget);
+      // Verify 3D Campus Illustration Cards
+      expect(find.text('HackPulse 2026'), findsOneWidget);
+      expect(find.text('Data Structures'), findsOneWidget);
+      expect(find.text('CSE Study Hub'), findsOneWidget);
+      expect(find.text('Rank #1 in Year 3'), findsOneWidget);
 
-    // Verify Layered Card Content
-    expect(find.textContaining('HackPulse 2026'), findsOneWidget);
-    expect(find.textContaining('Looking for a DSA & OS study buddy'), findsOneWidget);
-    expect(
-      find.textContaining('How do you balance OS coursework'),
-      findsOneWidget,
-    );
+      // Verify 6 Features
+      expect(find.text('Events & Registration'), findsAtLeast(1));
+      expect(find.text('Library & Notes'), findsAtLeast(1));
+      expect(find.text('Community Rooms'), findsAtLeast(1));
+      expect(find.text('Study Buddy'), findsAtLeast(1));
+      expect(find.text('Syllabus-Based Quizzes'), findsAtLeast(1));
+      expect(find.text('Course & Year Leaderboards'), findsAtLeast(1));
 
-    // Tap CTA
-    await tester.tap(find.text('Explore Campus'));
-    expect(browseEventsTapped, isTrue);
+      // Verify 3-Step Connected Journey
+      expect(find.text('Create your account'), findsOneWidget);
+      expect(find.text('Add your course and year'), findsOneWidget);
+      expect(find.text('Explore activities & study resources'), findsOneWidget);
 
-    await tester.tap(find.text('Get Started'));
-    expect(getStartedTapped, isTrue);
+      // Verify Final CTA
+      expect(find.text('Make the most of your campus.'), findsOneWidget);
+      expect(find.text('Create Student Account'), findsOneWidget);
 
-    // Verify Below-the-fold sections
-    expect(find.text('Everything you need to thrive on campus'), findsOneWidget);
-    expect(find.text('Explore Campus Events'), findsOneWidget);
-    expect(find.text('Find Your Study Buddy'), findsOneWidget);
-    expect(find.text('Master Core Engineering Subjects'), findsOneWidget);
-    expect(find.text('Live Campus Leaderboard'), findsOneWidget);
-    expect(find.text('Make more of your campus life.'), findsOneWidget);
-  });
+      // Tap CTA buttons
+      await tester.tap(find.text('Get Started').first);
+      expect(getStartedTapped, isTrue);
 
-  testWidgets('Mindly-styled WelcomeOnboardingScreen renders properly on Mobile viewport',
-      (tester) async {
-    // Mobile viewport dimensions (390 x 844 iPhone 14 / modern smartphone)
-    tester.view.physicalSize = const Size(390, 844);
-    tester.view.devicePixelRatio = 1.0;
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
+      await tester.tap(find.text('Events').last);
+      expect(browseEventsTapped, isTrue);
+    },
+  );
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: WelcomeOnboardingScreen(
-          onGetStarted: () {},
-          onBrowseEvents: () {},
+  testWidgets(
+    'Redesigned WelcomeOnboardingScreen renders properly on Mobile viewport',
+    (tester) async {
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: WelcomeOnboardingScreen(
+            onGetStarted: () {},
+            onBrowseEvents: () {},
+          ),
         ),
-      ),
-    );
+      );
 
-    await tester.pump();
+      await tester.pump();
 
-    // Verify Brand Logo on mobile
-    expect(find.text('Campus Pulse'), findsAtLeast(1));
-    expect(find.text('Log In'), findsOneWidget);
-    expect(find.text('Get Started'), findsOneWidget);
+      // Verify Brand Logo on mobile
+      expect(find.text('CAMPULSE'), findsAtLeast(1));
+      expect(find.byIcon(Icons.menu_rounded), findsOneWidget);
 
-    // Verify Mobile Hero Text
-    expect(
-      find.text('Your campus life deserves\na place to connect'),
-      findsOneWidget,
-    );
-    expect(find.text('Explore Campus'), findsOneWidget);
-    expect(find.text('Join Your Community'), findsOneWidget);
+      // Verify Hero Elements
+      expect(find.text('Campus Community Platform'), findsOneWidget);
+      expect(find.text('Get Started'), findsAtLeast(1));
 
-    // Verify Cards are present in scrollable carousel
-    expect(find.textContaining('HackPulse 2026'), findsOneWidget);
-  });
+      // Verify 3D Cards exist
+      expect(find.text('HackPulse 2026'), findsOneWidget);
+      expect(find.text('Data Structures'), findsOneWidget);
+    },
+  );
 }

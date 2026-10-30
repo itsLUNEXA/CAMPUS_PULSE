@@ -17,3 +17,4 @@ indexes:
     fields: status
   chat_report_msg_idx:
     fields: messageId
+

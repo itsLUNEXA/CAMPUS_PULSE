@@ -59,10 +59,8 @@ class QuizEndpoint extends Endpoint {
     if (attemptKey != null && attemptKey.isNotEmpty) {
       final existingAttempt = await QuizAttempt.db.findFirstRow(
         session,
-        where:
-            (t) =>
-                t.authUserId.equals(authUserId) &
-                t.attemptId.equals(attemptKey),
+        where: (t) =>
+            t.authUserId.equals(authUserId) & t.attemptId.equals(attemptKey),
       );
 
       if (existingAttempt != null) {
@@ -125,25 +123,24 @@ class QuizEndpoint extends Endpoint {
       }
     }
 
-    final percentage =
-        totalQuestions > 0 ? (score / totalQuestions) * 100.0 : 0.0;
+    final percentage = totalQuestions > 0
+        ? (score / totalQuestions) * 100.0
+        : 0.0;
     final now = DateTime.now().toUtc();
 
     // 3. Legitimate retake tracking: count prior attempts on this subject
     final priorAttemptsCount = await QuizAttempt.db.count(
       session,
-      where:
-          (t) =>
-              t.authUserId.equals(authUserId) &
-              t.subject.equals(submission.subject),
+      where: (t) =>
+          t.authUserId.equals(authUserId) &
+          t.subject.equals(submission.subject),
     );
     final attemptNumber = priorAttemptsCount + 1;
     final isRetake = priorAttemptsCount > 0;
 
-    final effectiveAttemptId =
-        (attemptKey != null && attemptKey.isNotEmpty)
-            ? attemptKey
-            : '${DateTime.now().microsecondsSinceEpoch}-${authUserId.toString().substring(0, 8)}';
+    final effectiveAttemptId = (attemptKey != null && attemptKey.isNotEmpty)
+        ? attemptKey
+        : '${DateTime.now().microsecondsSinceEpoch}-${authUserId.toString().substring(0, 8)}';
 
     // 4. Persist new attempt
     final attempt = await QuizAttempt.db.insertRow(

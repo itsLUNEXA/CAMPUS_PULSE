@@ -2,8 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'apple_tokens.dart';
 
+/// Central application theme adhering to the CAMPULSE three-color brand system:
+/// - Light Pink: #FFE4F6
+/// - Purple: #B26CFF
+/// - Deep Violet: #705EFF
 class AppTheme {
-  /// Sans-serif font for clean, modern interface typography (Inter)
+  /// Sans-serif body font
   static TextStyle _sansStyle(TextStyle style) {
     try {
       return GoogleFonts.inter(textStyle: style);
@@ -15,166 +19,199 @@ class AppTheme {
     }
   }
 
-  /// Headline font (Modern bold geometric sans-serif matching mobile screenshot)
+  /// Headline font (Clean, modern sans)
   static TextStyle _headlineStyle(TextStyle style) {
     try {
       return GoogleFonts.inter(
         textStyle: style.copyWith(
-          letterSpacing: -0.6,
-          fontWeight: FontWeight.w800,
-          color: AppleTokens.darkNavy,
+          color: AppleTokens.neutralDark,
+          letterSpacing: -0.3,
         ),
       );
     } catch (_) {
       return style.copyWith(
-        fontFamily: '-apple-system, Roboto, sans-serif',
-        fontWeight: FontWeight.w800,
-        color: AppleTokens.darkNavy,
+        fontFamily: '-apple-system, BlinkMacSystemFont, Roboto, sans-serif',
+        color: AppleTokens.neutralDark,
+        letterSpacing: -0.3,
       );
     }
   }
 
-  /// Pastel Mobile-Inspired Light Theme
+  /// CAMPULSE Light Theme
   static ThemeData get lightTheme {
     const colorScheme = ColorScheme.light(
-      primary: AppleTokens.primaryBlue, // Kept for unit test assertion
+      primary: AppleTokens.primaryTeal,
       onPrimary: Colors.white,
-      secondary: AppleTokens.softLavender,
-      onSecondary: AppleTokens.darkNavy,
-      surface: AppleTokens.pureWhite,
-      onSurface: AppleTokens.darkNavy,
+      secondary: AppleTokens.tealHover,
+      onSecondary: Colors.white,
+      surface: AppleTokens.cardSurface,
+      onSurface: AppleTokens.primaryText,
+      outline: AppleTokens.borderAndDivider,
+      outlineVariant: AppleTokens.borderAndDivider,
       error: AppleTokens.error,
       onError: Colors.white,
     );
 
     final textTheme = _createTextTheme(
-      AppleTokens.darkNavy,
-      AppleTokens.textMutedGrey,
+      AppleTokens.primaryText,
+      AppleTokens.secondaryText,
     );
 
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
       colorScheme: colorScheme,
-      scaffoldBackgroundColor: AppleTokens.warmWhite,
+      scaffoldBackgroundColor: AppleTokens.pageBackground,
       textTheme: textTheme,
       cardTheme: CardThemeData(
-        color: AppleTokens.pureWhite,
+        color: AppleTokens.cardSurface,
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppleTokens.radius24),
+          borderRadius: BorderRadius.circular(AppleTokens.radius12),
           side: const BorderSide(
-            color: AppleTokens.borderPastel,
+            color: AppleTokens.borderAndDivider,
             width: AppleTokens.space1,
           ),
         ),
         margin: EdgeInsets.zero,
       ),
       appBarTheme: AppBarTheme(
-        backgroundColor: AppleTokens.warmWhite.withValues(alpha: 0.95),
+        backgroundColor: AppleTokens.cardSurface,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         centerTitle: false,
         titleTextStyle: _headlineStyle(
           const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w800,
-            color: AppleTokens.darkNavy,
-            letterSpacing: -0.5,
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+            color: AppleTokens.primaryText,
           ),
         ),
-        iconTheme: const IconThemeData(color: AppleTokens.darkNavy),
+        iconTheme: const IconThemeData(color: AppleTokens.primaryText),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppleTokens.darkNavy,
-          foregroundColor: Colors.white,
+          backgroundColor: AppleTokens.primaryButton,
+          foregroundColor: AppleTokens.primaryButtonText,
           elevation: 0,
           padding: const EdgeInsets.symmetric(
-            horizontal: AppleTokens.space24,
-            vertical: AppleTokens.space16,
+            horizontal: 20.0,
+            vertical: 12.0,
           ),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppleTokens.radius999),
+            borderRadius: BorderRadius.circular(AppleTokens.radius8),
           ),
           textStyle: _sansStyle(
-            const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+            const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           ),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: AppleTokens.darkNavy,
-          backgroundColor: AppleTokens.pureWhite,
-          side: const BorderSide(color: AppleTokens.borderPastel, width: 1.2),
+          foregroundColor: AppleTokens.primaryText,
+          backgroundColor: AppleTokens.cardSurface,
+          side: const BorderSide(
+            color: AppleTokens.borderAndDivider,
+            width: AppleTokens.space1,
+          ),
           padding: const EdgeInsets.symmetric(
-            horizontal: AppleTokens.space24,
-            vertical: AppleTokens.space16,
+            horizontal: 20.0,
+            vertical: 12.0,
           ),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppleTokens.radius999),
+            borderRadius: BorderRadius.circular(AppleTokens.radius8),
           ),
           textStyle: _sansStyle(
-            const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+            const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+          ),
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: AppleTokens.primaryTeal,
+          textStyle: _sansStyle(
+            const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           ),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppleTokens.pureWhite,
+        fillColor: AppleTokens.cardSurface,
         contentPadding: const EdgeInsets.symmetric(
-          horizontal: AppleTokens.space16,
-          vertical: AppleTokens.space16,
+          horizontal: 16.0,
+          vertical: 12.0,
         ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppleTokens.radius16),
+          borderRadius: BorderRadius.circular(AppleTokens.radius8),
           borderSide: const BorderSide(
-            color: AppleTokens.borderPastel,
+            color: AppleTokens.borderAndDivider,
             width: AppleTokens.space1,
           ),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppleTokens.radius16),
+          borderRadius: BorderRadius.circular(AppleTokens.radius8),
           borderSide: const BorderSide(
-            color: AppleTokens.borderPastel,
+            color: AppleTokens.borderAndDivider,
             width: AppleTokens.space1,
           ),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppleTokens.radius16),
+          borderRadius: BorderRadius.circular(AppleTokens.radius8),
           borderSide: const BorderSide(
-            color: AppleTokens.softLavender,
-            width: 2.0,
+            color: AppleTokens.primaryTeal,
+            width: 1.5,
           ),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppleTokens.radius16),
+          borderRadius: BorderRadius.circular(AppleTokens.radius8),
           borderSide: const BorderSide(
             color: AppleTokens.error,
             width: AppleTokens.space1,
           ),
         ),
         hintStyle: _sansStyle(
-          const TextStyle(color: AppleTokens.textMuted, fontSize: 14),
+          const TextStyle(color: AppleTokens.mutedText, fontSize: 14),
         ),
       ),
       dividerTheme: const DividerThemeData(
-        color: AppleTokens.borderPastel,
+        color: AppleTokens.borderAndDivider,
         thickness: AppleTokens.space1,
         space: AppleTokens.space1,
+      ),
+      chipTheme: ChipThemeData(
+        backgroundColor: AppleTokens.lightMint,
+        labelStyle: _sansStyle(
+          const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: AppleTokens.primaryTeal,
+          ),
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppleTokens.radius8),
+          side: BorderSide.none,
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      ),
+      progressIndicatorTheme: const ProgressIndicatorThemeData(
+        color: AppleTokens.primaryTeal,
+        linearTrackColor: AppleTokens.lightCyan,
+        circularTrackColor: AppleTokens.lightCyan,
       ),
     );
   }
 
-  /// Dark Theme (Pastel Dark Surfaces & Lavender Accents)
+  /// CAMPULSE Dark Theme
   static ThemeData get darkTheme {
     const colorScheme = ColorScheme.dark(
-      primary: AppleTokens.secondaryBlue, // Kept for unit test assertion
-      onPrimary: Colors.black,
-      secondary: AppleTokens.softLavender,
-      onSecondary: AppleTokens.darkNavy,
+      primary: AppleTokens.darkTeal,
+      onPrimary: Color(0xFF080D19),
+      secondary: AppleTokens.primaryTeal,
+      onSecondary: Colors.white,
       surface: AppleTokens.darkSurface,
       onSurface: AppleTokens.darkTextPrimary,
+      outline: AppleTokens.darkBorder,
+      outlineVariant: AppleTokens.darkBorder,
       error: AppleTokens.error,
       onError: Colors.white,
     );
@@ -194,7 +231,7 @@ class AppTheme {
         color: AppleTokens.darkSurface,
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppleTokens.radius24),
+          borderRadius: BorderRadius.circular(AppleTokens.radius12),
           side: const BorderSide(
             color: AppleTokens.darkBorder,
             width: AppleTokens.space1,
@@ -202,52 +239,60 @@ class AppTheme {
         ),
         margin: EdgeInsets.zero,
       ),
-      appBarTheme: AppBarTheme(
-        backgroundColor: AppleTokens.darkBackground.withValues(alpha: 0.94),
+      appBarTheme: const AppBarTheme(
+        backgroundColor: AppleTokens.darkSurface,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         centerTitle: false,
-        titleTextStyle: _headlineStyle(
-          const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w800,
-            color: AppleTokens.darkTextPrimary,
-            letterSpacing: -0.5,
-          ),
+        titleTextStyle: TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.w700,
+          color: AppleTokens.darkTextPrimary,
         ),
-        iconTheme: const IconThemeData(color: AppleTokens.darkTextPrimary),
+        iconTheme: IconThemeData(color: AppleTokens.darkTextPrimary),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppleTokens.softLavender,
-          foregroundColor: AppleTokens.darkNavy,
+          backgroundColor: AppleTokens.primaryButton,
+          foregroundColor: Colors.white,
           elevation: 0,
           padding: const EdgeInsets.symmetric(
-            horizontal: AppleTokens.space24,
-            vertical: AppleTokens.space16,
+            horizontal: 20.0,
+            vertical: 12.0,
           ),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppleTokens.radius999),
+            borderRadius: BorderRadius.circular(AppleTokens.radius8),
           ),
           textStyle: _sansStyle(
-            const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+            const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           ),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: AppleTokens.darkTextPrimary,
-          backgroundColor: AppleTokens.darkSurfaceElevated,
-          side: const BorderSide(color: AppleTokens.darkBorder, width: 1.2),
+          backgroundColor: Colors.transparent,
+          side: const BorderSide(
+            color: AppleTokens.darkBorder,
+            width: AppleTokens.space1,
+          ),
           padding: const EdgeInsets.symmetric(
-            horizontal: AppleTokens.space24,
-            vertical: AppleTokens.space16,
+            horizontal: 20.0,
+            vertical: 12.0,
           ),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppleTokens.radius999),
+            borderRadius: BorderRadius.circular(AppleTokens.radius8),
           ),
           textStyle: _sansStyle(
-            const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+            const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+          ),
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: AppleTokens.darkTeal,
+          textStyle: _sansStyle(
+            const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           ),
         ),
       ),
@@ -255,32 +300,32 @@ class AppTheme {
         filled: true,
         fillColor: AppleTokens.darkSurface,
         contentPadding: const EdgeInsets.symmetric(
-          horizontal: AppleTokens.space16,
-          vertical: AppleTokens.space16,
+          horizontal: 16.0,
+          vertical: 12.0,
         ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppleTokens.radius16),
+          borderRadius: BorderRadius.circular(AppleTokens.radius8),
           borderSide: const BorderSide(
             color: AppleTokens.darkBorder,
             width: AppleTokens.space1,
           ),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppleTokens.radius16),
+          borderRadius: BorderRadius.circular(AppleTokens.radius8),
           borderSide: const BorderSide(
             color: AppleTokens.darkBorder,
             width: AppleTokens.space1,
           ),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppleTokens.radius16),
+          borderRadius: BorderRadius.circular(AppleTokens.radius8),
           borderSide: const BorderSide(
-            color: AppleTokens.softLavender,
-            width: 2.0,
+            color: AppleTokens.deepViolet,
+            width: 1.5,
           ),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppleTokens.radius16),
+          borderRadius: BorderRadius.circular(AppleTokens.radius8),
           borderSide: const BorderSide(
             color: AppleTokens.error,
             width: AppleTokens.space1,
@@ -295,6 +340,21 @@ class AppTheme {
         thickness: AppleTokens.space1,
         space: AppleTokens.space1,
       ),
+      chipTheme: ChipThemeData(
+        backgroundColor: AppleTokens.darkSurfaceElevated,
+        labelStyle: _sansStyle(
+          const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: AppleTokens.purple,
+          ),
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppleTokens.radius8),
+          side: BorderSide.none,
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      ),
     );
   }
 
@@ -302,64 +362,59 @@ class AppTheme {
     return TextTheme(
       displayLarge: _headlineStyle(
         TextStyle(
-          fontSize: 48,
+          fontSize: 40,
           fontWeight: FontWeight.w800,
           color: primaryColor,
-          letterSpacing: -1.2,
         ),
       ),
       displayMedium: _headlineStyle(
         TextStyle(
-          fontSize: 36,
+          fontSize: 32,
           fontWeight: FontWeight.w800,
           color: primaryColor,
-          letterSpacing: -1.0,
         ),
       ),
       displaySmall: _headlineStyle(
         TextStyle(
-          fontSize: 28,
-          fontWeight: FontWeight.w800,
+          fontSize: 26,
+          fontWeight: FontWeight.w700,
           color: primaryColor,
-          letterSpacing: -0.7,
         ),
       ),
       headlineMedium: _headlineStyle(
         TextStyle(
-          fontSize: 24,
-          fontWeight: FontWeight.w800,
+          fontSize: 22,
+          fontWeight: FontWeight.w700,
           color: primaryColor,
-          letterSpacing: -0.5,
         ),
       ),
       headlineSmall: _headlineStyle(
         TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.w700,
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
           color: primaryColor,
-          letterSpacing: -0.3,
         ),
       ),
       titleLarge: _sansStyle(
-        TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.w700,
-          color: primaryColor,
-        ),
-      ),
-      titleMedium: _sansStyle(
         TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.w600,
           color: primaryColor,
         ),
       ),
+      titleMedium: _sansStyle(
+        TextStyle(
+          fontSize: 15,
+          fontWeight: FontWeight.w600,
+          color: primaryColor,
+        ),
+      ),
       bodyLarge: _sansStyle(
         TextStyle(
-          fontSize: 16,
+          fontSize: 15,
           fontWeight: FontWeight.w400,
           color: primaryColor,
-          height: 1.6,
+          height: 1.5,
         ),
       ),
       bodyMedium: _sansStyle(
@@ -380,7 +435,7 @@ class AppTheme {
       labelLarge: _sansStyle(
         TextStyle(
           fontSize: 14,
-          fontWeight: FontWeight.w700,
+          fontWeight: FontWeight.w600,
           color: primaryColor,
         ),
       ),

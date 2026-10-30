@@ -8,12 +8,14 @@ import '../widgets/apple_card.dart';
 class AdminLoginScreen extends StatefulWidget {
   final AdminAuthState adminAuthState;
   final VoidCallback onAdminAuthenticated;
+  final VoidCallback? onLibraryStaffAuthenticated;
   final VoidCallback onBackToStudentPortal;
 
   const AdminLoginScreen({
     super.key,
     required this.adminAuthState,
     required this.onAdminAuthenticated,
+    this.onLibraryStaffAuthenticated,
     required this.onBackToStudentPortal,
   });
 
@@ -23,7 +25,9 @@ class AdminLoginScreen extends StatefulWidget {
 
 class _AdminLoginScreenState extends State<AdminLoginScreen> {
   final _emailController = TextEditingController(text: 'admin@campuspulse.edu');
-  final _passwordController = TextEditingController(text: 'AdminMasterPassword2026!');
+  final _passwordController = TextEditingController(
+    text: 'AdminMasterPassword2026!',
+  );
   bool _obscurePassword = true;
 
   @override
@@ -56,12 +60,25 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
     }
   }
 
+  Future<void> _handleLibraryStaffLogin() async {
+    final success = await widget.adminAuthState.loginLibraryStaffDemo();
+    if (success && mounted) {
+      if (widget.onLibraryStaffAuthenticated != null) {
+        widget.onLibraryStaffAuthenticated!();
+      } else {
+        widget.onAdminAuthenticated();
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF0F101A) : AppleTokens.warmWhite,
+      backgroundColor: isDark
+          ? AppleTokens.darkBackground
+          : AppleTokens.surfaceMuted,
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(AppleTokens.space24),
@@ -76,23 +93,18 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                   // Admin Security Shield Badge
                   Center(
                     child: Container(
-                      width: 56,
-                      height: 56,
+                      width: 52,
+                      height: 52,
                       decoration: BoxDecoration(
-                        color: AppleTokens.softLavender,
-                        borderRadius: BorderRadius.circular(18),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppleTokens.softLavender.withValues(alpha: 0.4),
-                            blurRadius: 16,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
+                        color: AppleTokens.primaryTeal,
+                        borderRadius: BorderRadius.circular(
+                          AppleTokens.radius8,
+                        ),
                       ),
                       child: const Center(
                         child: Icon(
                           Icons.admin_panel_settings_rounded,
-                          size: 30,
+                          size: 28,
                           color: Colors.white,
                         ),
                       ),
@@ -101,7 +113,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                   const SizedBox(height: 18),
 
                   Text(
-                    'Campus Pulse',
+                    'CAMPULSE',
                     textAlign: TextAlign.center,
                     style: GoogleFonts.inter(
                       fontSize: 13,
@@ -150,7 +162,11 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                         ),
                         child: Row(
                           children: [
-                            const Icon(Icons.error_outline, color: Colors.red, size: 20),
+                            const Icon(
+                              Icons.error_outline,
+                              color: Colors.red,
+                              size: 20,
+                            ),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
@@ -180,7 +196,9 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                   const SizedBox(height: 6),
                   Container(
                     decoration: BoxDecoration(
-                      color: isDark ? AppleTokens.darkSurface : AppleTokens.warmWhite,
+                      color: isDark
+                          ? AppleTokens.darkSurface
+                          : AppleTokens.warmWhite,
                       borderRadius: BorderRadius.circular(AppleTokens.radius16),
                       border: Border.all(color: AppleTokens.borderPastel),
                     ),
@@ -190,7 +208,10 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                         hintText: 'admin@campuspulse.edu',
                         prefixIcon: Icon(Icons.email_outlined, size: 18),
                         border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
                       ),
                     ),
                   ),
@@ -208,7 +229,9 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                   const SizedBox(height: 6),
                   Container(
                     decoration: BoxDecoration(
-                      color: isDark ? AppleTokens.darkSurface : AppleTokens.warmWhite,
+                      color: isDark
+                          ? AppleTokens.darkSurface
+                          : AppleTokens.warmWhite,
                       borderRadius: BorderRadius.circular(AppleTokens.radius16),
                       border: Border.all(color: AppleTokens.borderPastel),
                     ),
@@ -220,13 +243,20 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                         prefixIcon: const Icon(Icons.lock_outline, size: 18),
                         suffixIcon: IconButton(
                           icon: Icon(
-                            _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                            _obscurePassword
+                                ? Icons.visibility_off
+                                : Icons.visibility,
                             size: 18,
                           ),
-                          onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                          onPressed: () => setState(
+                            () => _obscurePassword = !_obscurePassword,
+                          ),
                         ),
                         border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
                       ),
                     ),
                   ),
@@ -252,6 +282,14 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                     variant: AppleButtonVariant.secondary,
                     onPressed: _handleDemoLogin,
                   ),
+                  const SizedBox(height: 10),
+
+                  // Library Staff Quick Access
+                  AppleButton(
+                    label: '🖨️ 1-Click Library Staff Access',
+                    variant: AppleButtonVariant.outline,
+                    onPressed: _handleLibraryStaffLogin,
+                  ),
                   const SizedBox(height: 16),
                   const Divider(),
                   const SizedBox(height: 8),
@@ -274,4 +312,3 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
     );
   }
 }
-

@@ -21,7 +21,7 @@ class AppleButton extends StatefulWidget {
     this.icon,
     this.isLoading = false,
     this.width,
-    this.height = 44.0, // Apple 44px touch target
+    this.height = 42.0,
     this.padding,
   });
 
@@ -37,44 +37,44 @@ class _AppleButtonState extends State<AppleButton> {
   Widget build(BuildContext context) {
     final isEnabled = widget.onPressed != null && !widget.isLoading;
 
-    // Determine colors based on variant and theme
     Color backgroundColor;
     Color textColor;
     BorderSide borderSide = BorderSide.none;
 
     switch (widget.variant) {
       case AppleButtonVariant.primary:
-        backgroundColor = AppleTokens.darkNavy;
-        textColor = Colors.white;
+        backgroundColor = AppleTokens.primaryButton;
+        textColor = AppleTokens.primaryButtonText;
         if (_isHovered && isEnabled) {
-          backgroundColor = const Color(0xFF262738);
+          backgroundColor = const Color(0xFF1B2433);
         }
         break;
 
       case AppleButtonVariant.secondary:
-        backgroundColor = AppleTokens.softLavender;
-        textColor = AppleTokens.darkNavy;
-        borderSide = BorderSide.none;
+        backgroundColor = AppleTokens.primaryTeal;
+        textColor = Colors.white;
         if (_isHovered && isEnabled) {
-          backgroundColor = const Color(0xFFC8B4FF);
+          backgroundColor = AppleTokens.tealHover;
         }
         break;
 
       case AppleButtonVariant.outline:
-        backgroundColor = AppleTokens.pureWhite;
-        final strokeColor = AppleTokens.borderPastel;
-        textColor = AppleTokens.darkNavy;
-        borderSide = BorderSide(color: strokeColor, width: 1.2);
+        backgroundColor = Colors.white;
+        textColor = AppleTokens.primaryText;
+        borderSide = const BorderSide(
+          color: AppleTokens.borderSubtle,
+          width: 1.0,
+        );
         if (_isHovered && isEnabled) {
-          backgroundColor = AppleTokens.paleLavender;
+          backgroundColor = AppleTokens.pageBackground;
         }
         break;
 
       case AppleButtonVariant.subtle:
         backgroundColor = Colors.transparent;
-        textColor = AppleTokens.softLavender;
+        textColor = AppleTokens.primaryTeal;
         if (_isHovered && isEnabled) {
-          backgroundColor = AppleTokens.paleLavender;
+          backgroundColor = AppleTokens.lightMint.withValues(alpha: 0.5);
         }
         break;
 
@@ -82,14 +82,14 @@ class _AppleButtonState extends State<AppleButton> {
         backgroundColor = AppleTokens.error;
         textColor = Colors.white;
         if (_isHovered && isEnabled) {
-          backgroundColor = AppleTokens.error.withValues(alpha: 0.85);
+          backgroundColor = const Color(0xFFB71C1C);
         }
         break;
     }
 
     if (!isEnabled) {
-      backgroundColor = AppleTokens.borderPastel;
-      textColor = AppleTokens.textMutedGrey;
+      backgroundColor = AppleTokens.borderAndDivider;
+      textColor = AppleTokens.mutedText;
       borderSide = BorderSide.none;
     }
 
@@ -106,19 +106,18 @@ class _AppleButtonState extends State<AppleButton> {
         onTap: isEnabled ? widget.onPressed : null,
         child: AnimatedScale(
           scale: scale,
-          duration: AppleTokens.duration100,
+          duration: AppleTokens.durationFast,
           curve: Curves.easeOutCubic,
           child: AnimatedContainer(
-            duration: AppleTokens.duration160,
+            duration: AppleTokens.durationFast,
             curve: AppleTokens.defaultCurve,
             width: widget.width,
             height: widget.height,
             padding:
-                widget.padding ??
-                const EdgeInsets.symmetric(horizontal: AppleTokens.space20),
+                widget.padding ?? const EdgeInsets.symmetric(horizontal: 18.0),
             decoration: BoxDecoration(
               color: backgroundColor,
-              borderRadius: BorderRadius.circular(AppleTokens.radius999),
+              borderRadius: BorderRadius.circular(AppleTokens.radius8),
               border: borderSide != BorderSide.none
                   ? Border.fromBorderSide(borderSide)
                   : null,
@@ -139,15 +138,15 @@ class _AppleButtonState extends State<AppleButton> {
                       children: [
                         if (widget.icon != null) ...[
                           Icon(widget.icon, size: 16, color: textColor),
-                          const SizedBox(width: AppleTokens.space8),
+                          const SizedBox(width: 8),
                         ],
                         Text(
                           widget.label,
                           style: TextStyle(
-                            fontSize: 15,
+                            fontSize: 14,
                             fontWeight: FontWeight.w600,
                             color: textColor,
-                            letterSpacing: -0.2,
+                            letterSpacing: -0.1,
                           ),
                         ),
                       ],

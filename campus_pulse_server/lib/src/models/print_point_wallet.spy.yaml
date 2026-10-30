@@ -1,0 +1,15 @@
+class: PrintPointWallet
+table: print_point_wallets
+fields:
+  authUserId: UuidValue, unique
+  studentName: String
+  balance: int
+  lifetimeEarned: int
+  lifetimeRedeemed: int
+  updatedAt: DateTime, default=now
+
+indexes:
+  print_wallet_user_idx:
+    fields: authUserId
+    unique: true
+
