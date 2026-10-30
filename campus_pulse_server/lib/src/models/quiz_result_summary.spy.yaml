@@ -1,0 +1,11 @@
+class: QuizResultSummary
+fields:
+  attemptId: int
+  subject: String
+  score: int
+  totalQuestions: int
+  percentage: double
+  durationSeconds: int
+  completedAt: DateTime
+  items: List<QuizResultItem>
+

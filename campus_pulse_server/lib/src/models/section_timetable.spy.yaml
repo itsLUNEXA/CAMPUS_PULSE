@@ -1,0 +1,18 @@
+class: SectionTimetable
+table: section_timetables
+fields:
+  branch: String
+  academicYear: int
+  semester: int
+  section: String
+  dayOfWeek: String
+  startTime: String
+  endTime: String
+  subject: String
+  room: String
+  createdAt: DateTime, default=now
+
+indexes:
+  section_schedule_idx:
+    fields: branch, semester, section, dayOfWeek
+

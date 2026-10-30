@@ -1,0 +1,25 @@
+class: EventCertificate
+table: event_certificate
+fields:
+  certificateId: String, unique
+  eventId: int, relation(parent=campus_event, onDelete=Cascade)
+  authUserId: UuidValue
+  studentName: String
+  eventName: String
+  eventDate: DateTime
+  issuedAt: DateTime, default=now
+  issuedByUserId: UuidValue?
+  verificationUrl: String
+  status: String
+  signatureTitle: String
+
+indexes:
+  cert_unique_id_idx:
+    fields: certificateId
+    unique: true
+  cert_event_student_idx:
+    fields: eventId, authUserId
+    unique: true
+  cert_user_idx:
+    fields: authUserId
+

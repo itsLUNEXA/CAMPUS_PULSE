@@ -1,0 +1,92 @@
+emailIdp:
+  - login:
+  - startRegistration:
+  - verifyRegistrationCode:
+  - finishRegistration:
+  - startPasswordReset:
+  - verifyPasswordResetCode:
+  - finishPasswordReset:
+  - hasAccount:
+jwtRefresh:
+  - refreshAccessToken:
+academicResource:
+  - uploadResource:
+  - filterResources:
+  - setApprovalStatus:
+  - recordDownload:
+  - getSubjectSyllabus:
+admin:
+  - loginAdmin:
+  - loginMasterAdminDemo:
+  - verifyAdminSession:
+  - getDashboardOverview:
+  - assignRole:
+  - getMyRoles:
+  - listAuditLogs:
+attendance:
+  - markAttendance:
+  - checkInWithCode:
+  - getEventAttendance:
+  - getMyAttendanceHistory:
+certificate:
+  - issueCertificate:
+  - verifyCertificate:
+  - getMyCertificates:
+  - revokeCertificate:
+chat:
+  - getOrCreateRoom:
+  - sendMessage:
+  - getRoomMessages:
+  - listMyRooms:
+event:
+  - listEvents:
+  - getEvent:
+  - createEvent:
+  - rsvpEvent:
+  - cancelRsvp:
+  - hasUserRsvpd:
+  - getMyRsvpdEventIds:
+  - streamRsvpUpdates:
+leaderboard:
+  - getLeaderboard:
+  - getMyRank:
+  - streamLeaderboardUpdates:
+mom:
+  - createMom:
+  - listMoms:
+  - getMomDetail:
+points:
+  - checkInWithQrToken:
+  - getMyPointsAndStreak:
+  - listRewards:
+  - addRewardPerk:
+  - redeemReward:
+quiz:
+  - getQuestionsForSubject:
+  - submitQuiz:
+  - getMyAttempts:
+search:
+  - search:
+  - submitContact:
+seed:
+  - seedData:
+student:
+  - loginDemo:
+  - registerStudent:
+  - getProfile:
+  - updateProfile:
+  - getPublicProfile:
+  - discoverStudents:
+studyRequest:
+  - sendRequest:
+  - getMyIncomingRequests:
+  - getMyOutgoingRequests:
+  - updateRequestStatus:
+timetable:
+  - addSectionTimetable:
+  - getSectionTimetable:
+  - getMyFreeSlots:
+  - updateFreeSlot:
+  - findTimetableStudyMatches:
+greeting:
+  - hello:

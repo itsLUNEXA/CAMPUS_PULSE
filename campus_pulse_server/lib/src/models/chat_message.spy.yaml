@@ -1,0 +1,17 @@
+class: ChatMessage
+table: chat_message
+fields:
+  roomId: int, relation(parent=chat_room, onDelete=Cascade)
+  senderUserId: UuidValue
+  senderName: String
+  content: String
+  attachmentUrl: String?
+  attachmentType: String?
+  isRead: bool, default=false
+  createdAt: DateTime, default=now
+  isEdited: bool, default=false
+
+indexes:
+  msg_room_idx:
+    fields: roomId, createdAt
+

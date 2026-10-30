@@ -1,0 +1,8 @@
+class: CampusNotification
+fields:
+  id: String
+  title: String
+  message: String
+  type: String
+  timestamp: DateTime
+

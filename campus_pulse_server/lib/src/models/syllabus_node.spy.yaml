@@ -1,0 +1,20 @@
+class: SyllabusNode
+table: syllabus_node
+fields:
+  university: String
+  course: String
+  branch: String
+  semester: int
+  subjectCode: String
+  subjectName: String
+  unitNumber: int
+  unitTitle: String
+  topics: List<String>
+  academicYear: int
+  version: String
+
+indexes:
+  syllabus_hierarchy_idx:
+    fields: university, course, branch, semester, subjectCode, unitNumber
+    unique: true
+

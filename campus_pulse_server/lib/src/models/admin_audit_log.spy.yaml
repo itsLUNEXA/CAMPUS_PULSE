@@ -1,0 +1,15 @@
+class: AdminAuditLog
+table: admin_audit_log
+fields:
+  actorUserId: UuidValue
+  actorName: String
+  actionType: String
+  targetEntity: String
+  targetId: String
+  details: String
+  timestamp: DateTime, default=now
+
+indexes:
+  audit_time_idx:
+    fields: timestamp
+

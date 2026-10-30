@@ -1,0 +1,14 @@
+class: PointsLedger
+table: points_ledger
+fields:
+  authUserId: UuidValue
+  studentName: String
+  source: String
+  points: int
+  description: String
+  timestamp: DateTime, default=now
+
+indexes:
+  ledger_user_idx:
+    fields: authUserId, timestamp
+

@@ -1,0 +1,13 @@
+class: UserRole
+table: user_role
+fields:
+  authUserId: UuidValue
+  role: String
+  assignedScope: String?
+  grantedAt: DateTime, default=now
+
+indexes:
+  user_role_user_idx:
+    fields: authUserId, role
+    unique: true
+

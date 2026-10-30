@@ -1,0 +1,7 @@
+class: QuizQuestionView
+fields:
+  id: int
+  subject: String
+  question: String
+  options: List<String>
+

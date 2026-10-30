@@ -1,0 +1,15 @@
+class: ChatRoom
+table: chat_room
+fields:
+  roomType: String
+  referenceId: String?
+  name: String
+  participantIds: List<UuidValue>
+  createdAt: DateTime, default=now
+  lastMessageText: String?
+  lastMessageAt: DateTime?
+
+indexes:
+  room_type_ref_idx:
+    fields: roomType, referenceId
+

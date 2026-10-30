@@ -1,0 +1,19 @@
+class: AttendanceRecord
+table: attendance_record
+fields:
+  eventId: int, relation(parent=campus_event, onDelete=Cascade)
+  authUserId: UuidValue
+  studentName: String
+  status: String
+  checkInCode: String?
+  markedByUserId: UuidValue?
+  markedAt: DateTime, default=now
+  notes: String?
+
+indexes:
+  event_attendance_user_idx:
+    fields: eventId, authUserId
+    unique: true
+  attendance_user_idx:
+    fields: authUserId
+

@@ -1,0 +1,6 @@
+class: QuizSubmission
+fields:
+  subject: String
+  answers: List<QuizAnswerSubmission>
+  durationSeconds: int
+

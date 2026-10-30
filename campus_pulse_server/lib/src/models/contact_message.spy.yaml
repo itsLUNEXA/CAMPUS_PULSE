@@ -1,0 +1,13 @@
+class: ContactMessage
+table: contact_message
+fields:
+  name: String
+  email: String
+  subject: String
+  message: String
+  createdAt: DateTime, default=now
+
+indexes:
+  contact_message_email_idx:
+    fields: email
+

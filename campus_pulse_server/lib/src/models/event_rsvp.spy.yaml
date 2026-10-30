@@ -1,0 +1,15 @@
+class: EventRsvp
+table: event_rsvp
+fields:
+  eventId: int, relation(parent=campus_event, onDelete=Cascade)
+  authUserId: UuidValue
+  studentName: String
+  createdAt: DateTime, default=now
+
+indexes:
+  event_student_rsvp_idx:
+    fields: eventId, authUserId
+    unique: true
+  rsvp_user_idx:
+    fields: authUserId
+

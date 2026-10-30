@@ -1,0 +1,7 @@
+class: LeaderboardUpdate
+fields:
+  subject: String
+  studentName: String
+  score: int
+  updatedAt: DateTime
+

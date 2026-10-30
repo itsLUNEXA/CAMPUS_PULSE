@@ -1,0 +1,16 @@
+class: RewardPerk
+table: reward_perks
+fields:
+  title: String
+  category: String
+  description: String
+  costPoints: int
+  stockRemaining: int
+  imageUrl: String?
+  isActive: bool, default=true
+  createdAt: DateTime, default=now
+
+indexes:
+  reward_active_idx:
+    fields: isActive
+

@@ -1,0 +1,44 @@
+services:
+  # Development services
+  postgres:
+    image: ghcr.io/serverpod/postgres:16
+    ports:
+      - "8090:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: campus_pulse
+      POSTGRES_PASSWORD: "KvAqOCnZm3hZI5PuXmAXk59kFLTB6_Pe"
+    volumes:
+      - campus_pulse_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:6.2.6
+    ports:
+      - "8091:6379"
+    command: redis-server --requirepass "C5N3yGO_Esj4NSXGUSWeL0qPHVCtolz0"
+    environment:
+      - REDIS_REPLICATION_MODE=master
+
+  # Test services
+  postgres_test:
+    image: ghcr.io/serverpod/postgres:16
+    ports:
+      - "9090:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: campus_pulse_test
+      POSTGRES_PASSWORD: "ekZk_96QG-5Nu3UIbS8KYH7siyrNFIWM"
+    volumes:
+      - campus_pulse_test_data:/var/lib/postgresql/data
+
+  redis_test:
+    image: redis:6.2.6
+    ports:
+      - "9091:6379"
+    command: redis-server --requirepass "VIoP1UuvJcskoIEvebF62DrTiOKPgJl7"
+    environment:
+      - REDIS_REPLICATION_MODE=master
+
+volumes:
+  campus_pulse_data:
+  campus_pulse_test_data:

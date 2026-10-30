@@ -1,0 +1,15 @@
+class: QuizQuestion
+table: quiz_question
+fields:
+  subject: String
+  question: String
+  options: List<String>
+  correctOptionIndex: int
+  explanation: String
+  difficulty: String
+  createdAt: DateTime, default=now
+
+indexes:
+  quiz_question_subject_idx:
+    fields: subject
+

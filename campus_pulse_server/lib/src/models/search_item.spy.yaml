@@ -1,0 +1,9 @@
+class: SearchItem
+fields:
+  type: String
+  id: String
+  title: String
+  subtitle: String
+  description: String?
+  category: String?
+

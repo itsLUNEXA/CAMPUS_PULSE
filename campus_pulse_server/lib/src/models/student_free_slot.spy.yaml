@@ -1,0 +1,18 @@
+class: StudentFreeSlot
+table: student_free_slots
+fields:
+  authUserId: UuidValue
+  dayOfWeek: String
+  slotLabel: String
+  startTime: String
+  endTime: String
+  isFree: bool, default=true
+  updatedAt: DateTime, default=now
+
+indexes:
+  student_slot_idx:
+    fields: authUserId, dayOfWeek, slotLabel
+    unique: true
+  student_free_user_idx:
+    fields: authUserId
+

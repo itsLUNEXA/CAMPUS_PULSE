@@ -1,0 +1,24 @@
+class: StudyRequest
+table: study_request
+fields:
+  senderAuthUserId: UuidValue
+  senderName: String
+  senderBranch: String
+  senderYear: int
+  recipientAuthUserId: UuidValue
+  recipientName: String
+  subject: String
+  message: String
+  status: String
+  urgency: String
+  createdAt: DateTime, default=now
+  updatedAt: DateTime, default=now
+
+indexes:
+  study_request_sender_idx:
+    fields: senderAuthUserId
+  study_request_recipient_idx:
+    fields: recipientAuthUserId
+  study_request_status_idx:
+    fields: status
+

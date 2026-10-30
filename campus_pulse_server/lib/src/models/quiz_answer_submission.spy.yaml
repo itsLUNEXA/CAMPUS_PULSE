@@ -1,0 +1,5 @@
+class: QuizAnswerSubmission
+fields:
+  questionId: int
+  selectedOptionIndex: int
+

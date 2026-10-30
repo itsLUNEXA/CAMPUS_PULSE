@@ -1,0 +1,18 @@
+class: MinutesOfMeeting
+table: minutes_of_meeting
+fields:
+  title: String
+  meetingDate: DateTime
+  organizerUserId: UuidValue
+  organizerName: String
+  attendeeNames: List<String>
+  agenda: String
+  discussionPoints: List<String>
+  decisions: List<String>
+  actionItems: List<String>
+  createdAt: DateTime, default=now
+
+indexes:
+  mom_date_idx:
+    fields: meetingDate
+

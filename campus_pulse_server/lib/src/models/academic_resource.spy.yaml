@@ -1,0 +1,29 @@
+class: AcademicResource
+table: academic_resource
+fields:
+  title: String
+  description: String?
+  university: String
+  course: String
+  branch: String
+  academicYear: int
+  semester: int
+  subjectCode: String
+  subjectName: String
+  unitNumber: int?
+  resourceType: String
+  fileUrl: String
+  fileSize: int?
+  uploadedByUserId: UuidValue
+  uploaderName: String
+  isApproved: bool, default=false
+  approvedByUserId: UuidValue?
+  createdAt: DateTime, default=now
+  downloadCount: int, default=0
+
+indexes:
+  resource_filter_idx:
+    fields: university, course, branch, semester, subjectCode
+  resource_approval_idx:
+    fields: isApproved
+

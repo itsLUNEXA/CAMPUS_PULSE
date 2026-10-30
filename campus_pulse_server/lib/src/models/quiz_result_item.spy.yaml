@@ -1,0 +1,10 @@
+class: QuizResultItem
+fields:
+  questionId: int
+  question: String
+  options: List<String>
+  selectedOptionIndex: int
+  correctOptionIndex: int
+  isCorrect: bool
+  explanation: String
+

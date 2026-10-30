@@ -1,0 +1,19 @@
+class: QuizAttempt
+table: quiz_attempt
+fields:
+  authUserId: UuidValue
+  studentName: String
+  studentBranch: String
+  subject: String
+  score: int
+  totalQuestions: int
+  percentage: double
+  durationSeconds: int
+  completedAt: DateTime, default=now
+
+indexes:
+  quiz_attempt_subject_score_idx:
+    fields: subject, score
+  quiz_attempt_user_idx:
+    fields: authUserId
+
